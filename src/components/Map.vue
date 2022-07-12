@@ -26,7 +26,7 @@ export default {
       this.loadIMDF(this.$route.params.mapID)
     },
     async loadIMDF(mapID) {
-      const url = `http://localhost:11000/api/map/${mapID}`
+      const url = `https://dev.mapstorage.polymap.ru/api/map/${mapID}`
       this.archive = await (await fetch(url)).json()
 
       const imdf = this.archive.imdf
