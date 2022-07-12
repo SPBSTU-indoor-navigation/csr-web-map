@@ -22,7 +22,7 @@ export default {
     }
   },
   async mounted() {
-    await useMapKit("http://localhost:11000/api/token")
+    await useMapKit("https://dev.mapstorage.polymap.ru/api/token")
 
     const m = new mapkit.Map('mapKitContainer', {
       showsPointsOfInterest: this.showsPointsOfInterest
