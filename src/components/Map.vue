@@ -10,13 +10,15 @@
 <script>
 import MapKitVue from './MapKit/MapKit.vue'
 import { importGeoJSON } from './MapKit/utils.js'
+import Venue from '../imdf/venue.js'
 
 import simplify from 'simplify-js'
+import lightTheme from '../styles/imdf/light.js'
 
 export default {
   data() {
     return {
-      archive: null,
+      // archive: null,
       theme: 'l'
     }
   },
@@ -28,6 +30,16 @@ export default {
     async loadIMDF(mapID) {
       const url = `https://dev.mapstorage.polymap.ru/api/map/${mapID}`
       this.archive = await (await fetch(url)).json()
+
+      const venue = new Venue(this.archive.imdf)
+      venue.Add(this.map)
+      venue.Style(lightTheme)
+
+      this.map.region = venue.geometry.region()
+      this.map.setCameraBoundaryAnimated(this.map.region)
+      this.map.cameraZoomRange = new mapkit.CameraZoomRange(100, 3000)
+      return;
+      // log
 
       const imdf = this.archive.imdf
       console.log("imdf", imdf);
