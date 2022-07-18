@@ -1,13 +1,15 @@
+import * as T from './mapkit_5.72.108.js';
+
 export default async function useMapKit(tokenUrl) {
 
-  await new Promise((resolve) => {
-    const element = document.createElement('script');
-    element.addEventListener('load', () => {
-      resolve();
-    });
-    element.src = 'https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.js';
-    document.head.appendChild(element);
-  });
+  // await new Promise((resolve) => {
+  //   const element = document.createElement('script');
+  //   element.addEventListener('load', () => {
+  //     resolve();
+  //   });
+  //   element.src = 'https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.js';
+  //   document.head.appendChild(element);
+  // });
 
   mapkit.init({
     authorizationCallback: function (done) {
