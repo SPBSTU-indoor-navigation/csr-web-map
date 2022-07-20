@@ -17,6 +17,8 @@ import lightTheme from '../styles/imdf/light.js'
 import { Scene, PerspectiveCamera, WebGLRenderer, AmbientLight } from 'three';
 import { BoxGeometry, MeshBasicMaterial, Mesh } from 'three';
 import * as THREE from 'three'
+import { Stats } from "three-stats";
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
 
 const metersInLatDegree = 111194.92664
@@ -54,7 +56,7 @@ export default {
         fillColor: lightTheme.venue.fillColor,
         strokeOpacity: 0
       })
-      this.map.addOverlay(venue.geometry)
+      // this.map.addOverlay(venue.geometry)
       // venue.Style(lightTheme)
 
       this.map.region = venue.geometry.region()
@@ -79,6 +81,8 @@ export default {
       this.scene = scene
       this.renderer = renderer
 
+      console.log(scene);
+
       renderer.setPixelRatio(window.devicePixelRatio)
 
       this.addPolygon(venue.geometry, lightTheme.venue.fillColor)
@@ -92,12 +96,16 @@ export default {
       console.log(this.camera);
 
 
-      window.onMapkitUpdate = this.animate
-      // this.animate()
+      // window.onMapkitUpdate = this.animate
+
+      this.stats = new Stats()
+      document.querySelector('.home').appendChild(this.stats.dom)
+
+      this.animate()
 
     },
     animate() {
-      // requestAnimationFrame(this.animate);
+      requestAnimationFrame(this.animate);
 
 
       const region = this.map.region
@@ -124,6 +132,8 @@ export default {
       this.renderer.render(this.scene, this.camera);
 
       // console.log("position", this.camera.position);
+      this.stats.update()
+
 
     },
     addPolygon(polygon, color) {
@@ -131,20 +141,24 @@ export default {
 
       if (Array.isArray(polygon)) return;
 
+      let geometrys = []
 
       polygon.points.forEach(polygon => {
         const shape = new THREE.Shape()
-
         const points = polygon.flatMap(p => this.vector(p))
-        shape.setFromPoints(points)
 
-        const mesh = new THREE.Mesh(
-          new THREE.ShapeGeometry(shape),
-          new THREE.MeshBasicMaterial({ color: color, wireframe: false })
-        );
-        this.scene.add(mesh);
+        shape.add(new THREE.Path().setFromPoints(points))
+
+        const geometry = (new THREE.ShapeGeometry(shape))
+        geometrys.push(geometry)
       })
 
+
+      const merged = BufferGeometryUtils.mergeBufferGeometries(geometrys, false)
+      const matertial = new THREE.MeshBasicMaterial({ color: color, wireframe: false })
+      const mesh = new THREE.Mesh(merged, matertial);
+      mesh.matrixAutoUpdate = false
+      this.scene.add(mesh);
 
     },
     vector(pos) {
