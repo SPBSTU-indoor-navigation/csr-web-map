@@ -1,5 +1,8 @@
 import "core-js/actual/array/group-by"
+import { Group } from "three"
 import { createPolygon, createMKStyle, createLine } from '../components/MapKit/utils'
+
+import { meshForFeatureCollection } from './utils'
 
 const order = [
   'forest',
@@ -19,53 +22,40 @@ const order = [
 
 
 export default class Environment {
-  constructor(environment, details) {
-    this.geometry = {
-      sorted: []
-    }
+  constructor(environment, detail) {
+    this.geometry = {}
 
-    this.data = environment
-
-
-    const grouped = this.data.groupBy(t => t.properties.category)
-    order.forEach(category => this.Polygon(category, grouped[category]))
-    Object.keys(grouped).filter(t => !order.includes(t)).forEach(category => this.Polygon(category, grouped[category]))
+    this.environment = environment
+    this.detail = detail
 
 
-    const groupedDetail = details.groupBy(t => t.properties.category)
-    order.forEach(category => this.Line(category, groupedDetail[category]))
-    Object.keys(groupedDetail).filter(t => !order.includes(t)).forEach(category => this.Line(category, groupedDetail[category]))
+    const groupedEnvironment = environment.groupBy(t => t.properties.category)
+    const groupedDetail = detail.groupBy(t => t.properties.category)
+
+    order.forEach((category, i) => {
+      const features = groupedEnvironment[category] || groupedDetail[category]
+      if (!features) return
+
+      this.geometry[category] = meshForFeatureCollection(features, 0xffff00, -1 + (i * 0.01))
+    })
+
+    this.groupMesh = new Group()
+    Object.values(this.geometry).forEach(mesh => this.groupMesh.add(mesh))
   }
 
-  Polygon(category, features) {
-    if (!features) return
-    this.geometry[category] = createPolygon(features)
-    this.geometry.sorted.push(category)
+  /** @param { import('three').Scene } scene */
+  Add(scene) {
+    scene.add(this.groupMesh)
   }
 
-  Line(category, features) {
-    if (!features) return
-    this.geometry[category] = createLine(features)
-    this.geometry.sorted.push(category)
-  }
-
-  Add(map) {
-    map.addOverlays(this.geometry.sorted.flatMap(t => this.geometry[t]))
-  }
-
-  Remove(map) {
-    map.removeOverlays(this.geometry.sorted.flatMap(t => this.geometry[t]))
+  /** @param { import('three').Scene } scene */
+  Remove(scene) {
+    scene.remove(this.groupMesh)
   }
 
   Style(styleSheet) {
-    this.geometry.sorted.forEach(t => {
-      if (styleSheet.environment[t]) {
-        if (this.geometry[t].style) {
-          this.geometry[t].style = createMKStyle(styleSheet.environment[t])
-        } else {
-          this.geometry[t].forEach(s => s.style = createMKStyle(styleSheet.environment[t]))
-        }
-      }
+    Object.keys(this.geometry).forEach(category => {
+      this.geometry[category].material.color.set(styleSheet.environment[category].fillColor)
     })
   }
 }

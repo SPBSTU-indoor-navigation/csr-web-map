@@ -8,28 +8,13 @@
 
 <script>
 import MapKitVue from './MapKit/MapKit.vue'
-import { importGeoJSON } from './MapKit/utils.js'
 import Venue from '../imdf/venue.js'
 
-import simplify from 'simplify-js'
 import lightTheme from '../styles/imdf/light.js'
 
-import { Scene, PerspectiveCamera, WebGLRenderer, AmbientLight } from 'three';
-import { BoxGeometry, MeshBasicMaterial, Mesh } from 'three';
-import * as THREE from 'three'
-import { Stats } from "three-stats";
-import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { Scene, OrthographicCamera, WebGLRenderer } from 'three';
 
-
-const metersInLatDegree = 111194.92664
-function GeoToVector(pivot, position) {
-
-  const Deg2Rad = Math.PI / 180.0
-
-  const x = (position.longitude - pivot.longitude) * metersInLatDegree * Math.cos(Deg2Rad * (pivot.latitude + position.latitude) / 2);
-  const y = (position.latitude - pivot.latitude) * metersInLatDegree;
-  return { x, y }
-}
+import { geoToVector } from '../imdf/utils'
 
 
 export default {
@@ -47,69 +32,32 @@ export default {
       const url = `https://dev.mapstorage.polymap.ru/api/map/${mapID}`
       this.archive = await (await fetch(url)).json()
 
-      const venue = new Venue(this.archive.imdf)
-
-      this.venuePivot = venue.geometry.region().center
-      console.log(this.venuePivot);
-      // venue.Add(this.map)
-      venue.geometry.style = new mapkit.Style({
-        fillColor: lightTheme.venue.fillColor,
-        strokeOpacity: 0
-      })
-      // this.map.addOverlay(venue.geometry)
-      // venue.Style(lightTheme)
-
-      this.map.region = venue.geometry.region()
-      // this.map.setCameraBoundaryAnimated(this.map.region)
-      // this.map.cameraZoomRange = new mapkit.CameraZoomRange(100, 3000)
-
-      const scene = new Scene();
-
-      const camera = new THREE.OrthographicCamera(-100, 100, 100, -100, 0.1, 1000);
-      camera.position.z = 2;
-
-      const renderer = new WebGLRenderer({ alpha: true, antialias: true });
-      renderer.setClearColor(0x000000, 0);
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.querySelector('.mk-map-view').insertBefore(renderer.domElement, document.querySelector(".mk-map-view>.mk-map-node-element"))
+      this.venue = new Venue(this.archive.imdf)
+      this.map.addOverlay(this.venue.mkGeometry)
+      this.map.region = this.venue.mkGeometry.region()
+      this.map.setCameraBoundaryAnimated(this.map.region)
+      this.map.cameraZoomRange = new mapkit.CameraZoomRange(0, 3000)
 
 
+      this.scene = new Scene()
+      this.camera = new OrthographicCamera(-100, 100, 100, -100, 0.1, 1000)
 
 
+      this.renderer = new WebGLRenderer({ alpha: true, antialias: true })
+      this.renderer.setClearColor(0x000000, 0);
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.renderer.setPixelRatio(window.devicePixelRatio)
+      document.querySelector('.mk-map-view').insertBefore(this.renderer.domElement, document.querySelector(".mk-map-view>.mk-map-node-element"))
 
-      this.camera = camera
-      this.scene = scene
-      this.renderer = renderer
+      window.onMapkitUpdate = this.animate
+      window.addEventListener('resize', this.onWindowResize, false);
 
-      console.log(scene);
-
-      renderer.setPixelRatio(window.devicePixelRatio)
-
-      this.addPolygon(venue.geometry, lightTheme.venue.fillColor)
-
-      console.log(venue);
-      venue.enviroment.geometry.sorted.forEach(key => {
-        this.addPolygon(venue.enviroment.geometry[key], lightTheme.environment[key].fillColor)
-      })
-      this.addPolygon(venue.building, lightTheme['building.footprint'].fillColor)
-
-      console.log(this.camera);
-
-
-      // window.onMapkitUpdate = this.animate
-
-      this.stats = new Stats()
-      document.querySelector('.home').appendChild(this.stats.dom)
-
-      this.animate()
-
+      this.venue.Style(lightTheme)
+      this.venue.Add(this.scene)
     },
     animate() {
-      requestAnimationFrame(this.animate);
-
-
       const region = this.map.region
-      const delta = GeoToVector(region.center,
+      const delta = geoToVector(region.center,
         {
           latitude: region.center.latitude + region.span.latitudeDelta / 2,
           longitude: region.center.longitude + region.span.longitudeDelta / 2
@@ -121,9 +69,8 @@ export default {
       this.camera.top = delta.y
       this.camera.bottom = -delta.y
 
-      const center = this.vector(this.map.center)
 
-
+      const center = this.venue.Translate(this.map.center)
       this.camera.position.set(center.x, center.y, 2)
       this.camera.rotation.set(0, 0, this.map.rotation * Math.PI / 180)
 
@@ -131,38 +78,14 @@ export default {
 
       this.renderer.render(this.scene, this.camera);
 
-      // console.log("position", this.camera.position);
-      this.stats.update()
-
-
     },
-    addPolygon(polygon, color) {
-      console.log(color);
+    onWindowResize() {
 
-      if (Array.isArray(polygon)) return;
+      this.camera.aspect = window.innerWidth / window.innerHeight;
+      this.camera.updateProjectionMatrix();
 
-      let geometrys = []
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-      polygon.points.forEach(polygon => {
-        const shape = new THREE.Shape()
-        const points = polygon.flatMap(p => this.vector(p))
-
-        shape.add(new THREE.Path().setFromPoints(points))
-
-        const geometry = (new THREE.ShapeGeometry(shape))
-        geometrys.push(geometry)
-      })
-
-
-      const merged = BufferGeometryUtils.mergeBufferGeometries(geometrys, false)
-      const matertial = new THREE.MeshBasicMaterial({ color: color, wireframe: false })
-      const mesh = new THREE.Mesh(merged, matertial);
-      mesh.matrixAutoUpdate = false
-      this.scene.add(mesh);
-
-    },
-    vector(pos) {
-      return GeoToVector(this.venuePivot, pos)
     }
   },
   computed: {
