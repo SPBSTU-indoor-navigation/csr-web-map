@@ -1,14 +1,10 @@
 import Environments from "./environment";
 import { createPolygon } from '../components/MapKit/utils'
-import { processGeometryCoordinates, meshForFeatureCollection, geoToVector } from './utils'
-
-import { Mesh, Color, Vector3 } from 'three';
-import { MeshLine, MeshLineMaterial } from 'three.meshline';
-
-import * as THREE from 'three'
+import { processGeometryCoordinates, meshForFeatureCollection, outlineMeshForFeatureCollection, geoToVector, createPolygonOutlineGeometry, LineMeshMaterialStorage } from './utils'
 
 export default class Venue {
   constructor(archive) {
+    this.lineMeshMaterialStorage = new LineMeshMaterialStorage()
     this.data = archive.venue
     this.mkGeometry = createPolygon(this.data)
     this.mkGeometry.style = new mapkit.Style({ fillOpacity: 0, strokeOpacity: 0 })
@@ -23,31 +19,20 @@ export default class Venue {
 
 
     console.log(archive);
-    this.environments = new Environments(archive.enviroment, archive.detail)
-    this.mesh = meshForFeatureCollection(archive.venue, 0xffff00, -2)
-    this.buildingFootprintMesh = meshForFeatureCollection(archive.building, 0x00ffff)
+    this.environments = new Environments(archive.enviroment, archive.detail, this.lineMeshMaterialStorage)
+    this.mesh = meshForFeatureCollection(archive.venue, -2)
+    this.buildingFootprintMesh = meshForFeatureCollection(archive.building)
+
+    this.buildingFootprintOutlineMesh = outlineMeshForFeatureCollection(archive.building, 1, this.lineMeshMaterialStorage)
 
   }
 
   /** @param { import('three').Scene } scene */
   Add(scene) {
-    [this.mesh, this.buildingFootprintMesh]
+    [this.mesh, this.buildingFootprintMesh, this.buildingFootprintOutlineMesh]
       .forEach(mesh => scene.add(mesh))
 
     this.environments.Add(scene)
-
-
-
-    const line = new MeshLine();
-    line.setPoints(this.data[0].geometry.coordinates[0].map(t => new Vector3(t.x, t.y, 0)));
-    const material = new MeshLineMaterial({
-      color: 0xff0000,
-      lineWidth: 0.005,
-      sizeAttenuation: false
-    });
-
-    const mesh = new Mesh(line, material);
-    scene.add(mesh);
   }
 
   /** @param { import('three').Scene } scene */
@@ -60,10 +45,17 @@ export default class Venue {
   Style(styleSheet) {
     this.mesh.material.color.set(styleSheet.venue.fillColor)
     this.buildingFootprintMesh.material.color.set(styleSheet['building.footprint'].fillColor)
+    this.buildingFootprintOutlineMesh.material.color.set(styleSheet['building.footprint'].strokeColor)
+
+    this.buildingFootprintOutlineMesh.material.lineWidth = styleSheet['building.footprint'].lineWidth
     this.environments.Style(styleSheet)
   }
 
   Translate(position) {
     return geoToVector(this.pivot, position)
+  }
+
+  OnResolutionChange(resolution) {
+    this.lineMeshMaterialStorage.UpdateResolution({ x: resolution.width, y: resolution.height })
   }
 }

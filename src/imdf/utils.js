@@ -1,4 +1,5 @@
-import { Shape, Path, ShapeGeometry, Mesh, MeshBasicMaterial, BufferGeometry } from 'three'
+import { Shape, Path, ShapeGeometry, Mesh, MeshBasicMaterial, BufferGeometry, Vector3 } from 'three'
+import { MeshLine, MeshLineMaterial } from 'three.meshline';
 import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
 const metersInLatDegree = 111194.92664
@@ -28,6 +29,9 @@ export function processGeometryCoordinates(geometry, pivot) {
     case 'MultiPolygon':
       coordinates = coordinates.map(polygon => polygon.map(cicle => processPointAttay(cicle)))
       break;
+    case 'MultiLineString':
+      coordinates = coordinates.map(lines => processPointAttay(lines))
+      break;
 
     default: break;
   }
@@ -35,6 +39,20 @@ export function processGeometryCoordinates(geometry, pivot) {
   return {
     type: geometry.type,
     coordinates: coordinates
+  }
+}
+
+export class LineMeshMaterialStorage {
+  constructor() {
+    this.materials = []
+  }
+
+  AddMateril(material) {
+    this.materials.push(material)
+  }
+
+  UpdateResolution(resolution) {
+    this.materials.forEach(material => material.resolution = resolution)
   }
 }
 
@@ -56,26 +74,81 @@ function createPolygonGeometry(coordinates) {
   return new ShapeGeometry(shape)
 }
 
+function createPolygonOutlineGeometry(coordinates) {
+  const lines = coordinates.map(points => {
+    const line = new MeshLine();
+    const venuePoints = points.map(t => new Vector3(t.x, t.y, 0))
+    venuePoints.push(venuePoints[1])
+    line.setPoints(venuePoints.flatMap(t => [t]))
+    return line
+  })
+
+  return mergeGeometrys(lines)
+}
+
+function createPolylineGeometry(coordinates) {
+  const line = new MeshLine();
+  const points = coordinates.map(p => new Vector3(p.x, p.y, 0)).flatMap(t => [t, t])
+  // points.push(points[points.length - 1])
+  // points.unshift(new Vector3(points[0].x + 1, points[0].y, 0))
+  line.setPoints(points)
+  return line
+}
+
 export function geometryIMDF2Three(geometry) {
   if (geometry.type === 'Polygon') return createPolygonGeometry(geometry.coordinates)
   if (geometry.type === 'MultiPolygon') return mergeBufferGeometries(geometry.coordinates.map(createPolygonGeometry))
+  if (geometry.type === 'MultiLineString') return mergeBufferGeometries(geometry.coordinates.map(createPolylineGeometry))
 
   console.warn('Unsupported geometry type: ' + geometry.type)
   return new BufferGeometry()
 }
 
-export function featureCollectionGeometryThree(collection) {
+export function outlineIMDF2Three(geometry) {
+  if (geometry.type === 'Polygon') return createPolygonOutlineGeometry(geometry.coordinates)
+  if (geometry.type === 'MultiPolygon') return mergeBufferGeometries(geometry.coordinates.map(createPolygonOutlineGeometry))
+
+  console.warn('Unsupported geometry type: ' + geometry.type)
+  return new BufferGeometry()
+}
+
+export function featureCollectionGeometry(collection) {
   return mergeGeometrys(collection.map(t => geometryIMDF2Three(t.geometry)))
+}
+
+export function featureCollectionOutlineGeometry(collection) {
+  return mergeGeometrys(collection.map(t => outlineIMDF2Three(t.geometry)))
 }
 
 export function mergeGeometrys(geometrys) {
   return mergeBufferGeometries(geometrys, false)
 }
 
-/** @return { Mesh } */
-export function meshForFeatureCollection(collection, color, order = 0) {
-  const matertial = new MeshBasicMaterial({ color: color, wireframe: false })
-  const mesh = new Mesh(featureCollectionGeometryThree(collection), matertial);
+/** @param { LineMeshMaterialStorage } materialStorage  @return { Mesh } */
+export function outlineMeshForFeatureCollection(collection, order = 0, materialStorage) {
+
+  const material = new MeshLineMaterial({ sizeAttenuation: false });
+
+  materialStorage.AddMateril(material)
+
+  const mesh = new Mesh(featureCollectionOutlineGeometry(collection), material);
+  mesh.translateZ(order)
+  mesh.updateMatrixWorld()
+  mesh.matrixAutoUpdate = false
+  return mesh
+}
+
+/** @param { LineMeshMaterialStorage } materialStorage @return { Mesh } */
+export function meshForFeatureCollection(collection, order = 0, materialStorage) {
+  let matertial
+  if (materialStorage) {
+    matertial = new MeshLineMaterial()
+    materialStorage.AddMateril(matertial)
+  } else {
+    matertial = new MeshBasicMaterial({ wireframe: false })
+  }
+
+  const mesh = new Mesh(featureCollectionGeometry(collection), matertial);
   mesh.translateZ(order)
   mesh.updateMatrixWorld()
   mesh.matrixAutoUpdate = false

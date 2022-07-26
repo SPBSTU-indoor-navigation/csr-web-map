@@ -17,12 +17,33 @@ const order = [
   'road.pedestrian.treadmill',
   'road.main',
   'fence.main',
+  'steps',
   'fence.second',
+  'fence.heigth',
+  'crosswalk',
+  'road.marking.main',
+  'parking.marking',
+  'parking.big',
+  'stadion.grass.marking',
+  'treadmill.marking'
 ]
+
+const geometryBatchType = {
+  'fence.main': 'line',
+  'fence.second': 'line',
+  'fence.heigth': 'line',
+  crosswalk: 'line',
+  'road.marking.main': 'line',
+  'parking.marking': 'line',
+  'parking.big': 'line',
+  steps: 'line',
+  'stadion.grass.marking': 'line',
+  'treadmill.marking': 'line',
+}
 
 
 export default class Environment {
-  constructor(environment, detail) {
+  constructor(environment, detail, lineMeshMaterialStorage) {
     this.geometry = {}
 
     this.environment = environment
@@ -36,7 +57,8 @@ export default class Environment {
       const features = groupedEnvironment[category] || groupedDetail[category]
       if (!features) return
 
-      this.geometry[category] = meshForFeatureCollection(features, 0xffff00, -1 + (i * 0.01))
+      const isLine = geometryBatchType[category] === 'line'
+      this.geometry[category] = meshForFeatureCollection(features, -1 + (i * 0.01), isLine ? lineMeshMaterialStorage : undefined)
     })
 
     this.groupMesh = new Group()
@@ -55,7 +77,18 @@ export default class Environment {
 
   Style(styleSheet) {
     Object.keys(this.geometry).forEach(category => {
-      this.geometry[category].material.color.set(styleSheet.environment[category].fillColor)
+      const style = styleSheet.environment[category]
+      const material = this.geometry[category].material
+
+      if (geometryBatchType[category] === 'line') {
+        material.color.set(style.strokeColor)
+        material.lineWidth = style.lineWidth
+        material.opacity = style.strokeOpacity || 1
+        material.transparent = material.opacity == 1 ? false : true
+        material.sizeAttenuation = style.screenSpace == undefined ? false : style.screenSpace
+      } else {
+        material.color.set(style.fillColor)
+      }
     })
   }
 }

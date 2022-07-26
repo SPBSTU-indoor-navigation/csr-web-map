@@ -1,22 +1,3 @@
-// StyleConstructorOptions {
-//   strokeColor: 'rgb(0, 122, 255)',
-//   strokeOpacity: 1,
-//   strokeStart: 0,
-//   strokeEnd: 1,
-//   lineWidth: 2,
-//   lineCap: 'butt' | 'round' | 'square',
-//   lineJoin: 'miter' | 'round' | 'bevel',
-//   lineDash: [10, 5],
-//   lineDashOffset: 1,
-//   lineGradient: new mapkit.LineGradient({
-//     0: "blue",
-//     1: "red"
-//   }),
-//   fillColor: 'rgb(0, 122, 255)',
-//   fillOpacity: 1,
-//   fillRule: 0,
-// }
-
 export default {
   venue: {
     fillColor: '#F6F4EC'
@@ -24,8 +5,7 @@ export default {
   'building.footprint': {
     fillColor: '#DDDDDD',
     strokeColor: '#A1A1A1',
-    strokeOpacity: 1,
-    lineWidth: 1
+    lineWidth: 2
   },
   environment: {
     grass: {
@@ -64,55 +44,49 @@ export default {
 
     crosswalk: {
       strokeColor: "#E9E9EA",
-      strokeOpacity: 1,
-      lineWidth: 2
+      lineWidth: 0.5,
+      screenSpace: true
     },
     'fence.main': {
       strokeColor: "#212121",
-      strokeOpacity: 1,
-      lineWidth: 1
+      lineWidth: 0.25,
+      screenSpace: true
     },
-    'frnce.height': {
+    'fence.heigth': {
       strokeColor: "#797979",
-      strokeOpacity: 1,
-      lineWidth: 2
+      lineWidth: 0.15,
+      screenSpace: true
     },
     'stadion.grass.marking': {
       strokeColor: "#FFFFFF",
-      strokeOpacity: 1,
-      lineWidth: 0.5
-
+      lineWidth: 0.3,
+      screenSpace: true
     },
     'steps': {
       strokeColor: "#CBCBCB",
       strokeOpacity: 0.5,
-      lineWidth: 1
-
+      lineWidth: 0.1,
+      screenSpace: true
     },
     'treadmill.marking': {
       strokeColor: '#FFFFFF',
-      strokeOpacity: 1,
-      lineWidth: 0.5
+      lineWidth: 0.05,
+      screenSpace: true
     },
     'road.marking.main': {
-      strokeColor: '#FFFFFF',
-      strokeOpacity: 1,
-      lineWidth: 0.5
+      strokeColor: '#E9E9EA',
+      lineWidth: 0.25,
+      screenSpace: true
     },
     'parking.marking': {
-      strokeColor: '#FFFFFF',
-      strokeOpacity: 1,
-      lineWidth: 0.5,
+      strokeColor: '#E9E9EA',
+      lineWidth: 0.2,
+      screenSpace: true
     },
     'parking.big': {
-      strokeColor: '#FFFFFF',
-      strokeOpacity: 1,
-      lineWidth: 1
-    },
-    'fence.heigth': {
-      strokeColor: '#797979',
-      strokeOpacity: 1,
-      lineWidth: 1
+      strokeColor: '#E9E9EA',
+      lineWidth: 1,
+      screenSpace: true
     }
   }
 }

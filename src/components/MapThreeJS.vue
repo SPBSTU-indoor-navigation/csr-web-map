@@ -50,6 +50,7 @@ export default {
       document.querySelector('.mk-map-view').insertBefore(this.renderer.domElement, document.querySelector(".mk-map-view>.mk-map-node-element"))
 
       window.onMapkitUpdate = this.animate
+      this.onWindowResize()
       window.addEventListener('resize', this.onWindowResize, false);
 
       this.venue.Style(lightTheme)
@@ -85,6 +86,10 @@ export default {
       this.camera.updateProjectionMatrix();
 
       this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.venue.OnResolutionChange({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
 
     }
   },
