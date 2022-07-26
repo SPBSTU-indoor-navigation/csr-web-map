@@ -12,6 +12,7 @@
     "simplify-js": "^1.2.4",
     "three": "^0.142.0",
     "three-stats": "^1.0.1",
+    "three.meshline": "^1.4.0",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0"
   },

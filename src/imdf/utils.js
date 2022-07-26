@@ -25,6 +25,9 @@ export function processGeometryCoordinates(geometry, pivot) {
     case 'Polygon':
       coordinates = coordinates.map(cicle => processPointAttay(cicle))
       break;
+    case 'MultiPolygon':
+      coordinates = coordinates.map(polygon => polygon.map(cicle => processPointAttay(cicle)))
+      break;
 
     default: break;
   }
@@ -55,7 +58,9 @@ function createPolygonGeometry(coordinates) {
 
 export function geometryIMDF2Three(geometry) {
   if (geometry.type === 'Polygon') return createPolygonGeometry(geometry.coordinates)
+  if (geometry.type === 'MultiPolygon') return mergeBufferGeometries(geometry.coordinates.map(createPolygonGeometry))
 
+  console.warn('Unsupported geometry type: ' + geometry.type)
   return new BufferGeometry()
 }
 

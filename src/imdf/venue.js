@@ -2,6 +2,11 @@ import Environments from "./environment";
 import { createPolygon } from '../components/MapKit/utils'
 import { processGeometryCoordinates, meshForFeatureCollection, geoToVector } from './utils'
 
+import { Mesh, Color, Vector3 } from 'three';
+import { MeshLine, MeshLineMaterial } from 'three.meshline';
+
+import * as THREE from 'three'
+
 export default class Venue {
   constructor(archive) {
     this.data = archive.venue
@@ -28,7 +33,21 @@ export default class Venue {
   Add(scene) {
     [this.mesh, this.buildingFootprintMesh]
       .forEach(mesh => scene.add(mesh))
+
     this.environments.Add(scene)
+
+
+
+    const line = new MeshLine();
+    line.setPoints(this.data[0].geometry.coordinates[0].map(t => new Vector3(t.x, t.y, 0)));
+    const material = new MeshLineMaterial({
+      color: 0xff0000,
+      lineWidth: 0.005,
+      sizeAttenuation: false
+    });
+
+    const mesh = new Mesh(line, material);
+    scene.add(mesh);
   }
 
   /** @param { import('three').Scene } scene */
