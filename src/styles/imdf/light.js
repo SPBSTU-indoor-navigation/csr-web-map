@@ -88,5 +88,26 @@ export default {
       lineWidth: 1,
       screenSpace: true
     }
+  },
+  indoor: {
+    default: {
+      fillColor: '#EBEBEB'
+    },
+    restricted: {
+      fillColor: '#CFCFCF'
+    },
+    outline: {
+      strokeColor: '#A1A1A1',
+      lineWidth: 2
+    },
+    walkway: {
+      fillColor: '#FEFEFE'
+    },
+    stairs: {
+      fillColor: '#C8D9DE'
+    },
+    restroom: {
+      fillColor: '#E5DFEC'
+    }
   }
 }

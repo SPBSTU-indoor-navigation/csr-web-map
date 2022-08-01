@@ -154,3 +154,16 @@ export function meshForFeatureCollection(collection, order = 0, materialStorage)
   mesh.matrixAutoUpdate = false
   return mesh
 }
+
+
+
+
+//IMDF
+
+export function unwrapBy(array, by) {
+  return array.reduce((acc, value) => {
+    const key = by(value)
+    acc[key] = value
+    return acc
+  }, {})
+}

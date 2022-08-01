@@ -72,7 +72,7 @@ export default {
 
 
       const center = this.venue.Translate(this.map.center)
-      this.camera.position.set(center.x, center.y, 2)
+      this.camera.position.set(center.x, center.y, 10)
       this.camera.rotation.set(0, 0, this.map.rotation * Math.PI / 180)
 
       this.camera.updateProjectionMatrix()
