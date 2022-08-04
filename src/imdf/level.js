@@ -6,7 +6,7 @@ export default class Level {
 
   constructor(data, units, openings, details, amenitys, occupants, lineMeshMaterialStorage) {
 
-
+    this.ordinal = data.properties.ordinal
 
     this.data = data
     this.units = units
@@ -23,21 +23,21 @@ export default class Level {
     })
 
     console.log(groupedUnits);
-    this.geometry = {}
+    this.geometrys = {}
 
     Object.keys(groupedUnits).forEach(category => {
-      this.geometry[category] = meshForFeatureCollection(groupedUnits[category], 2)
+      this.geometrys[category] = meshForFeatureCollection(groupedUnits[category], 2)
     })
 
-    this.geometry.outline = outlineMeshForFeatureCollection(units, 3, lineMeshMaterialStorage)
-    // this.geometry.outline.material.sizeAttenuation = true
+    this.geometrys.outline = outlineMeshForFeatureCollection(units, 3, lineMeshMaterialStorage)
+    this.geometrys.levelOutline = outlineMeshForFeatureCollection([data], 3.5, lineMeshMaterialStorage)
 
-    console.log(this.geometry);
+    console.log(this.geometrys);
 
 
 
     this.groupMesh = new Group()
-    Object.values(this.geometry).forEach(mesh => this.groupMesh.add(mesh))
+    Object.values(this.geometrys).forEach(mesh => this.groupMesh.add(mesh))
   }
 
   /** @param { import('three').Scene } scene */
@@ -52,7 +52,7 @@ export default class Level {
   }
 
   Style(styleSheet) {
-    Object.keys(this.geometry).forEach(category => {
+    Object.keys(this.geometrys).forEach(category => {
       let styleCategory = category
 
       if (['restroom', 'restroom.female', 'restroom.male'].includes(styleCategory)) {
@@ -64,12 +64,17 @@ export default class Level {
       }
 
       const style = styleSheet.indoor[styleCategory] || styleSheet.indoor.default
-      const material = this.geometry[category].material
+      const material = this.geometrys[category].material
 
       material.color.set(style.fillColor)
     })
 
-    this.geometry.outline.material.color.set(styleSheet.indoor.outline.strokeColor)
-    this.geometry.outline.material.lineWidth = styleSheet.indoor.outline.lineWidth
+    this.geometrys.outline.material.color.set(styleSheet.indoor.outline.strokeColor)
+    this.geometrys.levelOutline.material.color.set(styleSheet.indoor.outline.strokeColor)
+  }
+
+  OnZoom(zoom) {
+    this.geometrys.outline.material.lineWidth = Math.max(zoom / 15, 2)
+    this.geometrys.levelOutline.material.lineWidth = Math.max(zoom / 10, 7)
   }
 }

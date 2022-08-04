@@ -101,6 +101,10 @@ export default class Venue {
     return geoToVector(this.pivot, position)
   }
 
+  OnZoom(zoom) {
+    this.buildings.forEach(building => building.OnZoom(zoom))
+  }
+
   OnResolutionChange(resolution) {
     this.lineMeshMaterialStorage.UpdateResolution({ x: resolution.width, y: resolution.height })
   }

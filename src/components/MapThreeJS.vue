@@ -13,14 +13,17 @@ import Venue from '../imdf/venue.js'
 import lightTheme from '../styles/imdf/light.js'
 
 import { Scene, OrthographicCamera, WebGLRenderer } from 'three';
+import { Vector2 } from 'three';
 
 import { geoToVector } from '../imdf/utils'
 
+const size = new Vector2()
 
 export default {
   data() {
     return {
-      theme: 'l'
+      theme: 'l',
+      zoom: 0
     }
   },
   methods: {
@@ -77,8 +80,13 @@ export default {
 
       this.camera.updateProjectionMatrix()
 
-      this.renderer.render(this.scene, this.camera);
 
+      this.renderer.getSize(size)
+      this.zoom = size.x / delta.x
+      this.venue.OnZoom(this.zoom)
+
+
+      this.renderer.render(this.scene, this.camera);
     },
     onWindowResize() {
 
@@ -91,14 +99,6 @@ export default {
         height: window.innerHeight
       })
 
-    }
-  },
-  computed: {
-    color() {
-      return this.theme == 'l' ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 255)'
-    },
-    colorScheme() {
-      return this.theme == 'l' ? mapkit.Map.ColorSchemes.Light : mapkit.Map.ColorSchemes.Dark
     }
   },
   components: {
