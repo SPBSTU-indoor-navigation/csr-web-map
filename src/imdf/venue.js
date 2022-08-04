@@ -81,9 +81,11 @@ export default class Venue {
 
   /** @param { import('three').Scene } scene */
   Remove(scene) {
-    [this.mesh, this.buildingFootprintMesh]
+    [this.mesh, this.buildingFootprintMesh, this.buildingFootprintOutlineMesh]
       .forEach(mesh => scene.remove(mesh))
+
     this.environments.Remove(scene)
+    this.buildings.forEach(building => building.Remove(scene))
   }
 
   Style(styleSheet) {

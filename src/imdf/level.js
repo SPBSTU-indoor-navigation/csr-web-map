@@ -22,7 +22,6 @@ export default class Level {
       return !restriction ? t.properties.category : t.properties.category + '.' + restriction
     })
 
-    console.log(groupedUnits);
     this.geometrys = {}
 
     Object.keys(groupedUnits).forEach(category => {
@@ -32,9 +31,6 @@ export default class Level {
     this.geometrys.outline = outlineMeshForFeatureCollection(units, 3, lineMeshMaterialStorage)
     this.geometrys.levelOutline = outlineMeshForFeatureCollection([data], 3.5, lineMeshMaterialStorage)
 
-    console.log(this.geometrys);
-
-
 
     this.groupMesh = new Group()
     Object.values(this.geometrys).forEach(mesh => this.groupMesh.add(mesh))
@@ -43,7 +39,6 @@ export default class Level {
   /** @param { import('three').Scene } scene */
   Add(scene) {
     scene.add(this.groupMesh);
-    console.log(this.groupMesh);
   }
 
   /** @param { import('three').Scene } scene */

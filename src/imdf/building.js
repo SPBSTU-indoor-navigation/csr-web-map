@@ -24,17 +24,17 @@ export default class Building {
 
   /** @param { import('three').Scene } scene */
   Remove(scene) {
-
+    this.HideIndoor(scene)
   }
 
   /** @param { import('three').Scene } scene */
   ShowIndoor(scene, ordinal) {
     if (this.showLevel) return
 
-    const targetOrdinal = ordinal || this.currentOrdinal;
-    if (!this.levelByOrdinal[targetOrdinal]) return
+    this.currentOrdinal = ordinal || this.currentOrdinal;
+    if (!this.levelByOrdinal[this.currentOrdinal]) return
 
-    this.levelByOrdinal[targetOrdinal].Add(scene)
+    this.levelByOrdinal[this.currentOrdinal].Add(scene)
 
     this.showLevel = true;
   }
