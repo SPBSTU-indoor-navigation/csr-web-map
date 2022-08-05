@@ -7,6 +7,10 @@ import Level from "./level";
 
 
 export default class Venue {
+
+  /** @type {Building[]} */
+  buildings = []
+
   constructor(archive) {
     this.lineMeshMaterialStorage = new LineMeshMaterialStorage()
     this.data = archive.venue

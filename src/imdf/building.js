@@ -5,6 +5,9 @@ export default class Building {
   currentOrdinal = 0
   showLevel = false
 
+  /** @type { import('three').Scene } */
+  scene = null
+
   constructor(data, levels, attractions) {
     this.data = data
     this.levels = levels
@@ -19,32 +22,31 @@ export default class Building {
 
   /** @param { import('three').Scene } scene */
   Add(scene) {
-    this.ShowIndoor(scene, 1)
+    this.scene = scene
+    this.ShowIndoor(1)
   }
 
   /** @param { import('three').Scene } scene */
   Remove(scene) {
-    this.HideIndoor(scene)
+    this.HideIndoor()
   }
 
-  /** @param { import('three').Scene } scene */
-  ShowIndoor(scene, ordinal) {
+  ShowIndoor(ordinal) {
     if (this.showLevel) return
 
     this.currentOrdinal = ordinal || this.currentOrdinal;
     if (!this.levelByOrdinal[this.currentOrdinal]) return
 
-    this.levelByOrdinal[this.currentOrdinal].Add(scene)
+    this.levelByOrdinal[this.currentOrdinal].Add(this.scene)
 
     this.showLevel = true;
   }
 
-  /** @param { import('three').Scene } scene */
-  HideIndoor(scene) {
+  HideIndoor() {
     if (!this.showLevel) return
     if (!this.levelByOrdinal[this.currentOrdinal]) return
 
-    this.levelByOrdinal[this.currentOrdinal].Remove(scene)
+    this.levelByOrdinal[this.currentOrdinal].Remove(this.scene)
     this.showLevel = false
 
 

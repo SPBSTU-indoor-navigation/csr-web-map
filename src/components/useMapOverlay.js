@@ -5,7 +5,7 @@ import { Vector2 } from 'three';
 import { geoToVector } from '../imdf/utils'
 
 export default function useMapOverlay(options) {
-  const { venue, mkMap, styleSheet } = options
+  const { venue, mkMap, styleSheet, onAnimate } = options
 
   const screenSize = ref({ width: window.innerWidth, height: window.innerHeight })
   const zoom = ref(0)
@@ -81,6 +81,7 @@ export default function useMapOverlay(options) {
     zoom.value = size.x / delta.x
     venue.value.OnZoom(zoom.value)
 
+    onAnimate?.()
 
     renderer.render(scene, camera);
   }
@@ -90,6 +91,7 @@ export default function useMapOverlay(options) {
     screenSize,
     scene,
     camera,
-    renderer
+    renderer,
+    zoom
   }
 }

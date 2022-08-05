@@ -14,6 +14,10 @@ export default {
     showsPointsOfInterest: {
       type: Boolean,
       default: false
+    },
+    showsMapTypeControl: {
+      type: Boolean,
+      default: false
     }
   },
   watch: {
@@ -25,7 +29,8 @@ export default {
     await useMapKit("https://dev.mapstorage.polymap.ru/api/token")
 
     const m = new mapkit.Map('mapKitContainer', {
-      showsPointsOfInterest: this.showsPointsOfInterest
+      showsPointsOfInterest: this.showsPointsOfInterest,
+      showsMapTypeControl: this.showsMapTypeControl
     })
     useUtils(m)
     this.map = m
