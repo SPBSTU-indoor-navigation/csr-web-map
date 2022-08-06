@@ -9,6 +9,8 @@ export function nearestBuiling(bbox, camera, venue) {
     raycaster.setFromCamera(screen.clone(), camera)
     const point = raycaster.ray.intersectPlane(plane, new Vector3())
 
+    if (!point) return null
+
     return new Vector2(point.x, point.y)
   }
 
