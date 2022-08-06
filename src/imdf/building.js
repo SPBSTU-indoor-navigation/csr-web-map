@@ -1,3 +1,6 @@
+import { Vector2 } from 'three'
+import { Box2 } from 'three'
+import { polygonIntersection } from './utils'
 
 
 export default class Building {
@@ -7,6 +10,9 @@ export default class Building {
 
   /** @type { import('three').Scene } */
   scene = null
+
+  bbox = null
+  points = []
 
   constructor(data, levels, attractions) {
     this.data = data
@@ -18,12 +24,50 @@ export default class Building {
       return acc
     }, {})
 
+    this.currentOrdinal = Math.min(...levels.map(t => t.ordinal))
+
+
+
+    const toVector = (coordinates) => coordinates[0].map(point => new Vector2(point.x, point.y))
+
+    this.points = data.geometry.type === 'MultiPolygon' ? data.geometry.coordinates.flatMap(toVector) : toVector(data.geometry.coordinates)
+
+    this.bbox = (new Box2()).setFromPoints(data.geometry.coordinates.flatMap(t => t))
+  }
+
+  IsInside(point) {
+    if (!this.bbox.containsPoint(point)) return false
+
+    const points = this.data.geometry.coordinates[0]
+
+    let isInside = false
+    let i = 0, j = points.length - 1;
+    for (i, j; i < points.length; j = i++) {
+      if ((points[i].y > point.y) != (points[j].y > point.y) &&
+        point.x < (points[j].x - points[i].x) * (point.y - points[i].y) / (points[j].y - points[i].y) + points[i].x) {
+        isInside = !isInside;
+      }
+    }
+
+    return isInside;
+  }
+
+  IsIntersectByLine(line) {
+    if (this.data.geometry.type === 'MultiPolygon') {
+      for (let i = 0; i < this.data.geometry.coordinates.length; i++) {
+        const intersect = polygonIntersection(this.data.geometry.coordinates[i], line)
+        if (intersect) return true
+      }
+    } else {
+      return polygonIntersection(this.data.geometry.coordinates[0], line)
+    }
+
+    return false
   }
 
   /** @param { import('three').Scene } scene */
   Add(scene) {
     this.scene = scene
-    this.ShowIndoor(1)
   }
 
   /** @param { import('three').Scene } scene */

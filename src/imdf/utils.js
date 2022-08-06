@@ -167,3 +167,35 @@ export function unwrapBy(array, by) {
     return acc
   }, {})
 }
+
+
+
+// Help
+
+/** @param {import("three").Vector2} p0 */
+/** @param {import("three").Vector2} p1 */
+export function polygonIntersection(points, line) {
+  function intersection(p0, p1, p2, p3) {
+    var denominator = (p3.x - p2.x) * (p1.y - p0.y) - (p3.y - p2.y) * (p1.x - p0.x)
+    var ua = (p3.y - p2.y) * (p0.x - p2.x) - (p3.x - p2.x) * (p0.y - p2.y)
+    var ub = (p1.y - p0.y) * (p0.x - p2.x) - (p1.x - p0.x) * (p0.y - p2.y)
+
+    if (denominator < 0) {
+      ua = -ua; ub = -ub; denominator = -denominator
+    }
+
+    return ua >= 0.0 && ua <= denominator && ub >= 0.0 && ub <= denominator && denominator != 0
+  }
+
+  if (points.length <= 2) return false
+
+  const { start: p0, end: p1 } = line
+
+  if (intersection(p0, p1, points[0], points[points.length - 1])) return true
+
+  for (let i = 1; i < points.length; i++) {
+    if (intersection(p0, p1, points[i - 1], points[i])) return true
+  }
+
+  return false
+}
