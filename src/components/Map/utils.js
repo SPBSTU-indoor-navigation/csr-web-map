@@ -1,4 +1,4 @@
-import { Plane, Raycaster, Vector3, Vector2, Box2 } from "three"
+import { Box2, Plane, Raycaster, Vector2, Vector3 } from "three"
 
 /** @param {Box2} bbox */
 export function nearestBuiling(bbox, camera, venue) {

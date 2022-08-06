@@ -1,9 +1,7 @@
-import Environments from "./environment";
-import { createPolygon } from '../components/MapKit/utils'
-import { processGeometryCoordinates, meshForFeatureCollection, outlineMeshForFeatureCollection, geoToVector, LineMeshMaterialStorage } from './utils'
-import { unwrapBy } from './utils'
 import Building from "./building";
+import Environments from "./environment";
 import Level from "./level";
+import { createPolygon, geoToVector, LineMeshMaterialStorage, meshForFeatureCollection, outlineMeshForFeatureCollection, processGeometryCoordinates, unwrapBy } from './utils';
 
 
 export default class Venue {

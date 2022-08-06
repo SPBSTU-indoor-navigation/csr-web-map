@@ -1,5 +1,4 @@
-import { Vector2 } from 'three'
-import { Box2 } from 'three'
+import { Box2, Vector2 } from 'three'
 import { polygonIntersection } from './utils'
 
 

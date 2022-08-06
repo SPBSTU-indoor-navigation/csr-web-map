@@ -1,6 +1,6 @@
-import { Shape, Path, ShapeGeometry, Mesh, MeshBasicMaterial, BufferGeometry, Vector3 } from 'three'
+import { BufferGeometry, Mesh, MeshBasicMaterial, Path, Shape, ShapeGeometry, Vector3 } from 'three';
 import { MeshLine, MeshLineMaterial } from 'three.meshline';
-import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 const metersInLatDegree = 111194.92664
 const Deg2Rad = Math.PI / 180.0
@@ -156,6 +156,59 @@ export function meshForFeatureCollection(collection, order = 0, materialStorage)
 }
 
 
+
+
+function polygon2Coordinate(polygon) {
+  return polygon.map(cicle =>
+    cicle.map(point => new mapkit.Coordinate(point[1], point[0]))
+  )
+}
+
+function multiPolygon2Coordinate(multiPolygon) {
+  return multiPolygon.flatMap(t => polygon2Coordinate(t))
+}
+
+export function createPolygon(feature) {
+
+  let data = feature
+  if (!Array.isArray(feature)) {
+    data = [feature]
+  }
+
+  const geom = data.flatMap(feature => {
+    if (feature.geometry.type === 'Polygon') {
+      return polygon2Coordinate(feature.geometry.coordinates)
+    } else if (feature.geometry.type === 'MultiPolygon') {
+      return multiPolygon2Coordinate(feature.geometry.coordinates)
+    }
+  })
+
+  const res = new mapkit.PolygonOverlay(geom)
+  res.enabled = false
+  return res
+
+}
+
+export function createLine(feature) {
+
+  let data = feature
+  if (!Array.isArray(feature)) {
+    data = [feature]
+  }
+
+  const geom = data.flatMap(feature =>
+    feature.geometry.coordinates.map(segment =>
+      segment.map(point => new mapkit.Coordinate(point[1], point[0]))
+    )
+  )
+
+  return geom.map(t => {
+    const res = new mapkit.PolylineOverlay(t)
+
+    res.enabled = false
+    return res
+  })
+}
 
 
 //IMDF

@@ -8,12 +8,11 @@
         <router-link to="/test">Тест</router-link>
       </li>
     </ul>
-
   </div>
 </template>
 
+
 <script setup>
-import MapVue from "../components/Map.vue";
 </script>
 
 

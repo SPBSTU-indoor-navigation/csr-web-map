@@ -5,41 +5,37 @@
 <script>
 import useMapKit from './useMapKit'
 import { useUtils } from './utils'
-let map = null
 
 export default {
-  data: () => ({
-  }),
+  data: () => ({}),
   props: {
     showsPointsOfInterest: {
       type: Boolean,
-      default: false
+      default: false,
     },
     showsMapTypeControl: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   watch: {
     showsPointsOfInterest(newValue) {
       this.map.showsPointsOfInterest = newValue
-    }
+    },
   },
   async mounted() {
-    await useMapKit("https://dev.mapstorage.polymap.ru/api/token")
+    await useMapKit('https://dev.mapstorage.polymap.ru/api/token')
 
     const m = new mapkit.Map('mapKitContainer', {
       showsPointsOfInterest: this.showsPointsOfInterest,
-      showsMapTypeControl: this.showsMapTypeControl
+      showsMapTypeControl: this.showsMapTypeControl,
     })
     useUtils(m)
     this.map = m
-    console.log(m);
+    console.log(m)
     this.$emit('map-ready', this.map)
-  }
-
+  },
 }
-
 </script>
 
 <style scoped>

@@ -1,6 +1,5 @@
 import "core-js/actual/array/group-by"
 import { Group } from "three"
-import { createPolygon, createMKStyle, createLine } from '../components/MapKit/utils'
 
 import { meshForFeatureCollection } from './utils'
 

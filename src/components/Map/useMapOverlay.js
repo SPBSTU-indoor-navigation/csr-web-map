@@ -1,8 +1,7 @@
-import { ref, toRef, watch, watchEffect } from "vue";
-import { Scene, OrthographicCamera, WebGLRenderer } from 'three';
-import { Vector2 } from 'three';
+import { OrthographicCamera, Scene, Vector2, WebGLRenderer } from 'three';
+import { ref, watch, watchEffect } from "vue";
 
-import { geoToVector } from '../imdf/utils'
+import { geoToVector } from '../../imdf/utils';
 
 export default function useMapOverlay(options) {
   const { venue, mkMap, styleSheet, onAnimate } = options

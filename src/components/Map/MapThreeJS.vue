@@ -3,20 +3,20 @@
     <MapKitVue @map-ready="onMapReady" />
     <div class="abs-full container-map-ui">
       <input v-if="showIndoor && currentBuilding" type="range" :min="0" :max="currentBuilding.levels.length - 1"
-        v-model="currentOrdinal">
+        v-model="currentOrdinal" />
     </div>
   </div>
 </template>
 
 <script setup>
+import Venue from '@/imdf/venue'
+import lightTheme from '@/styles/imdf/light.js'
 import MapKitVue from './MapKit/MapKit.vue'
-import Venue from '../imdf/venue.js'
-import lightTheme from '../styles/imdf/light.js'
 import useMapOverlay from './useMapOverlay'
 
-import { defineComponent, ref, shallowRef, watch, watchEffect } from 'vue';
-import { useRoute } from 'vue-router';
-import { Box2, Vector2 } from 'three';
+import { Box2, Vector2 } from 'three'
+import { defineComponent, ref, shallowRef, watch, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
 
 import { nearestBuiling } from './utils'
 
@@ -35,20 +35,17 @@ let camera
 let renderer
 
 
-
-const SHOW_ZOOM = 4;
-const HIDE_ZOOM = 3.9;
+const SHOW_ZOOM = 4
+const HIDE_ZOOM = 3.9
 
 function onMapReady(map) {
   mkMap.value = map
 }
 
 function onAnimate() {
-
   const nearest = nearestBuiling(new Box2(new Vector2(-1, -1), new Vector2(1, 1)).expandByScalar(-0.1), camera, venue.value)
   currentBuilding.value = nearest
 
-  // console.log(nearest);
 }
 
 async function load() {
@@ -66,7 +63,7 @@ async function load() {
     venue,
     mkMap: mkMap.value,
     styleSheet,
-    onAnimate
+    onAnimate,
   })
 
   scene = mapOverlay.scene
@@ -82,7 +79,7 @@ async function load() {
 
 load()
 
-watch(zoom, (zoom) => {
+watch(zoom, zoom => {
   if (currentBuilding.value) {
     if (zoom > SHOW_ZOOM) {
       currentBuilding.value.ShowIndoor()
@@ -104,15 +101,13 @@ watch(currentBuilding, (building, old) => {
 })
 
 watch(currentOrdinal, level => {
-  console.log(level);
+  console.log(level)
   currentBuilding.value.ChangeOrdinal(level)
   window.onMapkitUpdate?.()
 })
 
 defineComponent([MapKitVue])
-
 </script>
-
 
 <style scoped lang="scss">
 .container-map-ui {

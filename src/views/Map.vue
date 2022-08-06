@@ -5,5 +5,5 @@
 </template>
 
 <script setup>
-import MapVue from "../components/MapThreeJS.vue";
+import MapVue from "../components/Map/MapThreeJS.vue";
 </script>
