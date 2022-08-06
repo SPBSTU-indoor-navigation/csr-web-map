@@ -97,7 +97,8 @@ export default class Building {
   }
 
   ChangeOrdinal(ordinal) {
-
+    this.HideIndoor()
+    this.ShowIndoor(ordinal)
   }
 
   Style(styleSheet) {

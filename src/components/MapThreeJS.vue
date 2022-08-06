@@ -2,6 +2,8 @@
   <div>
     <MapKitVue @map-ready="onMapReady" />
     <div class="abs-full container-map-ui">
+      <input v-if="showIndoor && currentBuilding" type="range" :min="0" :max="currentBuilding.levels.length - 1"
+        v-model="currentOrdinal">
     </div>
   </div>
 </template>
@@ -23,13 +25,16 @@ const mkMap = shallowRef()
 const venue = shallowRef()
 const styleSheet = shallowRef(lightTheme)
 const zoom = ref(0)
+const currentBuilding = shallowRef()
+const showIndoor = ref(false)
+const currentOrdinal = ref(0)
 
 let scene
 /** @type {import('three').Camera} */
 let camera
 let renderer
 
-let currentBuilding = shallowRef()
+
 
 const SHOW_ZOOM = 4;
 const HIDE_ZOOM = 3.9;
@@ -42,6 +47,8 @@ function onAnimate() {
 
   const nearest = nearestBuiling(new Box2(new Vector2(-1, -1), new Vector2(1, 1)).expandByScalar(-0.1), camera, venue.value)
   currentBuilding.value = nearest
+
+  // console.log(nearest);
 }
 
 async function load() {
@@ -79,15 +86,27 @@ watch(zoom, (zoom) => {
   if (currentBuilding.value) {
     if (zoom > SHOW_ZOOM) {
       currentBuilding.value.ShowIndoor()
+      showIndoor.value = true
     } else if (zoom < HIDE_ZOOM) {
       currentBuilding.value.HideIndoor()
+      showIndoor.value = false
     }
   }
 })
 
 watch(currentBuilding, (building, old) => {
   if (old) old.HideIndoor()
-  if (building && zoom.value > HIDE_ZOOM) building.ShowIndoor()
+  if (building && zoom.value > HIDE_ZOOM) {
+    currentOrdinal.value = building.currentOrdinal
+    building.ShowIndoor()
+    showIndoor.value = true
+  }
+})
+
+watch(currentOrdinal, level => {
+  console.log(level);
+  currentBuilding.value.ChangeOrdinal(level)
+  window.onMapkitUpdate?.()
 })
 
 defineComponent([MapKitVue])
