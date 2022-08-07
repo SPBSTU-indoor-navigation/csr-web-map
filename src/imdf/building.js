@@ -77,7 +77,7 @@ export default class Building {
   ShowIndoor(ordinal) {
     if (this.showLevel) return
 
-    this.currentOrdinal = ordinal || this.currentOrdinal;
+    this.currentOrdinal = ordinal == undefined ? this.currentOrdinal : ordinal;
     if (!this.levelByOrdinal[this.currentOrdinal]) return
 
     this.levelByOrdinal[this.currentOrdinal].Add(this.scene)

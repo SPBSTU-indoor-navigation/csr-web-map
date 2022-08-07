@@ -2,8 +2,11 @@
   <div>
     <MapKitVue @map-ready="onMapReady" />
     <div class="abs-full container-map-ui">
-      <input v-if="showIndoor && currentBuilding" type="range" :min="0" :max="currentBuilding.levels.length - 1"
-        v-model="currentOrdinal" />
+
+      <Transition name="slide-fade">
+        <LevelSwitcherVue v-if="showIndoor && currentBuilding" :levels="currentBuilding.levels"
+          v-model:level="currentOrdinal" />
+      </Transition>
     </div>
   </div>
 </template>
@@ -11,6 +14,7 @@
 <script setup>
 import Venue from '@/imdf/venue'
 import lightTheme from '@/styles/imdf/light.js'
+import LevelSwitcherVue from '../Controlls/LevelSwitcher/index.vue'
 import MapKitVue from './MapKit/MapKit.vue'
 import useMapOverlay from './useMapOverlay'
 
@@ -25,15 +29,15 @@ const mkMap = shallowRef()
 const venue = shallowRef()
 const styleSheet = shallowRef(lightTheme)
 const zoom = ref(0)
-const currentBuilding = shallowRef()
+const currentBuilding = ref()
 const showIndoor = ref(false)
 const currentOrdinal = ref(0)
+
 
 let scene
 /** @type {import('three').Camera} */
 let camera
 let renderer
-
 
 const SHOW_ZOOM = 4
 const HIDE_ZOOM = 3.9
@@ -74,7 +78,6 @@ async function load() {
     zoom.value = mapOverlay.zoom.value
   })
 
-  // venue.value = new Venue((await (await fetch('https://dev.mapstorage.polymap.ru/api/map/test2')).json()).imdf)
 }
 
 load()
@@ -100,18 +103,18 @@ watch(currentBuilding, (building, old) => {
   }
 })
 
-watch(currentOrdinal, level => {
-  console.log(level)
-  currentBuilding.value.ChangeOrdinal(level)
+watch(currentOrdinal, ordinal => {
+  currentBuilding.value.ChangeOrdinal(ordinal)
   window.onMapkitUpdate?.()
 })
 
-defineComponent([MapKitVue])
+defineComponent([MapKitVue, LevelSwitcherVue])
 </script>
 
 <style scoped lang="scss">
 .container-map-ui {
   pointer-events: none;
+  overflow: hidden;
 
   >* {
     pointer-events: auto;
@@ -130,5 +133,18 @@ defineComponent([MapKitVue])
   border-radius: 50%;
   top: 50%;
   left: 50%;
+}
+
+.slide-fade-enter-active {
+  transition: all 0.15s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.15s ease-out;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(40px);
 }
 </style>

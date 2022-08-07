@@ -2,6 +2,7 @@
   <div id="mapKitContainer"></div>
 </template>
 
+
 <script>
 import useMapKit from './useMapKit'
 import { useUtils } from './utils'

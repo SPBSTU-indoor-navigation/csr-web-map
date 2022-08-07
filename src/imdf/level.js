@@ -70,6 +70,6 @@ export default class Level {
 
   OnZoom(zoom) {
     this.geometrys.outline.material.lineWidth = Math.max(zoom / 15, 2)
-    this.geometrys.levelOutline.material.lineWidth = Math.max(zoom / 10, 7)
+    this.geometrys.levelOutline.material.lineWidth = Math.max(zoom / 10, 5)
   }
 }
