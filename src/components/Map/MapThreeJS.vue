@@ -138,7 +138,7 @@ defineComponent([MapKitVue, LevelSwitcherVue])
 }
 
 .slide-fade-enter-active {
-  transition: all 0.15s ease-out;
+  transition: all 0.15s ease-in;
 }
 
 .slide-fade-leave-active {
@@ -147,6 +147,6 @@ defineComponent([MapKitVue, LevelSwitcherVue])
 
 .slide-fade-enter-from,
 .slide-fade-leave-to {
-  transform: translateX(40px);
+  transform: translateX(4rem);
 }
 </style>
