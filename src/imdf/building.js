@@ -96,8 +96,12 @@ export default class Building {
   }
 
   ChangeOrdinal(ordinal) {
-    this.HideIndoor()
-    this.ShowIndoor(ordinal)
+    if (this.showLevel) {
+      this.HideIndoor()
+      this.ShowIndoor(ordinal)
+    } else {
+      this.currentOrdinal = ordinal
+    }
   }
 
   Style(styleSheet) {

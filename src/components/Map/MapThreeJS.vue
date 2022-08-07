@@ -96,10 +96,12 @@ watch(zoom, zoom => {
 
 watch(currentBuilding, (building, old) => {
   if (old) old.HideIndoor()
-  if (building && zoom.value > HIDE_ZOOM) {
+  if (building) {
     currentOrdinal.value = building.currentOrdinal
-    building.ShowIndoor()
-    showIndoor.value = true
+    if (zoom.value > HIDE_ZOOM) {
+      building.ShowIndoor()
+      showIndoor.value = true
+    }
   }
 })
 
