@@ -7,21 +7,30 @@
       </div>
     </div>
 
-    <div @click.prevent class="current" :style="`top: ${offset}rem`"></div>
+    <div @click.prevent class="current" :class="changed ? 'non-anim' : ''" :style="`top: ${offset}rem`"></div>
   </div>
 </template>
 
 <script setup>
-import { computed } from '@vue/reactivity';
+import { computed, ref } from '@vue/reactivity';
+import { watchEffect } from 'vue';
 
 const props = defineProps(['levels', 'level'])
 const emit = defineEmits(['update:level'])
+const changed = ref(false)
 
 const levels = computed(() => {
   return props.levels.map(t => ({ ordinal: t.ordinal, name: t.data.properties.short_name })).sort((a, b) => b.ordinal - a.ordinal)
 })
 
 const offset = computed(() => levels.value.map(t => t.ordinal).indexOf(props.level) * 3)
+
+watchEffect(async () => {
+  props.levels
+  changed.value = true
+  await new Promise(resolve => setTimeout(resolve, 0))
+  changed.value = false
+})
 
 </script>
 
@@ -75,6 +84,9 @@ $level-size: 3rem;
 
     transition: 0.15s ease-in-out;
 
+    &.non-anim {
+      transition: 0s !important
+    }
 
     &:after {
       content: '';
