@@ -78,6 +78,64 @@ async function load() {
     zoom.value = mapOverlay.zoom.value
   })
 
+  var factory = function (coordinate, options) {
+
+    function getNode(n, v) {
+      n = document.createElementNS("http://www.w3.org/2000/svg", n);
+      for (var p in v)
+        n.setAttributeNS(null, p, v[p]);
+      return n
+    }
+
+    const div = document.createElement("div")
+    const name = options.title
+
+    const svg = getNode('svg', {
+      'viewBox': "0 0 100 100"
+    })
+
+    const text = getNode('text', {})
+
+    const cirlce = getNode('circle', {
+      'cx': 50,
+      'cy': 50,
+      'r': 3,
+    })
+
+    text.textContent = name
+    text.className.baseVal = "annotation-text"
+
+    svg.appendChild(text)
+    svg.appendChild(cirlce)
+
+
+
+    div.appendChild(svg)
+
+    div.className = "circle-annotation";
+    return div;
+  };
+
+  console.log(archive.imdf);
+  console.log("rrr", archive.imdf.occupant.map(t => {
+    const coordArray = t.properties.anchor.geometry.coordinates
+    const coord = new mapkit.Coordinate(coordArray[1], coordArray[0])
+
+    var annotation = new mapkit.Annotation(coord, factory, {
+      title: t.properties.shortName.ru,
+    });
+
+    mkMap.value.addAnnotation(annotation)
+    return annotation
+
+    // var options = {
+    //     title: person.title,
+    //     data: { role: person.role, building: person.building }
+    // };
+    // var annotation = new mapkit.Annotation(person.coordinate, factory, options);
+    // map.addAnnotation(annotation);
+  }));
+
 }
 
 load()
@@ -113,7 +171,37 @@ watch(currentOrdinal, ordinal => {
 defineComponent([MapKitVue, LevelSwitcherVue])
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
+svg {
+  width: 100px;
+  height: 100px;
+}
+
+.annotation-text {
+  text-anchor: middle;
+  dominant-baseline: hanging;
+  fill: #000;
+  stroke-width: 2;
+  stroke: #fff;
+  paint-order: stroke;
+  transform: translate(50px, 55px);
+  color: #000;
+
+  font-size: 10px;
+  font-weight: bold;
+}
+
+
+.circle-annotation {
+  width: 100px;
+  height: 100px;
+
+  // background: rgba(204, 204, 204, 0.209);
+  // border-radius: 50px;
+  transform: translateY(50px);
+  cursor: default !important;
+}
+
 .container-map-ui {
   pointer-events: none;
   overflow: hidden;
