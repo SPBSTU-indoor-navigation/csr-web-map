@@ -117,24 +117,44 @@ async function load() {
   };
 
   console.log(archive.imdf);
-  console.log("rrr", archive.imdf.occupant.map(t => {
-    const coordArray = t.properties.anchor.geometry.coordinates
-    const coord = new mapkit.Coordinate(coordArray[1], coordArray[0])
+  console.log(archive.imdf.occupant.map(t => t.properties.anchor.properties.unit_id));
 
-    var annotation = new mapkit.Annotation(coord, factory, {
-      title: t.properties.shortName.ru,
-    });
+  const levelById = archive.imdf.level.reduce((acc, cur) => {
+    acc[cur.id] = cur
+    return acc
+  }, {})
 
-    mkMap.value.addAnnotation(annotation)
-    return annotation
 
-    // var options = {
-    //     title: person.title,
-    //     data: { role: person.role, building: person.building }
-    // };
-    // var annotation = new mapkit.Annotation(person.coordinate, factory, options);
-    // map.addAnnotation(annotation);
-  }));
+  const unitById = archive.imdf.unit.reduce((acc, cur) => {
+    acc[cur.id] = cur
+    return acc
+  }, {})
+
+  console.log(unitById);
+
+
+
+
+  console.log("rrr", archive.imdf.occupant
+    .filter(t => levelById[unitById[t.properties.anchor.properties.unit_id].properties.level_id].properties.ordinal == 0)
+    .map(t => {
+      const coordArray = t.properties.anchor.geometry.coordinates
+      const coord = new mapkit.Coordinate(coordArray[1], coordArray[0])
+
+      var annotation = new mapkit.Annotation(coord, factory, {
+        title: t.properties.shortName.ru,
+      });
+
+      mkMap.value.addAnnotation(annotation)
+      return annotation
+
+      // var options = {
+      //     title: person.title,
+      //     data: { role: person.role, building: person.building }
+      // };
+      // var annotation = new mapkit.Annotation(person.coordinate, factory, options);
+      // map.addAnnotation(annotation);
+    }));
 
 }
 
