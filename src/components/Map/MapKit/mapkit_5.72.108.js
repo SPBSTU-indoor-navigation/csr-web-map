@@ -8475,7 +8475,7 @@
         },
         _addAnnotationWaitingForTiles: function (t, e, i) {
           if ((Object.prototype.hasOwnProperty.call(t._impl, "canAnimate") || (t._impl.canAnimate = !t._impl.isPending), delete t._impl.isPending, e && t !== this._userLocationAnnotation) && !this._items.some((function (t) {
-            return t !== this._userLocationAnnotation && t._impl.mayBeDrawn()
+            return t !== this?._userLocationAnnotation && t._impl.mayBeDrawn()
           }))) return void (this._waitingAnnotations ? this._waitingAnnotations.push(t) : (this._waitingAnnotations = [t], this._tileLoadingTimeout = window.setTimeout(this.addWaitingAnnotations.bind(this, v.noop), 3e3)));
           !i && t._impl.doesAnimate() && t._impl.delayMs > 0 ? t._impl.timeout = window.setTimeout(this._addAnnotationToMapAsync.bind(this, t), t._impl.delayMs) : this._addAnnotationToMap(t, i)
         },
