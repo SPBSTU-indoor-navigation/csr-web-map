@@ -1213,7 +1213,17 @@
           }
         },
         migrateStateTo: function (t) {
-          t.configuration = this.node.configuration, t.tint = this.node.tint, t.language = this.node.language, t.pannable = this.node.pannable, t.allowWheelToZoom = this.node.allowWheelToZoom, t.pointOfInterestFilter = this.node._impl.pointOfInterestFilter, t.showsDefaultTiles = this.node.showsDefaultTiles, t.tileOverlays = this.node.tileOverlays, t.size = this.node.size, t.staysCenteredDuringZoom = this.node.staysCenteredDuringZoom;
+          t.configuration = this.node.configuration
+          // t.tint = this.node.tint
+          t.language = this.node.language
+          t.pannable = this.node.pannable
+          t.allowWheelToZoom = this.node.allowWheelToZoom
+          t.pointOfInterestFilter = this.node._impl.pointOfInterestFilter
+          t.showsDefaultTiles = this.node.showsDefaultTiles
+          t.tileOverlays = this.node.tileOverlays
+          t.size = this.node.size
+          t.staysCenteredDuringZoom = this.node.staysCenteredDuringZoom
+
           var e = this.node.visibleMapRect;
           e.size.width > 0 && e.size.height > 0 && (t.visibleMapRect = e), t.zoomable = this.node.zoomable, t.isRotationEnabled = this.isRotationEnabled, t.rotation = this.rotation, this._cameraZoomRange && t.setCameraZoomRangeAnimated(this._cameraZoomRange, !1), this._cameraDistance >= 0 && t.setCameraDistanceAnimated(this._cameraDistance, !1), this._cameraBoundaryRect && t.setCameraBoundaryAnimated(this._cameraBoundaryRect, !1), t._impl.debug = this.debug, t._impl.isRotationLocked = this.isRotationLocked, this.cameraAnimation && (this.cameraAnimation.map = t._impl, t._impl.cameraAnimation = this.cameraAnimation, this.cameraChangesHaveStarted && (t._impl.cameraChangesHaveStarted = !0))
         },
