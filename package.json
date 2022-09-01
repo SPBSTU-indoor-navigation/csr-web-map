@@ -2,9 +2,9 @@
   "name": "web-map-nossr",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite --port 8080",
+    "dev": "vite --port 8080 --host",
     "build": "vite build",
-    "preview": "vite preview --port 4173"
+    "preview": "vite preview --port 4173  --host"
   },
   "dependencies": {
     "axios": "^0.27.2",

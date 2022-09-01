@@ -41,17 +41,27 @@ export default function useMapAnnotations(options) {
       return new Vector2(((v.x + 1) / 2) * canvas.width / 2, ((-v.y + 1) / 2) * canvas.height / 2)
     }
 
+    const annotationsToRender = annotations.map(t => {
+      const pos = project(t.position)
+      t.updatePosition(pos)
+      return {
+        annotation: t,
+        screenPosition: pos
+      }
+    })
+
+
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    for (let i = 0; i < annotations.length; i++) {
-      const annotation = annotations[i];
-      
-      const screenPos = project(annotation.position)
+    annotationsToRender.forEach(t => {
+      ctx.save()
+      ctx.translate(t.screenPosition.x, t.screenPosition.y)
 
-      ctx.fillRect(screenPos.x, screenPos.y, 10, 10)
-    }
+      // ctx.fillRect(0, 0, 10, 10)
+      t.annotation.draw(ctx)
 
-    
+      ctx.restore()
+    })
   }
 
 

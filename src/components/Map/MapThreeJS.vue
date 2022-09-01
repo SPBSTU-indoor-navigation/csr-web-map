@@ -52,9 +52,9 @@ function onMapReady(map) {
 }
 
 function onAnimate() {
+  mapAnnotations.render({ cam: camera })
   const nearest = nearestBuiling(new Box2(new Vector2(-1, -1), new Vector2(1, 1)).expandByScalar(-0.1), camera, venue.value)
   currentBuilding.value = nearest
-  mapAnnotations.render({ cam: camera })
 }
 
 async function load() {
@@ -178,14 +178,11 @@ async function load() {
   console.log(unitById);
 
 
-  const annotation = new Annotation({}, new Vector2(0, 0), {})
-  console.log(annotation);
-  console.log(camera);
-  console.log(new Vector3(0, 0, 0));
-  mapAnnotations.add(annotation)
+  mapAnnotations.add(new Annotation({}, new Vector2(0, 0), {}))
+  mapAnnotations.add(new Annotation({}, new Vector2(-600, -300), {}))
 
   const annotations = archive.imdf.occupant
-    .filter(t => levelById[unitById[t.properties.anchor.properties.unit_id].properties.level_id].properties.ordinal == 0)
+    // .filter(t => levelById[unitById[t.properties.anchor.properties.unit_id].properties.level_id].properties.ordinal == 0)
     .map(t => {
       const coordArray = t.properties.anchor.geometry.coordinates
       const coord = new mapkit.Coordinate(coordArray[1], coordArray[0])
@@ -193,6 +190,10 @@ async function load() {
       var annotation = new mapkit.Annotation(coord, factory, {
         title: t.properties.shortName.ru,
       });
+
+      const pos = venue.value.Translate(coord)
+
+      // mapAnnotations.add(new Annotation({}, new Vector2(pos.x, pos.y), {}))
 
       annotation.calloutEnabled = false
       annotation.anchorOffset = new DOMPoint(0, -50)
