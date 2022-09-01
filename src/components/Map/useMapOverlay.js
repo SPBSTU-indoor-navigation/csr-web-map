@@ -1,6 +1,8 @@
 import { OrthographicCamera, Scene, Vector2, WebGLRenderer } from 'three';
 import { ref, watch, watchEffect } from "vue";
 
+import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer';
+
 import { geoToVector } from '../../imdf/utils';
 
 export default function useMapOverlay(options) {
@@ -19,6 +21,12 @@ export default function useMapOverlay(options) {
   renderer.setPixelRatio(window.devicePixelRatio)
   document.querySelector('.mk-map-view').insertBefore(renderer.domElement, document.querySelector(".mk-map-view>.mk-map-node-element"))
 
+  const labelRenderer = new CSS2DRenderer();
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.domElement.style.position = 'absolute';
+  labelRenderer.domElement.style.top = '0px';
+  labelRenderer.domElement.style.pointerEvents = 'none';
+  document.querySelector('.mk-map-view').insertBefore(labelRenderer.domElement, document.querySelector(".mk-map-view>.mk-map-node-element"))
 
   window.addEventListener('resize', () => { screenSize.value = { width: window.innerWidth, height: window.innerHeight } }, false);
 
@@ -28,6 +36,7 @@ export default function useMapOverlay(options) {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
+    labelRenderer.setSize(width, height);
 
     venue.value.OnResolutionChange(screenSize.value)
   })
@@ -51,6 +60,14 @@ export default function useMapOverlay(options) {
     oldValue.Remove(scene)
     newValue.Add(scene)
   })
+
+  const text = document.createElement('div');
+  text.className = 'label';
+  text.textContent = 'CSS2DObject';
+
+  const label = new CSS2DObject(text);
+  label.position.set(0, 0, 0);
+  scene.add(label);
 
 
   window.onMapkitUpdate = () => {
@@ -80,9 +97,10 @@ export default function useMapOverlay(options) {
     zoom.value = size.x / delta.x
     venue.value.OnZoom(zoom.value)
 
-    onAnimate?.()
 
     renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);
+    onAnimate?.()
   }
 
 
