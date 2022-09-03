@@ -98,9 +98,9 @@ export default function useMapOverlay(options) {
     venue.value.OnZoom(zoom.value)
 
 
-    renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
     onAnimate?.()
+    renderer.render(scene, camera);
   }
 
 

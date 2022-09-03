@@ -187,16 +187,16 @@ async function load() {
       const coordArray = t.properties.anchor.geometry.coordinates
       const coord = new mapkit.Coordinate(coordArray[1], coordArray[0])
 
-      var annotation = new mapkit.Annotation(coord, factory, {
-        title: t.properties.shortName.ru,
-      });
+      // var annotation = new mapkit.Annotation(coord, factory, {
+      //   title: t.properties.shortName.ru,
+      // });
 
       const pos = venue.value.Translate(coord)
 
       // mapAnnotations.add(new Annotation({}, new Vector2(pos.x, pos.y), {}))
 
-      annotation.calloutEnabled = false
-      annotation.anchorOffset = new DOMPoint(0, -50)
+      // annotation.calloutEnabled = false
+      // annotation.anchorOffset = new DOMPoint(0, -50)
       // mkMap.value.addAnnotation(annotation)
       return {
         coord,

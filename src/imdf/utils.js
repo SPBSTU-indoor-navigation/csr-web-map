@@ -1,5 +1,5 @@
 import { BufferGeometry, Mesh, MeshBasicMaterial, Path, Shape, ShapeGeometry, Vector3 } from 'three';
-import { MeshLine, MeshLineMaterial } from 'three.meshline';
+import { MeshLine, MeshLineMaterial } from './MeshLineESM.js';
 import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 const metersInLatDegree = 111194.92664
