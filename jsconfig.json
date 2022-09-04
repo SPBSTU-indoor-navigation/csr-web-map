@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "importHelpers": true,
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ]
+        },
+    },
+}

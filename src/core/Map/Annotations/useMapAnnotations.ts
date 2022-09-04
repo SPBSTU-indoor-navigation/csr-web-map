@@ -24,7 +24,7 @@ export default function useMapAnnotations(options) {
 
   const addAnotation = (annotation: IAnnotation | IAnnotation[]) => {
     if (Array.isArray(annotation)) {
-      annotations.push(...annotation)
+      annotation.forEach(t => annotations.push(t))
     } else {
       annotations.push(annotation)
     }
