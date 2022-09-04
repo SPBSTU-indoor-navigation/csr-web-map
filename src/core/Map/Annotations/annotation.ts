@@ -13,9 +13,9 @@ export interface IAnnotation {
 
   isDirty: boolean
 
-  updatePosition(pos: Vector2): void
+  updateScreenPosition(pos: Vector2): void
   draw(ctx: CanvasRenderingContext2D): void
-  animationUpdate(): void
+  pointerInside(pos: Vector2): boolean
 }
 
 export class Annotation implements IAnnotation {
@@ -33,7 +33,7 @@ export class Annotation implements IAnnotation {
     this.data = data
   }
 
-  updatePosition(pos: Vector2): void {
+  updateScreenPosition(pos: Vector2): void {
     this.rect.setFromCenterAndSize(pos, this.size)
   }
 
@@ -42,10 +42,9 @@ export class Annotation implements IAnnotation {
     this.isDirty = false
   }
 
-  animationUpdate(): void {
-
+  pointerInside(pos: Vector2): boolean {
+    return this.rect.containsPoint(pos)
   }
-
 
   private drawDebug(ctx: CanvasRenderingContext2D): void {
     ctx.strokeStyle = '#f0f'

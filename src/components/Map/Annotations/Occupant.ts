@@ -19,7 +19,18 @@ export class OccupantAnnotation extends Annotation {
       .onUpdate(t => {
         this.isDirty = true
       })
-      .start()
+    // .start()
+
+    new Tween(this.size)
+      .to({ x: 10, y: 10 }, 1000)
+      .easing(Easing.Quadratic.InOut)
+      .repeat(Infinity)
+      .repeatDelay(1000)
+      .yoyo(true)
+      .onUpdate(t => {
+        this.isDirty = true
+      })
+    // .start()
   }
 
   draw(ctx: CanvasRenderingContext2D): void {

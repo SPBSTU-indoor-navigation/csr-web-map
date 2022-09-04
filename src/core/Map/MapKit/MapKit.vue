@@ -1,14 +1,15 @@
 <template>
-  <div id="mapKitContainer"></div>
+  <div id="mapKitContainer" @pointerdown="pointerdown" @pointerup="pointerup"></div>
 </template>
-
 
 <script>
 import useMapKit from './useMapKit'
 import { useUtils } from './utils'
 
 export default {
-  data: () => ({}),
+  data: () => ({
+    downEvent: null,
+  }),
   props: {
     showsPointsOfInterest: {
       type: Boolean,
@@ -22,6 +23,23 @@ export default {
   watch: {
     showsPointsOfInterest(newValue) {
       this.map.showsPointsOfInterest = newValue
+    },
+  },
+  methods: {
+    pointerdown(e) {
+      this.downEvent = e
+    },
+    pointerup(e) {
+      if (!this.downEvent) return
+      const delta = e.timeStamp - this.downEvent.timeStamp
+      if (delta > 300) return
+
+      const screenX = e.screenX - this.downEvent.screenX
+      const screenY = e.screenY - this.downEvent.screenY
+
+      if (Math.abs(screenX) > 10 || Math.abs(screenY) > 10) return
+
+      this.$emit('singleClick', e)
     },
   },
   async mounted() {

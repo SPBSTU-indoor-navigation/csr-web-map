@@ -1,8 +1,7 @@
 <template>
   <div>
-    <MapKitVue @map-ready="onMapReady" />
+    <MapKitVue @map-ready="onMapReady" @singleClick="mapClick" />
     <div class="abs-full container-map-ui">
-
       <Transition name="slide-fade">
         <LevelSwitcherVue v-if="showIndoor && currentBuilding" :levels="currentBuilding.levels"
           v-model:level="currentOrdinal" />
@@ -44,6 +43,10 @@ let mapController
 const SHOW_ZOOM = 4
 const HIDE_ZOOM = 3.9
 
+function mapClick(e) {
+  mapController.mapAnnotations.click(new Vector2(e.clientX, e.clientY))
+}
+
 function onMapReady(map) {
   mkMap.value = map
 }
@@ -79,82 +82,6 @@ async function load() {
     zoom.value = mapOverlay.zoom.value
   })
 
-  var factory = function (coordinate, options) {
-
-    function getNode(n, v) {
-      n = document.createElementNS("http://www.w3.org/2000/svg", n);
-      for (var p in v)
-        n.setAttributeNS(null, p, v[p]);
-      return n
-    }
-
-    const div = document.createElement("div")
-    const name = options.title
-
-    const svg = getNode('svg', {
-      'viewBox': "0 0 100 100"
-    })
-
-    const text = getNode('text', {})
-
-    const cirlce = getNode('circle', {
-      'cx': 50,
-      'cy': 50,
-      'r': 3,
-    })
-
-    text.textContent = name
-    text.className.baseVal = "annotation-text"
-
-    svg.appendChild(text)
-    svg.appendChild(cirlce)
-
-
-
-    div.appendChild(svg)
-
-    // div.className = "circle-annotation";
-
-    const canvas = document.createElement("canvas")
-    const ctx = canvas.getContext('2d')
-
-    canvas.width = 100
-    canvas.height = 100
-
-    if (window.devicePixelRatio > 1) {
-      var canvasWidth = canvas.width;
-      var canvasHeight = canvas.height;
-
-      canvas.width = canvasWidth * window.devicePixelRatio;
-      canvas.height = canvasHeight * window.devicePixelRatio;
-      canvas.style.width = canvasWidth + "px";
-      canvas.style.height = canvasHeight + "px";
-
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-    }
-
-    ctx.imageSmoothingEnabled = true
-
-    ctx.translate(50, 50)
-    // ctx.fillRect(10, 10, 80, 80)
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
-    ctx.font = "bold 10px sans-serif"
-    ctx.fillStyle = "black"
-
-    ctx.lineWidth = 2
-    ctx.strokeStyle = "white"
-    ctx.strokeText(name, 0, 10)
-    ctx.fillText(name, 0, 10)
-
-
-    ctx.beginPath()
-    ctx.arc(0, 0, 2, 0, 2 * Math.PI);
-    ctx.fill();
-
-    return canvas;
-  };
-
   console.log(archive.imdf);
   console.log(archive.imdf.occupant.map(t => t.properties.anchor.properties.unit_id));
 
@@ -172,39 +99,22 @@ async function load() {
   console.log(unitById);
 
 
-  mapController.addAnnotation(new Annotation({}, new Vector2(0, 0), {}))
-  mapController.addAnnotation(new Annotation({}, new Vector2(-600, -300), {}))
-
   const annotations = archive.imdf.occupant
     // .filter(t => levelById[unitById[t.properties.anchor.properties.unit_id].properties.level_id].properties.ordinal == 0)
     .map(t => {
       const coordArray = t.properties.anchor.geometry.coordinates
       const coord = new mapkit.Coordinate(coordArray[1], coordArray[0])
 
-      // var annotation = new mapkit.Annotation(coord, factory, {
-      //   title: t.properties.shortName.ru,
-      // });
-
       const pos = venue.value.Translate(coord)
 
       mapController.addAnnotation(new OccupantAnnotation({}, new Vector2(pos.x, pos.y), {}))
 
-      // annotation.calloutEnabled = false
-      // annotation.anchorOffset = new DOMPoint(0, -50)
-      // mkMap.value.addAnnotation(annotation)
+
       return {
         coord,
         localCoord: venue.value.Translate(coord),
         name: t.properties.shortName.ru,
       }
-
-
-      // var options = {
-      //     title: person.title,
-      //     data: { role: person.role, building: person.building }
-      // };
-      // var annotation = new mapkit.Annotation(person.coordinate, factory, options);
-      // map.addAnnotation(annotation);
     });
 
   console.log(annotations);

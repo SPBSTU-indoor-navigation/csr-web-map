@@ -7,9 +7,12 @@ import Tween from '@tweenjs/tween.js'
 export interface IMapAnnotations {
   add(annotation: IAnnotation | IAnnotation[]): void
   render(options: { cam: Camera }): void
+  click(pos: Vector2): void
 }
 
 export default function useMapAnnotations(options: { mapController: MapController }): IMapAnnotations {
+
+  let canvasSize: Vector2
 
   const screenSize = ref({ width: window.innerWidth, height: window.innerHeight })
   window.addEventListener('resize', () => { screenSize.value = { width: window.innerWidth, height: window.innerHeight } }, false);
@@ -24,6 +27,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
     canvas.height = height * window.devicePixelRatio
     canvas.style.width = `${width}px`
     canvas.style.height = `${height}px`
+    canvasSize = new Vector2(width, height)
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
   })
 
@@ -45,12 +49,16 @@ export default function useMapAnnotations(options: { mapController: MapControlle
     const project = (pos: Vector2) => {
       const v = new Vector3(pos.x, pos.y, 0)
       v.project(cam)
-      return new Vector2(((v.x + 1) / 2) * canvas.width / 2, ((-v.y + 1) / 2) * canvas.height / 2)
+      v.x = ((v.x + 1) / 2)
+      v.y = ((-v.y + 1) / 2)
+
+
+      return new Vector2(v.x * canvasSize.x, v.y * canvasSize.y)
     }
 
     const annotationsToRender = annotations.map(t => {
       const pos = project(t.position).add(new Vector2(-t.size.x * t.pivot.x, -t.size.y * t.pivot.y))
-      t.updatePosition(pos)
+      t.updateScreenPosition(pos)
       return {
         annotation: t,
         screenPosition: pos
@@ -70,6 +78,20 @@ export default function useMapAnnotations(options: { mapController: MapControlle
     })
   }
 
+  const click = (pos: Vector2) => {
+    console.log(pos);
+
+    for (let i = 0; i < annotations.length; i++) {
+      const annotation = annotations[i];
+
+      if (annotation.pointerInside(pos)) {
+        console.log(annotation);
+        break;
+      }
+    }
+
+  }
+
   const updateEveryFrame = () => {
     Tween.update()
 
@@ -85,6 +107,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
   return {
     add: addAnotation,
     render,
+    click
   }
 
 }
