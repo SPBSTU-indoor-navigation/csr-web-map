@@ -1,8 +1,15 @@
 import { Vector2, Vector3, Camera } from 'three';
 import { ref, watchEffect } from 'vue';
+import { MapController } from '../mapController';
 import { Annotation, IAnnotation } from './annotation';
+import Tween from '@tweenjs/tween.js'
 
-export default function useMapAnnotations(options) {
+export interface IMapAnnotations {
+  add(annotation: IAnnotation | IAnnotation[]): void
+  render(options: { cam: Camera }): void
+}
+
+export default function useMapAnnotations(options: { mapController: MapController }): IMapAnnotations {
 
   const screenSize = ref({ width: window.innerWidth, height: window.innerHeight })
   window.addEventListener('resize', () => { screenSize.value = { width: window.innerWidth, height: window.innerHeight } }, false);
@@ -57,17 +64,27 @@ export default function useMapAnnotations(options) {
       ctx.save()
       ctx.translate(t.screenPosition.x, t.screenPosition.y)
 
-      // ctx.fillRect(0, 0, 10, 10)
       t.annotation.draw(ctx)
 
       ctx.restore()
     })
   }
 
+  const updateEveryFrame = () => {
+    Tween.update()
+
+    requestAnimationFrame(updateEveryFrame)
+    const isDirty = annotations.some(t => t.isDirty)
+    if (isDirty) {
+      options.mapController.scheduleUpdate()
+    }
+  }
+
+  updateEveryFrame()
 
   return {
     add: addAnotation,
-    render
+    render,
   }
 
 }

@@ -1,6 +1,6 @@
 import { Box2, Vector2 } from 'three'
 
-interface IGeoPosition {
+export interface IGeoPosition {
   latitude: number
   longitude: number
 }
@@ -39,6 +39,7 @@ export class Annotation implements IAnnotation {
 
   draw(ctx: CanvasRenderingContext2D): void {
     this.drawDebug(ctx)
+    this.isDirty = false
   }
 
   animationUpdate(): void {

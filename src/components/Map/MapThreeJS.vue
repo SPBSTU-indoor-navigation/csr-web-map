@@ -26,7 +26,7 @@ import { useRoute } from 'vue-router'
 import { nearestBuiling } from '@/core/Map/utils'
 import { Annotation } from '@/core/Map/Annotations/annotation'
 import { OccupantAnnotation } from './Annotations/Occupant'
-// import { } from './Annotation/Oc='
+import { MapController } from '@/core/Map/mapController'
 
 
 const mkMap = shallowRef()
@@ -38,14 +38,8 @@ const currentBuilding = ref()
 const showIndoor = ref(false)
 const currentOrdinal = ref(0)
 
-
-let scene
-/** @type {import('three').Camera} */
-let camera
-let renderer
-
-/** @type {ReturnType<typeof useMapAnnotations>} */
-let mapAnnotations
+/** @type {MapController} */
+let mapController
 
 const SHOW_ZOOM = 4
 const HIDE_ZOOM = 3.9
@@ -55,8 +49,8 @@ function onMapReady(map) {
 }
 
 function onAnimate() {
-  mapAnnotations.render({ cam: camera })
-  const nearest = nearestBuiling(new Box2(new Vector2(-1, -1), new Vector2(1, 1)).expandByScalar(-0.1), camera, venue.value)
+  mapController.render()
+  const nearest = nearestBuiling(new Box2(new Vector2(-1, -1), new Vector2(1, 1)).expandByScalar(-0.1), mapController.camera, venue.value)
   currentBuilding.value = nearest
 }
 
@@ -78,11 +72,8 @@ async function load() {
     onAnimate,
   })
 
-  mapAnnotations = useMapAnnotations({})
-
-  scene = mapOverlay.scene
-  camera = mapOverlay.camera
-  renderer = mapOverlay.renderer
+  mapController = new MapController(mapOverlay.scene, mapOverlay.camera, undefined, venue.value.mkGeometry)
+  mapController.mapAnnotations = useMapAnnotations({ mapController })
 
   watchEffect(() => {
     zoom.value = mapOverlay.zoom.value
@@ -181,8 +172,8 @@ async function load() {
   console.log(unitById);
 
 
-  mapAnnotations.add(new Annotation({}, new Vector2(0, 0), {}))
-  mapAnnotations.add(new Annotation({}, new Vector2(-600, -300), {}))
+  mapController.addAnnotation(new Annotation({}, new Vector2(0, 0), {}))
+  mapController.addAnnotation(new Annotation({}, new Vector2(-600, -300), {}))
 
   const annotations = archive.imdf.occupant
     // .filter(t => levelById[unitById[t.properties.anchor.properties.unit_id].properties.level_id].properties.ordinal == 0)
@@ -196,7 +187,7 @@ async function load() {
 
       const pos = venue.value.Translate(coord)
 
-      mapAnnotations.add(new OccupantAnnotation({}, new Vector2(pos.x, pos.y), {}))
+      mapController.addAnnotation(new OccupantAnnotation({}, new Vector2(pos.x, pos.y), {}))
 
       // annotation.calloutEnabled = false
       // annotation.anchorOffset = new DOMPoint(0, -50)
@@ -247,7 +238,7 @@ watch(currentBuilding, (building, old) => {
 
 watch(currentOrdinal, ordinal => {
   currentBuilding.value.ChangeOrdinal(ordinal)
-  window.onMapkitUpdate?.()
+  mapController.scheduleUpdate()
 })
 
 defineComponent([MapKitVue, LevelSwitcherVue])
