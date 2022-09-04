@@ -3,7 +3,7 @@ import { ref, watchEffect } from 'vue';
 import { Annotation, IAnnotation } from './annotation';
 
 export default function useMapAnnotations(options) {
-  
+
   const screenSize = ref({ width: window.innerWidth, height: window.innerHeight })
   window.addEventListener('resize', () => { screenSize.value = { width: window.innerWidth, height: window.innerHeight } }, false);
 
@@ -19,12 +19,12 @@ export default function useMapAnnotations(options) {
     canvas.style.height = `${height}px`
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
   })
-  
+
   const annotations: IAnnotation[] = []
 
   const addAnotation = (annotation: IAnnotation | IAnnotation[]) => {
     if (Array.isArray(annotation)) {
-      annotation.forEach(t => annotations.push(t))
+      annotations.push(...annotation)
     } else {
       annotations.push(annotation)
     }
@@ -42,7 +42,7 @@ export default function useMapAnnotations(options) {
     }
 
     const annotationsToRender = annotations.map(t => {
-      const pos = project(t.position)
+      const pos = project(t.position).add(new Vector2(-t.size.x * t.pivot.x, -t.size.y * t.pivot.y))
       t.updatePosition(pos)
       return {
         annotation: t,

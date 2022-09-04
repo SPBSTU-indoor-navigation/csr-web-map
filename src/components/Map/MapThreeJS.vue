@@ -25,6 +25,9 @@ import { useRoute } from 'vue-router'
 
 import { nearestBuiling } from '@/core/Map/utils'
 import { Annotation } from '@/core/Map/Annotations/annotation'
+import { OccupantAnnotation } from './Annotations/Occupant'
+// import { } from './Annotation/Oc='
+
 
 const mkMap = shallowRef()
 /** @type {import('vue').ShallowRef<Venue>} */
@@ -193,7 +196,7 @@ async function load() {
 
       const pos = venue.value.Translate(coord)
 
-      // mapAnnotations.add(new Annotation({}, new Vector2(pos.x, pos.y), {}))
+      mapAnnotations.add(new OccupantAnnotation({}, new Vector2(pos.x, pos.y), {}))
 
       // annotation.calloutEnabled = false
       // annotation.anchorOffset = new DOMPoint(0, -50)
