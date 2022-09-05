@@ -10,11 +10,8 @@ export class MapController {
     mapAnnotations: IMapAnnotations
     mkGeometry: any
 
-    constructor(scene: Scene, camera: Camera, mapAnnotations: IMapAnnotations, mkGeometry: any) {
-        this.scene = scene
-        this.mapAnnotations = mapAnnotations
+    constructor(mkGeometry: any) {
         this.mkGeometry = mkGeometry
-        this.camera = camera
     }
 
     render() {
@@ -31,6 +28,10 @@ export class MapController {
 
     addAnnotation(annotation: IAnnotation | IAnnotation[]) {
         this.mapAnnotations.add(annotation)
+    }
+
+    removeAnnotation(annotation: IAnnotation | IAnnotation[]) {
+        this.mapAnnotations.remove(annotation)
     }
 
     scheduleUpdate() {

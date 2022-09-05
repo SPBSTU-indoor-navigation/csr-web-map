@@ -1,11 +1,15 @@
 import { Vector2, Vector3, Camera } from 'three';
-import { ref, watchEffect } from 'vue';
+import { Ref, ref, watchEffect } from 'vue';
 import { MapController } from '../mapController';
 import { Annotation, IAnnotation } from './annotation';
 import Tween from '@tweenjs/tween.js'
 
 export interface IMapAnnotations {
+  selected: Ref<IAnnotation | null>
   add(annotation: IAnnotation | IAnnotation[]): void
+  remove(annotation: IAnnotation | IAnnotation[]): void
+  select(annotation: IAnnotation | null): void
+
   render(options: { cam: Camera }): void
   click(pos: Vector2): void
 }
@@ -13,6 +17,7 @@ export interface IMapAnnotations {
 export default function useMapAnnotations(options: { mapController: MapController }): IMapAnnotations {
 
   let canvasSize: Vector2
+  const selected = ref<IAnnotation | null>(null)
 
   const screenSize = ref({ width: window.innerWidth, height: window.innerHeight })
   window.addEventListener('resize', () => { screenSize.value = { width: window.innerWidth, height: window.innerHeight } }, false);
@@ -31,7 +36,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
   })
 
-  const annotations: IAnnotation[] = []
+  let annotations: IAnnotation[] = []
 
   const addAnotation = (annotation: IAnnotation | IAnnotation[]) => {
     if (Array.isArray(annotation)) {
@@ -39,6 +44,17 @@ export default function useMapAnnotations(options: { mapController: MapControlle
     } else {
       annotations.push(annotation)
     }
+  }
+
+  const removeAnotation = (annotation: IAnnotation | IAnnotation[]) => {
+    // @ts-ignore: ES6 Set
+    const toRemove = new Set(annotation)
+
+    if (toRemove.has(selected.value)) {
+      select(null, false)
+    }
+
+    annotations = annotations.filter(t => !toRemove.has(t))
   }
 
   const render = (options: {
@@ -56,6 +72,16 @@ export default function useMapAnnotations(options: { mapController: MapControlle
       return new Vector2(v.x * canvasSize.x, v.y * canvasSize.y)
     }
 
+    const draw = (annotation) => {
+      ctx.save()
+      ctx.translate(annotation.screenPosition.x, annotation.screenPosition.y)
+
+      annotation.annotation.draw(ctx)
+
+      ctx.restore()
+    }
+
+
     const annotationsToRender = annotations.map(t => {
       const pos = project(t.position).add(new Vector2(-t.size.x * t.pivot.x, -t.size.y * t.pivot.y))
       t.updateScreenPosition(pos)
@@ -65,29 +91,47 @@ export default function useMapAnnotations(options: { mapController: MapControlle
       }
     })
 
-
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    annotationsToRender.forEach(t => {
-      ctx.save()
-      ctx.translate(t.screenPosition.x, t.screenPosition.y)
+    let renderQueue = []
+    for (let i = 0; i < annotationsToRender.length; i++) {
+      const annotation = annotationsToRender[i]
 
-      t.annotation.draw(ctx)
+      if (annotation.annotation.isSelected) {
+        renderQueue.push(annotationsToRender[i])
+      } else {
+        draw(annotation)
+      }
+    }
 
-      ctx.restore()
-    })
+    renderQueue.forEach(t => draw(t))
+  }
+
+  const select = (annotation: IAnnotation | null, animated: boolean = true) => {
+    selected.value?.setSelected(false, animated)
+
+    selected.value = annotation
+
+    selected.value?.setSelected(true, animated)
   }
 
   const click = (pos: Vector2) => {
-    console.log(pos);
+    let isInside = false
 
     for (let i = 0; i < annotations.length; i++) {
       const annotation = annotations[i];
 
+      if (annotation.isSelected) continue
+
       if (annotation.pointerInside(pos)) {
-        console.log(annotation);
+        isInside = true
+        select(annotation)
         break;
       }
+    }
+
+    if (!isInside) {
+      select(null)
     }
 
   }
@@ -106,8 +150,11 @@ export default function useMapAnnotations(options: { mapController: MapControlle
 
   return {
     add: addAnotation,
+    remove: removeAnotation,
     render,
-    click
+    click,
+    select,
+    selected
   }
 
 }

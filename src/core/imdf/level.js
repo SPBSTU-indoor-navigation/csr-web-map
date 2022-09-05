@@ -1,10 +1,12 @@
-import { Group } from 'three'
+import { OccupantAnnotation } from '@/components/Map/Annotations/Occupant'
+import { Group, Vector2 } from 'three'
 import { meshForFeatureCollection, outlineMeshForFeatureCollection } from './utils'
 
 
 export default class Level {
+  annotations = []
 
-  constructor(data, units, openings, details, amenitys, occupants, lineMeshMaterialStorage) {
+  constructor(data, units, openings, details, amenitys, occupants, lineMeshMaterialStorage, Translate) {
 
     this.ordinal = data.properties.ordinal
 
@@ -15,6 +17,13 @@ export default class Level {
     this.amenitys = amenitys
     this.occupants = occupants
 
+    console.log('occupants', occupants);
+
+    this.annotations = occupants.map(t => {
+      const coordArray = t.properties.anchor.geometry.coordinates
+      const pos = Translate({ latitude: coordArray[1], longitude: coordArray[0] })
+      return new OccupantAnnotation({}, new Vector2(pos.x, pos.y), {})
+    })
 
     const groupedUnits = units.groupBy(t => {
       const restriction = t.properties.restriction
@@ -36,14 +45,16 @@ export default class Level {
     Object.values(this.geometrys).forEach(mesh => this.groupMesh.add(mesh))
   }
 
-  /** @param { import('three').Scene } scene */
-  Add(scene) {
-    scene.add(this.groupMesh);
+  /** @param { import('../Map/mapController').MapController } map */
+  Add(map) {
+    map.addOverlay(this.groupMesh)
+    map.addAnnotation(this.annotations)
   }
 
-  /** @param { import('three').Scene } scene */
-  Remove(scene) {
-    scene.remove(this.groupMesh);
+  /** @param { import('../Map/mapController').MapController } map */
+  Remove(map) {
+    map.removeOverlay(this.groupMesh)
+    map.removeAnnotation(this.annotations)
   }
 
   Style(styleSheet) {

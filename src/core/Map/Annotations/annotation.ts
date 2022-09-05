@@ -12,6 +12,9 @@ export interface IAnnotation {
   pivot: Vector2
 
   isDirty: boolean
+  isSelected: boolean
+
+  setSelected(selected: boolean, animated: boolean): void
 
   updateScreenPosition(pos: Vector2): void
   draw(ctx: CanvasRenderingContext2D): void
@@ -22,6 +25,7 @@ export class Annotation implements IAnnotation {
   rect = new Box2()
   position: Vector2
   isDirty = true
+  isSelected = false
 
 
   data = {}
@@ -33,8 +37,12 @@ export class Annotation implements IAnnotation {
     this.data = data
   }
 
+  setSelected(selected: boolean, animated: boolean): void {
+    this.isSelected = selected
+  }
+
   updateScreenPosition(pos: Vector2): void {
-    this.rect.setFromCenterAndSize(pos, this.size)
+    this.rect.set({ x: pos.x, y: pos.y }, { x: pos.x + this.size.x, y: pos.y + this.size.y })
   }
 
   draw(ctx: CanvasRenderingContext2D): void {

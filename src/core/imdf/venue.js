@@ -32,6 +32,7 @@ export default class Venue {
     })
 
 
+    console.log('pivot', this.pivot);
     console.log(archive);
 
 
@@ -50,7 +51,7 @@ export default class Venue {
           const amenitys = archive.amenity.filter(t => t.properties.unit_ids.filter(Set.prototype.has, unitsIds).size != 0)
           const occupants = archive.occupant.filter(t => unitsIds.has(t.properties.anchor.properties.unit_id))
 
-          return new Level(level, units, openings, details, amenitys, occupants, this.lineMeshMaterialStorage)
+          return new Level(level, units, openings, details, amenitys, occupants, this.lineMeshMaterialStorage, (p) => geoToVector(this.pivot, p))
         })
 
 
@@ -71,23 +72,23 @@ export default class Venue {
 
   }
 
-  /** @param { import('three').Scene } scene */
-  Add(scene) {
+  /** @param { import('../Map/mapController').MapController } map */
+  Add(map) {
     [this.mesh, this.buildingFootprintMesh, this.buildingFootprintOutlineMesh]
-      .forEach(mesh => scene.add(mesh))
+      .forEach(mesh => map.addOverlay(mesh))
 
-    this.environments.Add(scene)
+    this.environments.Add(map)
 
-    this.buildings.forEach(building => building.Add(scene))
+    this.buildings.forEach(building => building.Add(map))
   }
 
-  /** @param { import('three').Scene } scene */
-  Remove(scene) {
+  /** @param { import('../Map/mapController').MapController } map */
+  Remove(map) {
     [this.mesh, this.buildingFootprintMesh, this.buildingFootprintOutlineMesh]
-      .forEach(mesh => scene.remove(mesh))
+      .forEach(mesh => map.removeOverlay(mesh))
 
-    this.environments.Remove(scene)
-    this.buildings.forEach(building => building.Remove(scene))
+    this.environments.Remove(map)
+    this.buildings.forEach(building => building.Remove(map))
   }
 
   Style(styleSheet) {

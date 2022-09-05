@@ -8,7 +8,7 @@ export default class Building {
   showLevel = false
 
   /** @type { import('three').Scene } */
-  scene = null
+  map = null
 
   bbox = null
   points = []
@@ -64,13 +64,13 @@ export default class Building {
     return false
   }
 
-  /** @param { import('three').Scene } scene */
-  Add(scene) {
-    this.scene = scene
+  /** @param { import('../Map/mapController').MapController } map */
+  Add(map) {
+    this.map = map
   }
 
-  /** @param { import('three').Scene } scene */
-  Remove(scene) {
+  /** @param { import('../Map/mapController').MapController } map */
+  Remove(map) {
     this.HideIndoor()
   }
 
@@ -80,7 +80,7 @@ export default class Building {
     this.currentOrdinal = ordinal == undefined ? this.currentOrdinal : ordinal;
     if (!this.levelByOrdinal[this.currentOrdinal]) return
 
-    this.levelByOrdinal[this.currentOrdinal].Add(this.scene)
+    this.levelByOrdinal[this.currentOrdinal].Add(this.map)
 
     this.showLevel = true;
   }
@@ -89,7 +89,7 @@ export default class Building {
     if (!this.showLevel) return
     if (!this.levelByOrdinal[this.currentOrdinal]) return
 
-    this.levelByOrdinal[this.currentOrdinal].Remove(this.scene)
+    this.levelByOrdinal[this.currentOrdinal].Remove(this.map)
     this.showLevel = false
 
 

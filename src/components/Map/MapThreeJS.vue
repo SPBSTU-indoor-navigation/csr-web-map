@@ -67,57 +67,21 @@ async function load() {
   }
 
   venue.value = new Venue(archive.imdf)
+  mapController = new MapController(venue.value.mkGeometry)
 
   const mapOverlay = useMapOverlay({
     venue,
     mkMap: mkMap.value,
     styleSheet,
     onAnimate,
+    mapController
   })
 
-  mapController = new MapController(mapOverlay.scene, mapOverlay.camera, undefined, venue.value.mkGeometry)
   mapController.mapAnnotations = useMapAnnotations({ mapController })
 
   watchEffect(() => {
     zoom.value = mapOverlay.zoom.value
   })
-
-  console.log(archive.imdf);
-  console.log(archive.imdf.occupant.map(t => t.properties.anchor.properties.unit_id));
-
-  const levelById = archive.imdf.level.reduce((acc, cur) => {
-    acc[cur.id] = cur
-    return acc
-  }, {})
-
-
-  const unitById = archive.imdf.unit.reduce((acc, cur) => {
-    acc[cur.id] = cur
-    return acc
-  }, {})
-
-  console.log(unitById);
-
-
-  const annotations = archive.imdf.occupant
-    // .filter(t => levelById[unitById[t.properties.anchor.properties.unit_id].properties.level_id].properties.ordinal == 0)
-    .map(t => {
-      const coordArray = t.properties.anchor.geometry.coordinates
-      const coord = new mapkit.Coordinate(coordArray[1], coordArray[0])
-
-      const pos = venue.value.Translate(coord)
-
-      mapController.addAnnotation(new OccupantAnnotation({}, new Vector2(pos.x, pos.y), {}))
-
-
-      return {
-        coord,
-        localCoord: venue.value.Translate(coord),
-        name: t.properties.shortName.ru,
-      }
-    });
-
-  console.log(annotations);
 
 }
 

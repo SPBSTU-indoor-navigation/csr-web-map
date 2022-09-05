@@ -4,13 +4,16 @@ import { ref, watch, watchEffect } from "vue";
 import { geoToVector } from '@/core/imdf/utils';
 
 export default function useMapOverlay(options) {
-  const { venue, mkMap, styleSheet, onAnimate } = options
+  const { venue, mkMap, styleSheet, onAnimate, mapController } = options
 
   const screenSize = ref({ width: window.innerWidth, height: window.innerHeight })
   const zoom = ref(0)
 
   const scene = new Scene()
   const camera = new OrthographicCamera(-100, 100, 100, -100, 0.1, 1000)
+
+  mapController.camera = camera
+  mapController.scene = scene
 
 
   const renderer = new WebGLRenderer({ alpha: true, antialias: true })
@@ -38,7 +41,7 @@ export default function useMapOverlay(options) {
     mkMap.setCameraBoundaryAnimated(mkMap.region)
     mkMap.cameraZoomRange = new mapkit.CameraZoomRange(0, 3000)
 
-    venue.value.Add(scene)
+    venue.value.Add(mapController)
   })
 
   // StyleSheet
