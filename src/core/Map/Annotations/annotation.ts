@@ -18,7 +18,8 @@ export interface IAnnotation {
 
   updateScreenPosition(pos: Vector2): void
   draw(ctx: CanvasRenderingContext2D): void
-  pointerInside(pos: Vector2): boolean
+  pointInside(pos: Vector2): boolean
+  intersect(rect: Box2): boolean
 }
 
 export class Annotation implements IAnnotation {
@@ -50,8 +51,12 @@ export class Annotation implements IAnnotation {
     this.isDirty = false
   }
 
-  pointerInside(pos: Vector2): boolean {
+  pointInside(pos: Vector2): boolean {
     return this.rect.containsPoint(pos)
+  }
+
+  intersect(rect: Box2): boolean {
+    return this.rect.intersectsBox(rect)
   }
 
   private drawDebug(ctx: CanvasRenderingContext2D): void {

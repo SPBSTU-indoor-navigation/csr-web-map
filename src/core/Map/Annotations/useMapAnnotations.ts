@@ -11,7 +11,7 @@ export interface IMapAnnotations {
   select(annotation: IAnnotation | null): void
 
   render(options: { cam: Camera }): void
-  click(pos: Vector2): void
+  click(pos: Vector2, e: PointerEvent): void
 }
 
 export default function useMapAnnotations(options: { mapController: MapController }): IMapAnnotations {
@@ -115,22 +115,40 @@ export default function useMapAnnotations(options: { mapController: MapControlle
     selected.value?.setSelected(true, animated)
   }
 
-  const click = (pos: Vector2) => {
-    let isInside = false
+  const click = (pos: Vector2, e: PointerEvent) => {
+    let selected = false
+
+    const isTouch = e.pointerType === 'touch'
+    let touchDistance = Number.MAX_VALUE;
+    let touchAnnotation = null;
 
     for (let i = 0; i < annotations.length; i++) {
       const annotation = annotations[i];
 
       if (annotation.isSelected) continue
 
-      if (annotation.pointerInside(pos)) {
-        isInside = true
+      if (annotation.pointInside(pos)) {
+        selected = true
         select(annotation)
         break;
       }
+
+      if (isTouch) {
+        let distance = annotation.rect.distanceToPoint(pos)
+        if (distance < touchDistance) {
+          touchDistance = distance
+          touchAnnotation = annotation
+        }
+      }
+
     }
 
-    if (!isInside) {
+    if (!selected && touchAnnotation && touchDistance < 15) {
+      selected = true;
+      select(touchAnnotation)
+    }
+
+    if (!selected) {
       select(null)
     }
 

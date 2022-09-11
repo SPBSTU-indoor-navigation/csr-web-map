@@ -44,7 +44,7 @@ const SHOW_ZOOM = 4
 const HIDE_ZOOM = 3.9
 
 function mapClick(e) {
-  mapController.mapAnnotations.click(new Vector2(e.clientX, e.clientY))
+  mapController.mapAnnotations.click(new Vector2(e.clientX, e.clientY), e)
 }
 
 function onMapReady(map) {

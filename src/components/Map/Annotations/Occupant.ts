@@ -6,27 +6,17 @@ import { Easing, Tween } from '@tweenjs/tween.js'
 export class OccupantAnnotation extends Annotation {
 
   size = new Vector2(15, 15);
-  pivot = new Vector2(0.5, 1)
+  pivot = new Vector2(0.5, 0.5)
 
   constructor(geoPosition: IGeoPosition, localPosition: Vector2, data: Object) {
     super(geoPosition, localPosition, data)
-    new Tween(this.pivot)
-      .to({ x: 0.5, y: 0 }, 1000)
-      .easing(Easing.Quadratic.InOut)
-      .repeat(Infinity)
-      .repeatDelay(1000)
-      .yoyo(true)
-      .onUpdate(t => {
-        this.isDirty = true
-      })
-
   }
 
   override setSelected(selected: boolean, animated: boolean): void {
     super.setSelected(selected, animated)
 
     new Tween(this.size)
-      .to(selected ? { x: 50, y: 50 } : { x: 15, y: 15 }, 200)
+      .to(selected ? { x: 50, y: 50 } : { x: 15, y: 15 }, 150)
       .easing(Easing.Quadratic.InOut)
       .onUpdate(t => {
         this.isDirty = true
@@ -35,11 +25,13 @@ export class OccupantAnnotation extends Annotation {
   }
 
   override draw(ctx: CanvasRenderingContext2D): void {
-    super.draw(ctx)
 
     if (this.isSelected) {
       ctx.fillStyle = '#fff'
       ctx.fillRect(0, 0, this.size.x, this.size.y)
     }
+
+
+    super.draw(ctx)
   }
 }
