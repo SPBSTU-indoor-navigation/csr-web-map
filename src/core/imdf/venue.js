@@ -1,17 +1,24 @@
 import Building from "./building";
 import Environments from "./environment";
 import Level from "./level";
-import { createPolygon, geoToVector, LineMeshMaterialStorage, meshForFeatureCollection, outlineMeshForFeatureCollection, processGeometryCoordinates, unwrapBy } from './utils';
+import {
+  createPolygon, geoToVector,
+  LineMeshMaterialStorage,
+  meshForFeatureCollection, outlineMeshForFeatureCollection, processGeometryCoordinates,
+  unwrapBy, createSvgPathFromFeature, createSvgPathFromFeatureCollection
+} from './utils';
 
 
 export default class Venue {
 
   /** @type {Building[]} */
   buildings = []
+  archive = {}
 
   constructor(archive) {
     this.lineMeshMaterialStorage = new LineMeshMaterialStorage()
     this.data = archive.venue
+    this.archive = archive
     this.mkGeometry = createPolygon(this.data)
     this.mkGeometry.style = new mapkit.Style({ fillOpacity: 0, strokeOpacity: 0 })
 
@@ -31,10 +38,7 @@ export default class Venue {
       })
     })
 
-
-    console.log('pivot', this.pivot);
-    console.log(archive);
-
+    console.log('archive', archive);
 
     this.buildings = archive.building.map(building => {
 
@@ -67,9 +71,6 @@ export default class Venue {
     this.buildingFootprintMesh = meshForFeatureCollection(archive.building)
 
     this.buildingFootprintOutlineMesh = outlineMeshForFeatureCollection(archive.building, 1, this.lineMeshMaterialStorage)
-
-
-
   }
 
   /** @param { import('../Map/mapController').MapController } map */
@@ -100,6 +101,30 @@ export default class Venue {
     this.environments.Style(styleSheet)
 
     this.buildings.forEach(building => building.Style(styleSheet))
+  }
+
+  CrateSVG() {
+    const archive = this.archive
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+
+    const points = archive.venue[0].geometry.coordinates[0]
+    const minX = Math.min(...points.map(t => t.x))
+    const minY = Math.min(...points.map(t => t.y))
+
+    svg.setAttribute('viewBox', `${minX} ${minY} ${Math.max(...points.map(t => t.x)) - Math.min(...points.map(t => t.x))} ${Math.max(...points.map(t => t.y)) - Math.min(...points.map(t => t.y))}`)
+
+    const venue = createSvgPathFromFeature(archive.venue[0], this.mesh.material.color.getHexString())
+    svg.appendChild(venue)
+
+    svg.appendChild(this.environments.CrateSVG())
+
+    const footprint = createSvgPathFromFeatureCollection(archive.building, this.buildingFootprintMesh.material.color.getHexString())
+    footprint.setAttribute('stroke', '#' + this.buildingFootprintOutlineMesh.material.color.getHexString())
+    footprint.setAttribute('stroke-width', this.buildingFootprintOutlineMesh.material.lineWidth)
+    svg.appendChild(footprint)
+
+
+    console.log('svg', svg);
   }
 
   Translate(position) {

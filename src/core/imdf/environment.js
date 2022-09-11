@@ -1,7 +1,7 @@
 import "core-js/actual/array/group-by"
 import { Group } from "three"
 
-import { meshForFeatureCollection } from './utils'
+import { createSvgPathFromFeatureCollection, meshForFeatureCollection } from './utils'
 
 const order = [
   'forest',
@@ -89,5 +89,34 @@ export default class Environment {
         material.color.set(style.fillColor)
       }
     })
+  }
+
+  CrateSVG() {
+    const element = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+
+    const groupedEnvironment = this.environment.groupBy(t => t.properties.category)
+    const groupedDetail = this.detail.groupBy(t => t.properties.category)
+
+    order.forEach((category, i) => {
+      const features = groupedEnvironment[category] || groupedDetail[category]
+      if (!features) return
+
+      const isLine = geometryBatchType[category] === 'line'
+
+      const path = createSvgPathFromFeatureCollection(features)
+
+      if (!isLine) {
+        path.setAttribute('fill', '#' + this.geometry[category].material.color.getHexString())
+      } else {
+        path.setAttribute('fill', 'transparent')
+        path.setAttribute('stroke', '#' + this.geometry[category].material.color.getHexString())
+        path.setAttribute('stroke-width', this.geometry[category].material.lineWidth)
+      }
+
+      element.appendChild(path)
+    })
+
+
+    return element
   }
 }

@@ -223,6 +223,74 @@ export function unwrapBy(array, by) {
 
 
 
+class SVGPath {
+
+  path = ''
+
+  constructor() { }
+
+  moveTo(x, y) {
+    this.path += ` M${x} ${y}`
+  }
+
+  lineTo(x, y) {
+    this.path += ` L${x} ${y}`
+  }
+
+  close() {
+    this.path += ` Z`
+  }
+
+}
+
+//SVG
+export function createSvgPathFromFeature(imdf, fill = null) {
+  const path = new SVGPath()
+  const { coordinates } = imdf.geometry
+
+  const processPolygon = (polygon, close = false) => {
+    polygon.forEach((points, i) => {
+      points.forEach((point, j) => {
+        if (j == 0) {
+          path.moveTo(point.x, -point.y)
+        } else {
+          path.lineTo(point.x, -point.y)
+        }
+      })
+      if (close) path.close()
+    })
+  }
+
+  if (imdf.geometry.type === 'MultiPolygon') {
+    coordinates.forEach((polygon, i) => {
+      processPolygon(polygon, true)
+    })
+  } else if (imdf.geometry.type === 'Polygon') {
+    processPolygon(coordinates, true)
+  } else {
+    processPolygon(coordinates)
+  }
+  const element = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+  element.setAttribute('d', path.path)
+  if (fill)
+    element.setAttribute('fill', `#${fill}`)
+
+  return element
+}
+
+export function createSvgPathFromFeatureCollection(imdf, fill = null) {
+  const element = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+
+  imdf.forEach(feature => {
+    element.appendChild(createSvgPathFromFeature(feature, null))
+  })
+
+  if (fill)
+    element.setAttribute('fill', `#${fill}`)
+
+  return element
+}
+
 // Help
 
 /** @param {import("three").Vector2} p0 */
