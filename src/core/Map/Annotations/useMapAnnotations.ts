@@ -12,6 +12,7 @@ export interface IMapAnnotations {
 
   render(options: { cam: Camera }): void
   click(pos: Vector2, e: PointerEvent): void
+  zoom(zoom: Number)
 }
 
 export default function useMapAnnotations(options: { mapController: MapController }): IMapAnnotations {
@@ -154,6 +155,11 @@ export default function useMapAnnotations(options: { mapController: MapControlle
 
   }
 
+  const zoom = (zoom: Number) => {
+    console.log(zoom);
+    annotations.forEach(t => t.zoom(zoom))
+  }
+
   const updateEveryFrame = () => {
     Tween.update()
 
@@ -171,6 +177,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
     remove: removeAnotation,
     render,
     click,
+    zoom,
     select,
     selected
   }

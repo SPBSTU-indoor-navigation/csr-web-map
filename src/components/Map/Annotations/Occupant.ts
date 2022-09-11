@@ -31,6 +31,8 @@ export class OccupantAnnotation extends Annotation {
       ctx.fillRect(0, 0, this.size.x, this.size.y)
     }
 
+    ctx.fillText(this.currentZoom.toFixed(1).toString(), 0, 24)
+
 
     super.draw(ctx)
   }

@@ -17,7 +17,9 @@ export interface IAnnotation {
   setSelected(selected: boolean, animated: boolean): void
 
   updateScreenPosition(pos: Vector2): void
+  zoom(zoom: Number)
   draw(ctx: CanvasRenderingContext2D): void
+
   pointInside(pos: Vector2): boolean
   intersect(rect: Box2): boolean
 }
@@ -33,6 +35,8 @@ export class Annotation implements IAnnotation {
   size = new Vector2(100, 100)
   pivot = new Vector2(0.5, 0.5)
 
+  currentZoom: Number = 0
+
   constructor(geoPosition: IGeoPosition, localPosition: Vector2, data: Object) {
     this.position = localPosition
     this.data = data
@@ -44,6 +48,10 @@ export class Annotation implements IAnnotation {
 
   updateScreenPosition(pos: Vector2): void {
     this.rect.set({ x: pos.x, y: pos.y }, { x: pos.x + this.size.x, y: pos.y + this.size.y })
+  }
+
+  zoom(zoom: Number) {
+    this.currentZoom = zoom
   }
 
   draw(ctx: CanvasRenderingContext2D): void {

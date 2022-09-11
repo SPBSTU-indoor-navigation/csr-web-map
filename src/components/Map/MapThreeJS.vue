@@ -81,6 +81,7 @@ async function load() {
 
   watchEffect(() => {
     zoom.value = mapOverlay.zoom.value
+    mapController.mapAnnotations.zoom(zoom.value)
   })
 
 }
