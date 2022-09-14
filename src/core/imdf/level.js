@@ -22,7 +22,7 @@ export default class Level {
     this.annotations = occupants.map(t => {
       const coordArray = t.properties.anchor.geometry.coordinates
       const pos = Translate({ latitude: coordArray[1], longitude: coordArray[0] })
-      return new OccupantAnnotation({}, new Vector2(pos.x, pos.y), {})
+      return new OccupantAnnotation(new Vector2(pos.x, pos.y), t)
     })
 
     const groupedUnits = units.groupBy(t => {

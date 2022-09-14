@@ -1,4 +1,5 @@
 import { Box2, Vector2 } from 'three'
+import { DetailLevelProcessor, DetailLevelState } from './detailLevelProcessor'
 
 export interface IGeoPosition {
   latitude: number
@@ -24,12 +25,11 @@ export interface IAnnotation {
   intersect(rect: Box2): boolean
 }
 
-export class Annotation implements IAnnotation {
+export class Annotation<DetailLevel, State> implements IAnnotation {
   rect = new Box2()
   position: Vector2
   isDirty = true
   isSelected = false
-
 
   data = {}
   size = new Vector2(100, 100)
@@ -37,9 +37,14 @@ export class Annotation implements IAnnotation {
 
   currentZoom: Number = 0
 
-  constructor(geoPosition: IGeoPosition, localPosition: Vector2, data: Object) {
+  detailLevel: DetailLevel;
+  state: State
+  evaluteDetailLevel: (detailLevel: DetailLevel, mapSize: Number) => State
+
+  constructor(localPosition: Vector2, detailLevel: DetailLevel, data: any) {
     this.position = localPosition
     this.data = data
+    this.detailLevel = detailLevel
   }
 
   setSelected(selected: boolean, animated: boolean): void {
@@ -52,6 +57,10 @@ export class Annotation implements IAnnotation {
 
   zoom(zoom: Number) {
     this.currentZoom = zoom
+    const state = this.evaluteDetailLevel(this.detailLevel, zoom)
+    if (state != this.state) {
+      this.changeState(state)
+    }
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
@@ -65,6 +74,10 @@ export class Annotation implements IAnnotation {
 
   intersect(rect: Box2): boolean {
     return this.rect.intersectsBox(rect)
+  }
+
+  changeState(state: State) {
+    this.state = state
   }
 
   private drawDebug(ctx: CanvasRenderingContext2D): void {

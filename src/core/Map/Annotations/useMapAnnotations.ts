@@ -18,6 +18,7 @@ export interface IMapAnnotations {
 export default function useMapAnnotations(options: { mapController: MapController }): IMapAnnotations {
 
   let canvasSize: Vector2
+  let lastZoom: Number = 0
   const selected = ref<IAnnotation | null>(null)
 
   const screenSize = ref({ width: window.innerWidth, height: window.innerHeight })
@@ -40,16 +41,13 @@ export default function useMapAnnotations(options: { mapController: MapControlle
   let annotations: IAnnotation[] = []
 
   const addAnotation = (annotation: IAnnotation | IAnnotation[]) => {
-    if (Array.isArray(annotation)) {
-      annotations.push(...annotation)
-    } else {
-      annotations.push(annotation)
-    }
+    const toAdd = Array.isArray(annotation) ? annotation : [annotation]
+    annotations.push(...toAdd)
+    toAdd.forEach(a => a.zoom(lastZoom))
   }
 
   const removeAnotation = (annotation: IAnnotation | IAnnotation[]) => {
-    // @ts-ignore: ES6 Set
-    const toRemove = new Set(annotation)
+    const toRemove = new Set(Array.isArray(annotation) ? annotation : [annotation])
 
     if (toRemove.has(selected.value)) {
       select(null, false)
@@ -157,6 +155,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
 
   const zoom = (zoom: Number) => {
     console.log(zoom);
+    lastZoom = zoom
     annotations.forEach(t => t.zoom(zoom))
   }
 
