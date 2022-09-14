@@ -5,6 +5,7 @@
                 "./src/*"
             ]
         },
-        "target": "esnext"
+        "target": "esnext",
+        "moduleResolution": "node",
     },
 }
