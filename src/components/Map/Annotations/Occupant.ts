@@ -1,4 +1,4 @@
-import { Annotation, IGeoPosition } from '@/core/Map/Annotations/annotation'
+import { DetailLevelAnnotation, IGeoPosition } from '@/core/Map/Annotations/annotation'
 import { Vector2 } from 'three'
 import { Easing, Tween } from '@tweenjs/tween.js'
 import { DetailLevelProcessor, DetailLevelState } from '@/core/Map/Annotations/detailLevelProcessor'
@@ -33,7 +33,7 @@ const levelProcessor = new DetailLevelProcessor<DetailLevel, DetailLevelState>()
 
 const DEFAULT_RADIUS = 10
 
-export class OccupantAnnotation extends Annotation<DetailLevel, DetailLevelState> {
+export class OccupantAnnotation extends DetailLevelAnnotation<DetailLevel, DetailLevelState> {
   size = new Vector2(DEFAULT_RADIUS, DEFAULT_RADIUS);
   pivot = new Vector2(0.5, 0.5)
 

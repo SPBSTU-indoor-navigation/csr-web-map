@@ -23,7 +23,7 @@ import { defineComponent, ref, shallowRef, watch, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { nearestBuiling } from '@/core/Map/utils'
-import { Annotation } from '@/core/Map/Annotations/annotation'
+import { DetailLevelAnnotation } from '@/core/Map/Annotations/annotation'
 import { OccupantAnnotation } from './Annotations/Occupant'
 import { MapController } from '@/core/Map/mapController'
 

@@ -12,13 +12,13 @@ export interface IMapAnnotations {
 
   render(options: { cam: Camera }): void
   click(pos: Vector2, e: PointerEvent): void
-  zoom(zoom: Number)
+  zoom(zoom: number)
 }
 
 export default function useMapAnnotations(options: { mapController: MapController }): IMapAnnotations {
 
   let canvasSize: Vector2
-  let lastZoom: Number = 0
+  let lastZoom: number = 0
   const selected = ref<IAnnotation | null>(null)
 
   const screenSize = ref({ width: window.innerWidth, height: window.innerHeight })
@@ -71,7 +71,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
       return new Vector2(v.x * canvasSize.x, v.y * canvasSize.y)
     }
 
-    const draw = (annotation) => {
+    const draw = (annotation: { screenPosition: Vector2, annotation: IAnnotation }) => {
       ctx.save()
       ctx.translate(annotation.screenPosition.x, annotation.screenPosition.y)
 
@@ -82,7 +82,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
 
 
     const annotationsToRender = annotations.map(t => {
-      const pos = project(t.position).add(new Vector2(-t.size.x * t.pivot.x, -t.size.y * t.pivot.y))
+      const pos = project(t.scenePosition)
       t.updateScreenPosition(pos)
       return {
         annotation: t,
@@ -133,7 +133,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
       }
 
       if (isTouch) {
-        let distance = annotation.rect.distanceToPoint(pos)
+        let distance = annotation.frame.distanceToPoint(pos)
         if (distance < touchDistance) {
           touchDistance = distance
           touchAnnotation = annotation
@@ -153,7 +153,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
 
   }
 
-  const zoom = (zoom: Number) => {
+  const zoom = (zoom: number) => {
     console.log(zoom);
     lastZoom = zoom
     annotations.forEach(t => t.zoom(zoom))

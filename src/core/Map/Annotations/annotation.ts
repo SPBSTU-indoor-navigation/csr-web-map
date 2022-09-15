@@ -1,5 +1,6 @@
 import { Box2, Vector2 } from 'three'
 import { DetailLevelProcessor, DetailLevelState } from './detailLevelProcessor'
+import { Bounds } from './bounds'
 
 export interface IGeoPosition {
   latitude: number
@@ -7,60 +8,66 @@ export interface IGeoPosition {
 }
 
 export interface IAnnotation {
-  rect: Box2
-  position: Vector2
-  size: Vector2
-  pivot: Vector2
-
+  scenePosition: Vector2
   isDirty: boolean
   isSelected: boolean
 
-  setSelected(selected: boolean, animated: boolean): void
+  frame: Box2
+  bounds: Bounds
 
+  zoom(zoom: number): void
+  setSelected(selected: boolean, animated: boolean): void
   updateScreenPosition(pos: Vector2): void
-  zoom(zoom: Number)
-  draw(ctx: CanvasRenderingContext2D): void
 
   pointInside(pos: Vector2): boolean
   intersect(rect: Box2): boolean
+
+  draw(ctx: CanvasRenderingContext2D): void
 }
 
-export class Annotation<DetailLevel, State> implements IAnnotation {
-  rect = new Box2()
-  position: Vector2
+class Shape2D {
+  frame = new Box2()
+  bounds = new Bounds()
+
+  constructor(width: number = 50, height: number = 50, pivot: Vector2 = new Vector2(0.5, 0.5)) {
+    this.bounds = new Bounds(width, height, pivot)
+  }
+
+  updateScreenPosition(pos: Vector2) {
+    const rect = this.bounds.rect
+    this.frame.set(new Vector2(rect.min.x + pos.x, rect.min.y + pos.y), new Vector2(rect.max.x + pos.x, rect.max.y + pos.y))
+  }
+}
+
+export class Annotation extends Shape2D implements IAnnotation {
+  scenePosition: Vector2
+
   isDirty = true
   isSelected = false
 
-  data = {}
-  size = new Vector2(100, 100)
-  pivot = new Vector2(0.5, 0.5)
+  protected currentZoom: number = 0
+  protected data = {}
 
-  currentZoom: Number = 0
-
-  detailLevel: DetailLevel;
-  state: State
-  evaluteDetailLevel: (detailLevel: DetailLevel, mapSize: Number) => State
-
-  constructor(localPosition: Vector2, detailLevel: DetailLevel, data: any) {
-    this.position = localPosition
+  constructor(localPosition: Vector2, data: any) {
+    super()
+    this.scenePosition = localPosition
     this.data = data
-    this.detailLevel = detailLevel
   }
 
   setSelected(selected: boolean, animated: boolean): void {
     this.isSelected = selected
   }
 
-  updateScreenPosition(pos: Vector2): void {
-    this.rect.set({ x: pos.x, y: pos.y }, { x: pos.x + this.size.x, y: pos.y + this.size.y })
+  zoom(zoom: number) {
+    this.currentZoom = zoom
   }
 
-  zoom(zoom: Number) {
-    this.currentZoom = zoom
-    const state = this.evaluteDetailLevel(this.detailLevel, zoom)
-    if (state != this.state) {
-      this.changeState(state)
-    }
+  pointInside(pos: Vector2): boolean {
+    return this.frame.containsPoint(pos)
+  }
+
+  intersect(rect: Box2): boolean {
+    return this.frame.intersectsBox(rect)
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
@@ -68,24 +75,37 @@ export class Annotation<DetailLevel, State> implements IAnnotation {
     this.isDirty = false
   }
 
-  pointInside(pos: Vector2): boolean {
-    return this.rect.containsPoint(pos)
-  }
-
-  intersect(rect: Box2): boolean {
-    return this.rect.intersectsBox(rect)
-  }
-
-  changeState(state: State) {
-    this.state = state
-  }
-
   private drawDebug(ctx: CanvasRenderingContext2D): void {
+    const bounds = this.bounds
     ctx.strokeStyle = '#f0f'
-    ctx.strokeRect(0, 0, this.size.x, this.size.y)
+    ctx.strokeRect(0, 0, bounds.width, bounds.height)
 
     ctx.beginPath()
-    ctx.arc(this.size.x * this.pivot.x, this.size.y * this.pivot.y, 2, 0, Math.PI * 2)
+    ctx.arc(bounds.width * bounds.pivot.x, bounds.height * bounds.pivot.y, 2, 0, Math.PI * 2)
     ctx.stroke()
+  }
+
+}
+
+export class DetailLevelAnnotation<DetailLevel, State> extends Annotation {
+  protected detailLevel: DetailLevel;
+  protected state: State
+  protected evaluteDetailLevel: (detailLevel: DetailLevel, mapSize: number) => State
+
+  constructor(localPosition: Vector2, detailLevel: DetailLevel, data: any) {
+    super(localPosition, data)
+    this.detailLevel = detailLevel
+  }
+
+  override zoom(zoom: number) {
+    this.currentZoom = zoom
+    const state = this.evaluteDetailLevel(this.detailLevel, zoom)
+    if (state != this.state) {
+      this.changeState(state)
+    }
+  }
+
+  protected changeState(state: State) {
+    this.state = state
   }
 }
