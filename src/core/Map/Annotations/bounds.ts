@@ -1,16 +1,24 @@
 import { Box2, Vector2 } from 'three'
 
+export class Size {
+    width: number
+    height: number
+
+    constructor(width: number, height: number) {
+        this.width = width
+        this.height = height
+    }
+}
+
 export class Bounds {
     private _rect: Box2 = new Box2()
-    private _width = 0
-    private _height = 0
 
-    private _pivot: Vector2 = new Vector2(0.5, 0.5)
+    size: Size = new Size(50, 50)
+    pivot: Vector2 = new Vector2(0.5, 0.5)
 
-    constructor(width: number = 50, height: number = 50, pivot: Vector2 = new Vector2(0.5, 0.5)) {
-        this._width = width
-        this._height = height
-        this._pivot = pivot
+    constructor(size: Size = new Size(50, 50), pivot: Vector2 = new Vector2(0.5, 0.5)) {
+        this.size = size
+        this.pivot = pivot
         this.updateRect()
     }
 
@@ -18,36 +26,25 @@ export class Bounds {
         return this._rect
     }
 
-    public get width(): number {
-        return this._width
+    public set(bounds: { size: Size, pivot: Vector2 }) {
+        this.size = bounds.size
+        this.pivot = bounds.pivot
+        this.updateRect()
     }
 
-    public get height(): number {
-        return this._height
-    }
-
-    public get pivot(): Vector2 {
-        return this._pivot
-    }
-
-    public set pivot(pivot: Vector2) {
+    public setPivot(pivot: Vector2) {
         this.pivot = pivot
         this.updateRect()
     }
 
-    public set width(width: number) {
-        this._width = width
+    public setSize(size: Size) {
+        this.size = size
         this.updateRect()
     }
 
-    public set height(height: number) {
-        this._height = height
-        this.updateRect()
-    }
-
-    private updateRect() {
-        this._rect.set(
-            new Vector2(-this._width * this._pivot.x, -this._height * this._pivot.y),
-            new Vector2(this._width * (1 - this._pivot.x), this._height * (1 - this._pivot.y)))
+    public updateRect() {
+        this.rect.set(
+            new Vector2(-this.size.width * this.pivot.x, -this.size.height * this.pivot.y),
+            new Vector2(this.size.width * (1 - this.pivot.x), this.size.height * (1 - this.pivot.y)))
     }
 }

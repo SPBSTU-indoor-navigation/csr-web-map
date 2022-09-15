@@ -1,11 +1,11 @@
 import { Vector2, Vector3, Camera } from 'three';
-import { Ref, ref, watchEffect } from 'vue';
+import { Ref, ref, UnwrapRef, watchEffect } from 'vue';
 import { MapController } from '../mapController';
 import { Annotation, IAnnotation } from './annotation';
 import Tween from '@tweenjs/tween.js'
 
 export interface IMapAnnotations {
-  selected: Ref<IAnnotation | null>
+  selected: Ref<UnwrapRef<IAnnotation | null>>
   add(annotation: IAnnotation | IAnnotation[]): void
   remove(annotation: IAnnotation | IAnnotation[]): void
   select(annotation: IAnnotation | null): void
@@ -49,7 +49,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
   const removeAnotation = (annotation: IAnnotation | IAnnotation[]) => {
     const toRemove = new Set(Array.isArray(annotation) ? annotation : [annotation])
 
-    if (toRemove.has(selected.value)) {
+    if (toRemove.has(selected.value as IAnnotation)) {
       select(null, false)
     }
 

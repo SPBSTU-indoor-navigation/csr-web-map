@@ -1,6 +1,6 @@
 import { Box2, Vector2 } from 'three'
 import { DetailLevelProcessor, DetailLevelState } from './detailLevelProcessor'
-import { Bounds } from './bounds'
+import { Bounds, Size } from './bounds'
 
 export interface IGeoPosition {
   latitude: number
@@ -30,7 +30,7 @@ class Shape2D {
   bounds = new Bounds()
 
   constructor(width: number = 50, height: number = 50, pivot: Vector2 = new Vector2(0.5, 0.5)) {
-    this.bounds = new Bounds(width, height, pivot)
+    this.bounds = new Bounds(new Size(width, height), pivot)
   }
 
   updateScreenPosition(pos: Vector2) {
@@ -78,10 +78,10 @@ export class Annotation extends Shape2D implements IAnnotation {
   private drawDebug(ctx: CanvasRenderingContext2D): void {
     const bounds = this.bounds
     ctx.strokeStyle = '#f0f'
-    ctx.strokeRect(0, 0, bounds.width, bounds.height)
+    ctx.strokeRect(bounds.rect.min.x, bounds.rect.min.y, bounds.size.width, bounds.size.height)
 
     ctx.beginPath()
-    ctx.arc(bounds.width * bounds.pivot.x, bounds.height * bounds.pivot.y, 2, 0, Math.PI * 2)
+    ctx.arc(0, 0, 2, 0, Math.PI * 2)
     ctx.stroke()
   }
 

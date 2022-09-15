@@ -8,7 +8,7 @@ declare type Animation = {
   toFunc?: () => any,
   easing?: (amount: number) => number,
   completion?: () => void,
-  onUpdate?: () => void
+  onUpdate?: (val: any) => void
 };
 
 export class Animator {
@@ -39,7 +39,7 @@ export class Animator {
         .delay(delay ?? 0)
         .onUpdate((t) => {
           this.setDirty?.()
-          onUpdate?.()
+          onUpdate?.(t)
         })
         .onComplete((t) => completion?.())
 

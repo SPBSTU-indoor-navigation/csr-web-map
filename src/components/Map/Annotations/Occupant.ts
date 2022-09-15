@@ -3,6 +3,7 @@ import { Vector2 } from 'three'
 import { Easing, Tween } from '@tweenjs/tween.js'
 import { DetailLevelProcessor, DetailLevelState } from '@/core/Map/Annotations/detailLevelProcessor'
 import { Animator } from '@/core/animator/animator'
+import { Size } from '@/core/Map/Annotations/bounds'
 
 enum DetailLevel {
   circlePrimary,
@@ -34,20 +35,26 @@ const levelProcessor = new DetailLevelProcessor<DetailLevel, DetailLevelState>()
 const DEFAULT_RADIUS = 10
 
 export class OccupantAnnotation extends DetailLevelAnnotation<DetailLevel, DetailLevelState> {
-  size = new Vector2(DEFAULT_RADIUS, DEFAULT_RADIUS);
-  pivot = new Vector2(0.5, 0.5)
 
-  selectAnimation = new Animator(() => this.isDirty = true)
-    .animate({ value: this.size, to: () => this.targetSize(), duration: 500 })
-    .animate({ value: this.pivot, to: { x: 0.5, y: 1 }, duration: 200, delay: 300 })
+  onAnim = () => {
+    this.isDirty = true
+    this.bounds.updateRect()
+  }
 
-  deSelectAnimation = new Animator(() => this.isDirty = true)
-    .animate({ value: this.size, to: () => this.targetSize(), duration: 500, easing: Easing.Quadratic.Out })
-    .animate({ value: this.pivot, to: { x: 0.5, y: 0.5 }, duration: 200, easing: Easing.Quadratic.Out })
+  selectAnimation = new Animator(this.onAnim)
+    .animate({
+      value: this.bounds.size, to: () => this.targetSize(), duration: 500, onUpdate: (value) => this.bounds.size = value
+    })
+    .animate({ value: this.bounds.pivot, to: { x: 0.5, y: 1 }, duration: 200, delay: 300 })
+
+  deSelectAnimation = new Animator(this.onAnim)
+    .animate({ value: this.bounds.size, to: () => this.targetSize(), duration: 500, easing: Easing.Quadratic.Out })
+    .animate({ value: this.bounds.pivot, to: { x: 0.5, y: 0.5 }, duration: 200, delay: 300 })
 
   constructor(localPosition: Vector2, data: any) {
     super(localPosition, detailLevelByCategory(data.properties?.category), data)
     this.evaluteDetailLevel = (detailLevel: DetailLevel, mapSize: number) => levelProcessor.evaluate(detailLevel, mapSize)
+    this.bounds.set({ size: new Size(DEFAULT_RADIUS, DEFAULT_RADIUS), pivot: new Vector2(0.5, 0.5) })
   }
 
   override setSelected(selected: boolean, animated: boolean): void {
@@ -69,7 +76,7 @@ export class OccupantAnnotation extends DetailLevelAnnotation<DetailLevel, Detai
   override draw(ctx: CanvasRenderingContext2D): void {
     if (this.isSelected) {
       ctx.fillStyle = '#fff'
-      ctx.fillRect(0, 0, this.size.x, this.size.y)
+      ctx.fillRect(0, 0, this.bounds.size.width, this.bounds.size.height)
     }
 
     ctx.fillStyle = '#000'
@@ -93,10 +100,10 @@ export class OccupantAnnotation extends DetailLevelAnnotation<DetailLevel, Detai
       }
     }
 
-    if (this.isSelected) return { x: DEFAULT_RADIUS * 7, y: DEFAULT_RADIUS * 7 }
+    if (this.isSelected) return { width: DEFAULT_RADIUS * 7, height: DEFAULT_RADIUS * 7 }
 
     const m = scale()
-    return { x: DEFAULT_RADIUS * m, y: DEFAULT_RADIUS * m }
+    return { width: DEFAULT_RADIUS * m, height: DEFAULT_RADIUS * m }
   }
 }
 
