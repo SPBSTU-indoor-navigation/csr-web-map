@@ -5,6 +5,7 @@ import { DetailLevelProcessor, DetailLevelState } from '@/core/Map/Annotations/d
 import { Animator } from '@/core/animator/animator'
 import { Size } from '@/core/Map/Annotations/bounds'
 import { modify, Color } from '@/core/shared/utils'
+import { AnimatedAnnotation } from './animatedAnnotation'
 
 enum DetailLevel {
   circlePrimary,
@@ -32,13 +33,32 @@ const levelProcessor = new DetailLevelProcessor<DetailLevel, DetailLevelState>()
     { state: DetailLevelState.big, size: 20 },
   ])
 
+const detailLevelByCategory = (category: string): DetailLevel => {
+  switch (category) {
+    case 'restroom':
+    case 'restroomMale':
+    case 'restroomFemale':
+    case 'security':
+      return DetailLevel.circleWithoutLabel
+    case 'administration':
+    case 'wardrobe':
+    case 'ticket':
+      return DetailLevel.circleWithoutLabel
+    case 'souvenirs':
+    case 'foodserviceСoffee':
+    case 'foodservice':
+      return DetailLevel.circleWithoutLabel
+    case 'auditorium':
+    case 'classroom':
+      return DetailLevel.pointSecondary
+    default:
+      return DetailLevel.pointSecondary
+  }
+}
 
 const DEFAULT_RADIUS = 5
 
-export class OccupantAnnotation extends DetailLevelAnnotation<DetailLevel, DetailLevelState> {
-  selectAnimation: Animator
-  deSelectAnimation: Animator
-
+export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLevelState> {
   annotationParams = {
     point: {
       size: 1,
@@ -64,14 +84,8 @@ export class OccupantAnnotation extends DetailLevelAnnotation<DetailLevel, Detai
     pointStrokeWidth: 0.7,
   }
 
-  onAnim = () => {
-    this.isDirty = true
-    this.bounds.updateRect()
-  }
-
   constructor(localPosition: Vector2, data: any) {
-    super(localPosition, detailLevelByCategory(data.properties?.category), data, (detailLevel: DetailLevel, mapSize: number) => levelProcessor.evaluate(detailLevel, mapSize))
-    this.bounds.set({ size: new Size(15, 15), pivot: new Vector2(0.5, 0.5) })
+    super(localPosition, data, detailLevelByCategory(data.category), levelProcessor)
 
     const target = this.target
 
@@ -92,48 +106,19 @@ export class OccupantAnnotation extends DetailLevelAnnotation<DetailLevel, Detai
     modify(this.annotationParams.point, target.mainPoint(), false)
   }
 
-  override setSelected(selected: boolean, animated: boolean): void {
-    super.setSelected(selected, animated)
-
-    if (selected) {
-      this.selectAnimation.start()
-    }
-    else {
-      this.deSelectAnimation.start()
-    }
-  }
-
   override changeState(state: DetailLevelState): void {
     super.changeState(state)
-
-    const change = new Animator(this.onAnim)
+    this.animateChangeState(new Animator(this.onAnim)
       .animate({ value: this.annotationParams.point, to: () => this.target.mainPoint(), duration: 100, easing: Easing.Quadratic.InOut })
-
-    if (this.selectAnimation.isPlaying) {
-      this.selectAnimation.onEnd(() => change.start())
-    } else if (this.deSelectAnimation.isPlaying) {
-      this.deSelectAnimation.onEnd(() => change.start())
-    } else {
-      change.start()
-    }
-
-    this.isDirty = true
+    )
   }
-
 
   override draw(ctx: CanvasRenderingContext2D): void {
     const { point, miniPoint, label, shape } = this.annotationParams
 
-    if (miniPoint.size > 0) {
-      ctx.beginPath()
-      ctx.arc(0, 0, miniPoint.size, 0, 2 * Math.PI)
+    const drawPoint = () => {
       ctx.fillStyle = this.style.pointFill.hex
-      ctx.fill()
-    }
 
-    ctx.fillStyle = this.style.pointFill.hex
-
-    {
       ctx.save()
       ctx.translate(0, point.offsetY)
       ctx.scale(point.size, point.size)
@@ -153,13 +138,26 @@ export class OccupantAnnotation extends DetailLevelAnnotation<DetailLevel, Detai
       }
 
       ctx.restore()
+
+      if (point.strokeOpacity > 0) {
+        ctx.strokeStyle = this.style.pointStroke.withAlphaComponent(point.strokeOpacity).hex
+        ctx.lineWidth = this.style.pointStrokeWidth
+        ctx.stroke()
+      }
     }
 
-    if (point.strokeOpacity > 0) {
-      ctx.strokeStyle = this.style.pointStroke.withAlphaComponent(point.strokeOpacity).hex
-      ctx.lineWidth = this.style.pointStrokeWidth
-      ctx.stroke()
+    const drawMiniPoint = () => {
+      if (miniPoint.size > 0) {
+        ctx.beginPath()
+        ctx.arc(0, 0, miniPoint.size, 0, 2 * Math.PI)
+        ctx.fillStyle = this.style.pointFill.hex
+        ctx.fill()
+      }
     }
+
+    drawPoint()
+    drawMiniPoint()
+
 
     super.draw(ctx)
   }
@@ -200,31 +198,5 @@ export class OccupantAnnotation extends DetailLevelAnnotation<DetailLevel, Detai
 
       return size()
     }
-  }
-}
-
-
-
-
-const detailLevelByCategory = (category: string): DetailLevel => {
-  switch (category) {
-    case 'restroom':
-    case 'restroomMale':
-    case 'restroomFemale':
-    case 'security':
-      return DetailLevel.circleWithoutLabel
-    case 'administration':
-    case 'wardrobe':
-    case 'ticket':
-      return DetailLevel.circleWithoutLabel
-    case 'souvenirs':
-    case 'foodserviceСoffee':
-    case 'foodservice':
-      return DetailLevel.circleWithoutLabel
-    case 'auditorium':
-    case 'classroom':
-      return DetailLevel.pointSecondary
-    default:
-      return DetailLevel.pointSecondary
   }
 }
