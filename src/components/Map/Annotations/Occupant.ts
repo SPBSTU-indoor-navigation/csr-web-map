@@ -59,7 +59,7 @@ export class OccupantAnnotation extends DetailLevelAnnotation<DetailLevel, Detai
   }
 
   style = {
-    pointFill: new Color('#ffab00'),
+    pointFill: new Color('#ffae00'),
     pointStroke: new Color('#ffffff'),
     pointStrokeWidth: 0.7,
   }
