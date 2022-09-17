@@ -71,7 +71,7 @@ export class Annotation extends Shape2D implements IAnnotation {
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
-    this.drawDebug(ctx)
+    // this.drawDebug(ctx)
     this.isDirty = false
   }
 
@@ -92,9 +92,10 @@ export class DetailLevelAnnotation<DetailLevel, State> extends Annotation {
   protected state: State
   protected evaluteDetailLevel: (detailLevel: DetailLevel, mapSize: number) => State
 
-  constructor(localPosition: Vector2, detailLevel: DetailLevel, data: any) {
+  constructor(localPosition: Vector2, detailLevel: DetailLevel, data: any, evaluteDetailLevel: (detailLevel: DetailLevel, mapSize: number) => State) {
     super(localPosition, data)
     this.detailLevel = detailLevel
+    this.evaluteDetailLevel = evaluteDetailLevel
   }
 
   override zoom(zoom: number) {

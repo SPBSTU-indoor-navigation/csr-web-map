@@ -107,11 +107,19 @@ export default function useMapAnnotations(options: { mapController: MapControlle
   }
 
   const select = (annotation: IAnnotation | null, animated: boolean = true) => {
+    if (selected.value) {
+      annotations = annotations.filter(t => t !== selected.value)
+      annotations.push(selected.value as IAnnotation)
+    }
+
     selected.value?.setSelected(false, animated)
 
     selected.value = annotation
 
     selected.value?.setSelected(true, animated)
+
+    console.log('selected', selected.value)
+
   }
 
   const click = (pos: Vector2, e: PointerEvent) => {
