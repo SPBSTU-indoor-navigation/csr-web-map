@@ -155,9 +155,11 @@ export class OccupantAnnotation extends DetailLevelAnnotation<DetailLevel, Detai
       ctx.restore()
     }
 
-    ctx.strokeStyle = this.style.pointStroke.withAlphaComponent(point.strokeOpacity).hex
-    ctx.lineWidth = this.style.pointStrokeWidth
-    ctx.stroke()
+    if (point.strokeOpacity > 0) {
+      ctx.strokeStyle = this.style.pointStroke.withAlphaComponent(point.strokeOpacity).hex
+      ctx.lineWidth = this.style.pointStrokeWidth
+      ctx.stroke()
+    }
 
     super.draw(ctx)
   }
