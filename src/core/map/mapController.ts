@@ -1,6 +1,6 @@
 import { Camera, Scene } from 'three'
-import { IAnnotation } from './Annotations/annotation';
-import { IMapAnnotations } from './Annotations/useMapAnnotations';
+import { IAnnotation } from './annotations/annotation';
+import { IMapAnnotations } from './annotations/useMapAnnotations';
 
 
 export class MapController {

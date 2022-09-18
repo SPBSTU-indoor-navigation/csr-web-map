@@ -1,7 +1,7 @@
 import { Animator } from "@/core/animator/animator";
-import { DetailLevelAnnotation } from "@/core/Map/Annotations/annotation";
-import { Size } from "@/core/Map/Annotations/bounds";
-import { DetailLevelProcessor } from "@/core/Map/Annotations/detailLevelProcessor";
+import { DetailLevelAnnotation } from "@/core/map/annotations/annotation";
+import { Size } from "@/core/map/annotations/bounds";
+import { DetailLevelProcessor } from "@/core/map/annotations/detailLevelProcessor";
 import { Vector2 } from "three";
 
 

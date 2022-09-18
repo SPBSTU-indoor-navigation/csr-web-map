@@ -1,4 +1,4 @@
-import { OccupantAnnotation } from '@/components/Map/Annotations/occupant'
+import { OccupantAnnotation } from '@/components/Map/annotations/occupant'
 import { Group, Vector2 } from 'three'
 import { meshForFeatureCollection, outlineMeshForFeatureCollection } from './utils'
 

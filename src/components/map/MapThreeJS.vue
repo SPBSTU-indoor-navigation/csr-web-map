@@ -13,19 +13,19 @@
 <script setup>
 import Venue from '@/core/imdf/venue'
 import lightTheme from '@/styles/imdf/light.js'
-import LevelSwitcherVue from '../Controlls/LevelSwitcher/index.vue'
-import useMapAnnotations from '@/core/Map/Annotations/useMapAnnotations'
-import MapKitVue from '@/core/Map/MapKit/MapKit.vue'
-import useMapOverlay from '@/core/Map/Overlays/useMapOverlay'
+import LevelSwitcherVue from '../controlls/levelSwitcher/index.vue'
+import useMapAnnotations from '@/core/map/annotations/useMapAnnotations'
+import MapKitVue from '@/core/map/mapKit/MapKit.vue'
+import useMapOverlay from '@/core/map/Overlays/useMapOverlay'
 
 import { Box2, Vector2, Vector3 } from 'three'
 import { defineComponent, ref, shallowRef, watch, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { nearestBuiling } from '@/core/Map/utils'
-import { DetailLevelAnnotation } from '@/core/Map/Annotations/annotation'
-import { OccupantAnnotation } from './Annotations/occupant'
-import { MapController } from '@/core/Map/mapController'
+import { nearestBuiling } from '@/core/map/utils'
+import { DetailLevelAnnotation } from '@/core/map/annotations/annotation'
+import { OccupantAnnotation } from './annotations/occupant'
+import { MapController } from '@/core/map/mapController'
 
 
 const mkMap = shallowRef()
