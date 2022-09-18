@@ -176,13 +176,14 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       ctx.font = this.style.font
       ctx.textAlign = 'center'
       ctx.lineWidth = 3
+      ctx.textBaseline = 'top'
       ctx.strokeStyle = this.style.labelStroke.withAlphaComponent(label.opacity).hex
 
       ctx.lineJoin = 'round'
 
       var text = this.data.properties.shortName['ru']
-      ctx.strokeText(text, 0, label.offsetY + 14)
-      ctx.fillText(text, 0, label.offsetY + 14)
+      ctx.strokeText(text, 0, label.offsetY + 5)
+      ctx.fillText(text, 0, label.offsetY + 5)
 
       ctx.canvas.style.letterSpacing = '0';
     }
