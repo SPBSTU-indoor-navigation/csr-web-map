@@ -1,4 +1,4 @@
-import { OccupantAnnotation } from '@/components/Map/annotations/occupant'
+import { OccupantAnnotation } from '@/components/map/annotations/occupant'
 import { Group, Vector2 } from 'three'
 import { meshForFeatureCollection, outlineMeshForFeatureCollection } from './utils'
 
@@ -45,13 +45,13 @@ export default class Level {
     Object.values(this.geometrys).forEach(mesh => this.groupMesh.add(mesh))
   }
 
-  /** @param { import('../Map/mapController').MapController } map */
+  /** @param { import('../map/mapController').MapController } map */
   Add(map) {
     map.addOverlay(this.groupMesh)
     map.addAnnotation(this.annotations)
   }
 
-  /** @param { import('../Map/mapController').MapController } map */
+  /** @param { import('../map/mapController').MapController } map */
   Remove(map) {
     map.removeOverlay(this.groupMesh)
     map.removeAnnotation(this.annotations)

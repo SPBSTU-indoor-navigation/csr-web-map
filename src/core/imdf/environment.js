@@ -64,12 +64,12 @@ export default class Environment {
     Object.values(this.geometry).forEach(mesh => this.groupMesh.add(mesh))
   }
 
-  /** @param { import('../Map/mapController').MapController } map */
+  /** @param { import('../map/mapController').MapController } map */
   Add(map) {
     map.addOverlay(this.groupMesh)
   }
 
-  /** @param { import('../Map/mapController').MapController } map */
+  /** @param { import('../map/mapController').MapController } map */
   Remove(map) {
     map.removeOverlay(this.groupMesh)
   }

@@ -64,12 +64,12 @@ export default class Building {
     return false
   }
 
-  /** @param { import('../Map/mapController').MapController } map */
+  /** @param { import('../map/mapController').MapController } map */
   Add(map) {
     this.map = map
   }
 
-  /** @param { import('../Map/mapController').MapController } map */
+  /** @param { import('../map/mapController').MapController } map */
   Remove(map) {
     this.HideIndoor()
   }

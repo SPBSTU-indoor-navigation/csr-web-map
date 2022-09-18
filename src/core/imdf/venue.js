@@ -73,7 +73,7 @@ export default class Venue {
     this.buildingFootprintOutlineMesh = outlineMeshForFeatureCollection(archive.building, 1, this.lineMeshMaterialStorage)
   }
 
-  /** @param { import('../Map/mapController').MapController } map */
+  /** @param { import('../map/mapController').MapController } map */
   Add(map) {
     [this.mesh, this.buildingFootprintMesh, this.buildingFootprintOutlineMesh]
       .forEach(mesh => map.addOverlay(mesh))
@@ -83,7 +83,7 @@ export default class Venue {
     this.buildings.forEach(building => building.Add(map))
   }
 
-  /** @param { import('../Map/mapController').MapController } map */
+  /** @param { import('../map/mapController').MapController } map */
   Remove(map) {
     [this.mesh, this.buildingFootprintMesh, this.buildingFootprintOutlineMesh]
       .forEach(mesh => map.removeOverlay(mesh))
