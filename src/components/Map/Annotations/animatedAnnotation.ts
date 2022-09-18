@@ -31,13 +31,13 @@ export class AnimatedAnnotation<DetailLevel extends number, DetailLevelState> ex
   }
 
   protected animateChangeState(animator: Animator) {
-    if (this.selectAnimation.isPlaying) {
-      this.selectAnimation.onEnd(() => animator.start())
-    } else if (this.deSelectAnimation.isPlaying) {
-      this.deSelectAnimation.onEnd(() => animator.start())
-    } else {
-      animator.start()
-    }
+    if (this.isSelected) return;
+
+    animator
+      .addDependent(this.selectAnimation)
+      .addDependent(this.deSelectAnimation)
+      .start()
+
 
     this.isDirty = true
   }

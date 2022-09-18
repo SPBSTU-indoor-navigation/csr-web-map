@@ -3,7 +3,6 @@ import { Vector2 } from 'three'
 import { Easing, Tween } from '@tweenjs/tween.js'
 import { DetailLevelProcessor, DetailLevelState } from '@/core/Map/Annotations/detailLevelProcessor'
 import { Animator } from '@/core/animator/animator'
-import { Size } from '@/core/Map/Annotations/bounds'
 import { modify, Color } from '@/core/shared/utils'
 import { AnimatedAnnotation } from './animatedAnnotation'
 
@@ -30,14 +29,14 @@ const levelProcessor = new DetailLevelProcessor<DetailLevel, DetailLevelState>()
     { state: DetailLevelState.hide, size: 1 },
     { state: DetailLevelState.min, size: 2 },
     { state: DetailLevelState.normal, size: 7 },
-    { state: DetailLevelState.big, size: 20 },
+    { state: DetailLevelState.big, size: 13 },
   ])
 
 const detailLevelByCategory = (category: string): DetailLevel => {
   switch (category) {
     case 'restroom':
-    case 'restroomMale':
-    case 'restroomFemale':
+    case 'restroom.male':
+    case 'restroom.female':
     case 'security':
       return DetailLevel.circleWithoutLabel
     case 'administration':
@@ -45,7 +44,7 @@ const detailLevelByCategory = (category: string): DetailLevel => {
     case 'ticket':
       return DetailLevel.circleWithoutLabel
     case 'souvenirs':
-    case 'foodserviceСoffee':
+    case 'foodservice.coffee':
     case 'foodservice':
       return DetailLevel.circleWithoutLabel
     case 'auditorium':
@@ -73,43 +72,56 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     },
     label: {
       offsetY: 0,
-      opacity: 0,
-      color: new Color('#ffab00')
+      opacity: 1,
+      color: new Color('#D6862F')
     }
   }
 
   style = {
     pointFill: new Color('#ffae00'),
     pointStroke: new Color('#ffffff'),
+    labelColor: new Color('#D6862F'),
+    labelStroke: new Color('#ffffff'),
     pointStrokeWidth: 0.7,
+    font: '700 10px apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   }
 
   constructor(localPosition: Vector2, data: any) {
-    super(localPosition, data, detailLevelByCategory(data.category), levelProcessor)
+    super(localPosition, data, detailLevelByCategory(data.properties.category), levelProcessor)
 
     const target = this.target
 
     this.selectAnimation = new Animator(this.onAnim)
       .animateSpring(0.4, 0.4, { value: this.annotationParams.point, to: () => target.mainPoint(), duration: 1000 })
-      .animateSpring(0.7, 0.3, { value: this.annotationParams.miniPoint, to: () => ({ size: target.miniPoint() }), duration: 1000, delay: 250 })
-      .animate({ value: this.annotationParams.point, to: () => ({ strokeOpacity: target.borderOpacity() }), duration: 100, easing: Easing.Quadratic.InOut })
-      .animate({ value: this.annotationParams.shape, to: () => ({ progress: target.shapeProgress() }), duration: 200, delay: 50, easing: Easing.Quadratic.InOut })
+      .animateSpring(0.6, 0.4, { value: this.annotationParams.label, to: () => target.labelTransform(), duration: 1000 })
+      .animateSpring(0.7, 0.3, { value: this.annotationParams.miniPoint, to: () => target.miniPoint(), duration: 1000, delay: 250 })
+      .animate({ value: this.annotationParams.point, to: () => target.borderOpacity(), duration: 100, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.shape, to: () => target.shapeProgress(), duration: 200, delay: 50, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.label, to: () => target.labelOpacity(), duration: 200, delay: 50, easing: Easing.Quadratic.InOut })
 
     this.deSelectAnimation = new Animator(this.onAnim, [this.selectAnimation])
       .animateSpring(0.7, 0.3, { value: this.annotationParams.point, to: () => target.mainPoint(), duration: 1000 })
-      .animate({ value: this.annotationParams.point, to: () => ({ strokeOpacity: target.borderOpacity() }), duration: 300, easing: Easing.Quadratic.InOut })
-      .animate({ value: this.annotationParams.miniPoint, to: () => ({ size: target.miniPoint() }), duration: 300, easing: Easing.Quadratic.InOut })
-      .animate({ value: this.annotationParams.shape, to: () => ({ progress: target.shapeProgress() }), duration: 300, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.point, to: () => target.borderOpacity(), duration: 300, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.miniPoint, to: () => target.miniPoint(), duration: 300, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.shape, to: () => target.shapeProgress(), duration: 300, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.label, to: () => ({ ...target.labelOpacity(), ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.In })
 
     this.selectAnimation.addDependent(this.deSelectAnimation)
 
-    modify(this.annotationParams.point, target.mainPoint(), false)
+    modify(this.annotationParams.point, target.mainPoint())
+    modify(this.annotationParams.label, target.labelTransform())
+    modify(this.annotationParams.label, target.labelOpacity())
   }
 
   override changeState(state: DetailLevelState): void {
     super.changeState(state)
+    const target = this.target
+
     this.animateChangeState(new Animator(this.onAnim)
-      .animate({ value: this.annotationParams.point, to: () => this.target.mainPoint(), duration: 100, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.point, to: () => ({ ...target.mainPoint(), ...target.borderOpacity() }), duration: 100, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.miniPoint, to: () => target.miniPoint(), duration: 300, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.label, to: () => ({ ...target.labelOpacity(), ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.label, to: () => ({ ...target.labelOpacity(), ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.InOut })
     )
   }
 
@@ -155,9 +167,24 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       }
     }
 
+    const drawLabel = () => {
+      if (label.opacity == 0) return
+      ctx.fillStyle = label.color.withAlphaComponent(label.opacity).hex
+      ctx.font = this.style.font
+      ctx.textAlign = 'center'
+      ctx.lineWidth = 3
+      ctx.strokeStyle = this.style.labelStroke.withAlphaComponent(label.opacity).hex
+
+      ctx.lineJoin = 'round'
+
+      var text = this.data.properties.shortName['ru']
+      ctx.strokeText(text, 0, label.offsetY + 14)
+      ctx.fillText(text, 0, label.offsetY + 14)
+    }
+
     drawPoint()
     drawMiniPoint()
-
+    drawLabel()
 
     super.draw(ctx)
   }
@@ -188,15 +215,42 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
         offsetY: 0
       }
     },
-    borderOpacity: () => this.isSelected ? 0 : 1,
-    shapeProgress: () => this.isSelected ? 1 : 0,
+    borderOpacity: () => ({ strokeOpacity: this.isSelected ? 0 : 1 }),
+    shapeProgress: () => ({ progress: this.isSelected ? 1 : 0 }),
     miniPoint: () => {
       const size = () => {
         if (this.isSelected) return 2
         return 0
       }
 
-      return size()
+      return { size: size() }
+    },
+    labelTransform: () => {
+      const color = () => {
+        if (this.isSelected) return new Color('#000000')
+        return new Color(this.style.labelColor.hex)
+      }
+
+      const offset = () => {
+        if (this.isSelected) return -1
+        return 0
+      }
+
+      return {
+        offsetY: offset(),
+        color: color()
+      }
+    },
+    labelOpacity: () => {
+      const opacity = () => {
+        if (this.isSelected) return 1
+        if ([DetailLevel.circleWithoutLabel].includes(this.detailLevel)) return 0
+        return [DetailLevelState.big].includes(this.state) ? 1 : 0
+      }
+
+      return {
+        opacity: opacity(),
+      }
     }
   }
 }

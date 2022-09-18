@@ -46,7 +46,12 @@ export class Annotation extends Shape2D implements IAnnotation {
   isSelected = false
 
   protected currentZoom: number = 0
-  protected data = {}
+  protected data: {
+    properties?: {
+      shortName: {
+      }
+    }
+  } = {}
 
   constructor(localPosition: Vector2, data: any) {
     super()

@@ -1,5 +1,5 @@
 
-export function modify(obj: Object, newObj: Object, deleteOld: boolean = true) {
+export function modify(obj: Object, newObj: Object, deleteOld: boolean = false) {
     if (deleteOld) {
         Object.keys(obj).forEach(function (key) {
             delete obj[key];
@@ -9,6 +9,10 @@ export function modify(obj: Object, newObj: Object, deleteOld: boolean = true) {
     Object.keys(newObj).forEach(function (key) {
         obj[key] = newObj[key];
     });
+}
+
+function clamp(value: number, min: number, max: number) {
+    return Math.min(Math.max(value, min), max);
 }
 
 export class Color {
@@ -44,7 +48,7 @@ export class Color {
 
     toHex() {
         function componentToHex(c: number) {
-            var hex = c.toString(16);
+            var hex = clamp(Math.round(c), 0, 255).toString(16);
             return hex.length == 1 ? "0" + hex : hex;
         }
 
@@ -61,7 +65,7 @@ export class Color {
 
     withAlphaComponent(alpha: number) {
         const color = new Color(this.toRgba())
-        color.a = Math.min(Math.max(Math.round(alpha * 255), 0), 255)
+        color.a = clamp(Math.round(alpha * 255), 0, 255)
 
         return color
     }

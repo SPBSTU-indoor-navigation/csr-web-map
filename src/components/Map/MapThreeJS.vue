@@ -24,7 +24,7 @@ import { useRoute } from 'vue-router'
 
 import { nearestBuiling } from '@/core/Map/utils'
 import { DetailLevelAnnotation } from '@/core/Map/Annotations/annotation'
-import { OccupantAnnotation } from './Annotations/Occupant'
+import { OccupantAnnotation } from './Annotations/occupant'
 import { MapController } from '@/core/Map/mapController'
 
 

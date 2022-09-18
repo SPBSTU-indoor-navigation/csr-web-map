@@ -47,6 +47,7 @@ export class Animator {
   addDependent(dependent: Animator | Animator[]) {
     const add = Array.isArray(dependent) ? dependent : [dependent]
     this.dependents.push(...add)
+    return this
   }
 
   onStart(callback: () => void) {

@@ -170,7 +170,8 @@ export default function useMapAnnotations(options: { mapController: MapControlle
   const updateEveryFrame = () => {
     Tween.update()
 
-    setTimeout(() => requestAnimationFrame(updateEveryFrame), 1000 / 60)
+    // setTimeout(() => requestAnimationFrame(updateEveryFrame), 1000 / 60)
+    setTimeout(updateEveryFrame, 1000 / 60)
 
     // requestAnimationFrame(updateEveryFrame)
     const isDirty = annotations.some(t => t.isDirty)
