@@ -23,6 +23,7 @@ export interface IAnnotation {
   intersect(rect: Box2): boolean
 
   draw(ctx: CanvasRenderingContext2D): void
+  style(styleSheet: any): void
 }
 
 class Shape2D {
@@ -50,6 +51,7 @@ export class Annotation extends Shape2D implements IAnnotation {
     properties?: {
       shortName: {
       }
+      category: string
     }
   } = {}
 
@@ -79,6 +81,8 @@ export class Annotation extends Shape2D implements IAnnotation {
     // this.drawDebug(ctx)
     this.isDirty = false
   }
+
+  style(styleSheet: any): void { }
 
   private drawDebug(ctx: CanvasRenderingContext2D): void {
     const bounds = this.bounds

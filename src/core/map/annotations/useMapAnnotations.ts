@@ -15,7 +15,7 @@ export interface IMapAnnotations {
   zoom(zoom: number)
 }
 
-export default function useMapAnnotations(options: { mapController: MapController }): IMapAnnotations {
+export default function useMapAnnotations(options: { mapController: MapController, styleSheet: Ref<UnwrapRef<any>> }): IMapAnnotations {
 
   let canvasSize: Vector2
   let lastZoom: number = 0
@@ -40,10 +40,17 @@ export default function useMapAnnotations(options: { mapController: MapControlle
 
   let annotations: IAnnotation[] = []
 
+  watchEffect(() => {
+    annotations.forEach(a => a.style(options.styleSheet.value.annotations))
+  })
+
   const addAnotation = (annotation: IAnnotation | IAnnotation[]) => {
     const toAdd = Array.isArray(annotation) ? annotation : [annotation]
     annotations.push(...toAdd)
-    toAdd.forEach(a => a.zoom(lastZoom))
+    toAdd.forEach(a => {
+      a.style(options.styleSheet.value.annotation)
+      a.zoom(lastZoom)
+    })
   }
 
   const removeAnotation = (annotation: IAnnotation | IAnnotation[]) => {

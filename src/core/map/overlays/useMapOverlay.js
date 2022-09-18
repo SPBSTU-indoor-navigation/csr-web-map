@@ -46,7 +46,7 @@ export default function useMapOverlay(options) {
 
   // StyleSheet
   watchEffect(() => {
-    venue.value.Style(styleSheet.value)
+    venue.value.Style(styleSheet.value.imdf)
   })
 
   watch(venue, (newValue, oldValue) => {

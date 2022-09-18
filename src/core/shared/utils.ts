@@ -22,6 +22,10 @@ export class Color {
     a: number
 
     constructor(color: string) {
+        this.set(color)
+    }
+
+    set(color: string) {
         if (color[0] == '#') {
             this.r = parseInt(color.slice(1, 3), 16)
             this.g = parseInt(color.slice(3, 5), 16)

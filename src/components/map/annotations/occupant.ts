@@ -77,7 +77,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     }
   }
 
-  style = {
+  currentStyle = {
     pointFill: new Color('#ffae00'),
     pointStroke: new Color('#ffffff'),
     labelColor: new Color('#D6862F'),
@@ -125,11 +125,24 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     )
   }
 
+  override style(styleSheet: any): void {
+    const s = styleSheet.occupant
+    const style = this.currentStyle
+    const defaultStyle: { pointFill: string, labelFill: string, strokeColor: string } = s.default
+    const annotation = s[this.data.properties.category] ?? defaultStyle
+
+    const pointFill = annotation.pointFill ?? defaultStyle.pointFill
+
+    style.pointFill.set(pointFill)
+    style.labelColor.set(annotation.labelFill ?? pointFill)
+    style.pointStroke.set(annotation.strokeColor ?? defaultStyle.strokeColor)
+  }
+
   override draw(ctx: CanvasRenderingContext2D): void {
     const { point, miniPoint, label, shape } = this.annotationParams
 
     const drawPoint = () => {
-      ctx.fillStyle = this.style.pointFill.hex
+      ctx.fillStyle = this.currentStyle.pointFill.hex
 
       ctx.save()
       ctx.translate(0, point.offsetY)
@@ -152,8 +165,8 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       ctx.restore()
 
       if (point.strokeOpacity > 0) {
-        ctx.strokeStyle = this.style.pointStroke.withAlphaComponent(point.strokeOpacity).hex
-        ctx.lineWidth = this.style.pointStrokeWidth
+        ctx.strokeStyle = this.currentStyle.pointStroke.withAlphaComponent(point.strokeOpacity).hex
+        ctx.lineWidth = this.currentStyle.pointStrokeWidth
         ctx.stroke()
       }
     }
@@ -162,7 +175,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       if (miniPoint.size > 0) {
         ctx.beginPath()
         ctx.arc(0, 0, miniPoint.size, 0, 2 * Math.PI)
-        ctx.fillStyle = this.style.pointFill.hex
+        ctx.fillStyle = this.currentStyle.pointFill.hex
         ctx.fill()
       }
     }
@@ -173,11 +186,11 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       ctx.canvas.style.letterSpacing = '-0.3px';
 
       ctx.fillStyle = label.color.withAlphaComponent(label.opacity).hex
-      ctx.font = this.style.font
+      ctx.font = this.currentStyle.font
       ctx.textAlign = 'center'
       ctx.lineWidth = 3
       ctx.textBaseline = 'top'
-      ctx.strokeStyle = this.style.labelStroke.withAlphaComponent(label.opacity).hex
+      ctx.strokeStyle = this.currentStyle.labelStroke.withAlphaComponent(label.opacity).hex
 
       ctx.lineJoin = 'round'
 
@@ -234,7 +247,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     labelTransform: () => {
       const color = () => {
         if (this.isSelected) return new Color('#000000')
-        return new Color(this.style.labelColor.hex)
+        return new Color(this.currentStyle.labelColor.hex)
       }
 
       const offset = () => {

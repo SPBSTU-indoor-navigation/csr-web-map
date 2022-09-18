@@ -1,21 +1,18 @@
 <template>
-	<div>
-		<MapKitVue @map-ready="onMapReady" @singleClick="mapClick" />
-		<div class="abs-full container-map-ui">
-			<Transition name="slide-fade">
-				<LevelSwitcherVue
-					v-if="showIndoor && currentBuilding"
-					:levels="currentBuilding.levels"
-					v-model:level="currentOrdinal"
-				/>
-			</Transition>
-		</div>
-	</div>
+  <div>
+    <MapKitVue @map-ready="onMapReady" @singleClick="mapClick" />
+    <div class="abs-full container-map-ui">
+      <Transition name="slide-fade">
+        <LevelSwitcherVue v-if="showIndoor && currentBuilding" :levels="currentBuilding.levels"
+          v-model:level="currentOrdinal" />
+      </Transition>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import Venue from '@/core/imdf/venue';
-import lightTheme from '@/styles/imdf/light.js';
+import lightTheme from '@/styles/map/light.js';
 import LevelSwitcherVue from '../controlls/levelSwitcher/index.vue';
 import useMapAnnotations from '@/core/map/annotations/useMapAnnotations';
 import MapKitVue from '@/core/map/mapKit/MapKit.vue';
@@ -46,79 +43,79 @@ const SHOW_ZOOM = 4;
 const HIDE_ZOOM = 3.9;
 
 function mapClick(e) {
-	mapController.mapAnnotations.click(new Vector2(e.clientX, e.clientY), e);
+  mapController.mapAnnotations.click(new Vector2(e.clientX, e.clientY), e);
 }
 
 function onMapReady(map) {
-	mkMap.value = map;
+  mkMap.value = map;
 }
 
 function onAnimate() {
-	mapController.render();
-	const nearest = nearestBuiling(
-		new Box2(new Vector2(-1, -1), new Vector2(1, 1)).expandByScalar(-0.1),
-		mapController.camera,
-		venue.value
-	);
-	currentBuilding.value = nearest;
+  mapController.render();
+  const nearest = nearestBuiling(
+    new Box2(new Vector2(-1, -1), new Vector2(1, 1)).expandByScalar(-0.1),
+    mapController.camera,
+    venue.value
+  );
+  currentBuilding.value = nearest;
 }
 
 async function load() {
-	const router = useRoute();
-	const url = `https://dev.mapstorage.polymap.ru/api/map/${router.params.mapID}`;
-	const archive = await (await fetch(url)).json();
+  const router = useRoute();
+  const url = `https://dev.mapstorage.polymap.ru/api/map/${router.params.mapID}`;
+  const archive = await (await fetch(url)).json();
 
-	while (!mkMap.value) {
-		await new Promise((resolve) => setTimeout(resolve, 100));
-	}
+  while (!mkMap.value) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
 
-	venue.value = new Venue(archive.imdf);
-	mapController = new MapController(venue.value.mkGeometry);
+  venue.value = new Venue(archive.imdf);
+  mapController = new MapController(venue.value.mkGeometry);
 
-	const mapOverlay = useMapOverlay({
-		venue,
-		mkMap: mkMap.value,
-		styleSheet,
-		onAnimate,
-		mapController,
-	});
+  const mapOverlay = useMapOverlay({
+    venue,
+    mkMap: mkMap.value,
+    styleSheet,
+    onAnimate,
+    mapController,
+  });
 
-	mapController.mapAnnotations = useMapAnnotations({ mapController });
+  mapController.mapAnnotations = useMapAnnotations({ mapController, styleSheet });
 
-	watchEffect(() => {
-		zoom.value = mapOverlay.zoom.value;
-		mapController.mapAnnotations.zoom(zoom.value);
-	});
+  watchEffect(() => {
+    zoom.value = mapOverlay.zoom.value;
+    mapController.mapAnnotations.zoom(zoom.value);
+  });
 }
 
 load();
 
 watch(zoom, (zoom) => {
-	if (currentBuilding.value) {
-		if (zoom > SHOW_ZOOM) {
-			currentBuilding.value.ShowIndoor();
-			showIndoor.value = true;
-		} else if (zoom < HIDE_ZOOM) {
-			currentBuilding.value.HideIndoor();
-			showIndoor.value = false;
-		}
-	}
+  if (currentBuilding.value) {
+    if (zoom > SHOW_ZOOM) {
+      currentBuilding.value.ShowIndoor();
+      showIndoor.value = true;
+    } else if (zoom < HIDE_ZOOM) {
+      currentBuilding.value.HideIndoor();
+      showIndoor.value = false;
+    }
+  }
 });
 
 watch(currentBuilding, (building, old) => {
-	if (old) old.HideIndoor();
-	if (building) {
-		currentOrdinal.value = building.currentOrdinal;
-		if (zoom.value > HIDE_ZOOM) {
-			building.ShowIndoor();
-			showIndoor.value = true;
-		}
-	}
+  if (old) old.HideIndoor();
+  if (building) {
+    currentOrdinal.value = building.currentOrdinal;
+    if (zoom.value > HIDE_ZOOM) {
+      building.ShowIndoor();
+      showIndoor.value = true;
+    }
+  }
 });
 
 watch(currentOrdinal, (ordinal) => {
-	currentBuilding.value.ChangeOrdinal(ordinal);
-	mapController.scheduleUpdate();
+  currentBuilding.value.ChangeOrdinal(ordinal);
+  mapController.scheduleUpdate();
 });
 
 defineComponent([MapKitVue, LevelSwitcherVue]);
