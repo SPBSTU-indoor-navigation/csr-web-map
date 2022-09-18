@@ -83,7 +83,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     labelColor: new Color('#D6862F'),
     labelStroke: new Color('#ffffff'),
     pointStrokeWidth: 0.7,
-    font: '700 10px apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    font: '700 11px apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   }
 
   constructor(localPosition: Vector2, data: any) {
@@ -169,6 +169,9 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
 
     const drawLabel = () => {
       if (label.opacity == 0) return
+
+      ctx.canvas.style.letterSpacing = '-0.3px';
+
       ctx.fillStyle = label.color.withAlphaComponent(label.opacity).hex
       ctx.font = this.style.font
       ctx.textAlign = 'center'
@@ -180,6 +183,8 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       var text = this.data.properties.shortName['ru']
       ctx.strokeText(text, 0, label.offsetY + 14)
       ctx.fillText(text, 0, label.offsetY + 14)
+
+      ctx.canvas.style.letterSpacing = '0';
     }
 
     drawPoint()
