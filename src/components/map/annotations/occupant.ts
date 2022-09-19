@@ -5,6 +5,7 @@ import { DetailLevelProcessor, DetailLevelState } from '@/core/map/annotations/d
 import { Animator } from '@/core/animator/animator'
 import { modify, Color } from '@/core/shared/utils'
 import { AnimatedAnnotation } from './animatedAnnotation'
+import { clamp } from 'three/src/math/MathUtils'
 
 enum DetailLevel {
   circlePrimary,
@@ -63,6 +64,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       size: 1,
       offsetY: 0,
       strokeOpacity: 1,
+      imageOpacity: 0
     },
     shape: {
       progress: 0,
@@ -73,7 +75,8 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     label: {
       offsetY: 0,
       opacity: 1,
-      color: new Color('#D6862F')
+      color: new Color('#D6862F'),
+      scale: 1
     }
   }
 
@@ -90,6 +93,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     super(localPosition, data, detailLevelByCategory(data.properties.category), levelProcessor)
 
     const target = this.target
+    this.loadImg()
 
     this.selectAnimation = new Animator(this.onAnim)
       .animateSpring(0.4, 0.4, { value: this.annotationParams.point, to: () => target.mainPoint(), duration: 1000 })
@@ -138,6 +142,14 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     style.pointStroke.set(annotation.strokeColor ?? defaultStyle.strokeColor)
   }
 
+  img: any
+
+  async loadImg() {
+    this.img = new Image()
+    // @ts-ignore
+    this.img.src = (await import('@/assets/annotations/administration.png')).default
+  }
+
   override draw(ctx: CanvasRenderingContext2D): void {
     const { point, miniPoint, label, shape } = this.annotationParams
 
@@ -148,6 +160,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       ctx.translate(0, point.offsetY)
       ctx.scale(point.size, point.size)
 
+      ctx.save()
       ctx.beginPath()
       ctx.arc(0, 0, DEFAULT_RADIUS, 0, 2 * Math.PI)
       ctx.fill()
@@ -160,6 +173,21 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
         ctx.bezierCurveTo(0, 0, 0, 0, 1.5, -2)
         ctx.bezierCurveTo(3, -4, 5, -8, 10, -10)
         ctx.fill()
+      }
+
+      ctx.restore()
+
+
+      if (point.imageOpacity > 0) {
+        ctx.globalAlpha = clamp(point.imageOpacity, 0, 1)
+        const aspect = this.img.height / this.img.width
+        const size = 7
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = 'high'
+
+        ctx.drawImage(this.img, -size / 2, -size * aspect / 2, size, size * aspect)
+
+        ctx.imageSmoothingEnabled = false
       }
 
       ctx.restore()
@@ -194,16 +222,21 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
 
       ctx.lineJoin = 'round'
 
-      var text = this.data.properties.shortName['ru']
+      const text = this.data.properties.shortName['ru']
+      ctx.save()
+      ctx.scale(label.scale, label.scale)
       ctx.strokeText(text, 0, label.offsetY + 5)
       ctx.fillText(text, 0, label.offsetY + 5)
+      ctx.restore()
 
       ctx.canvas.style.letterSpacing = '0';
     }
 
-    drawPoint()
     drawMiniPoint()
+    drawPoint()
     drawLabel()
+
+
 
     super.draw(ctx)
   }
@@ -211,10 +244,11 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
   private target = {
     mainPoint: () => {
       let scale = () => {
+        if (this.isSelected) return 5
         if ([DetailLevel.circleWithoutLabel].includes(this.detailLevel)) {
           switch (this.state) {
-            case DetailLevelState.big: return 1.5
-            default: return 1.2
+            case DetailLevelState.big: return 1.7
+            default: return 1.4
           }
         } else {
           switch (this.state) {
@@ -224,14 +258,17 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
         }
       }
 
-      if (this.isSelected) return {
-        size: 5,
-        offsetY: -35
+      let imageOpacity = () => {
+        if (this.isSelected) return 1
+        if ([DetailLevel.circleWithoutLabel].includes(this.detailLevel)) return 1
+        return 0
       }
+
 
       return {
         size: scale(),
-        offsetY: 0
+        offsetY: this.isSelected ? -35 : 0,
+        imageOpacity: imageOpacity()
       }
     },
     borderOpacity: () => ({ strokeOpacity: this.isSelected ? 0 : 1 }),
@@ -255,9 +292,16 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
         return 0
       }
 
+      const scale = () => {
+        if (this.isSelected) return 1
+        if ([DetailLevel.circleWithoutLabel].includes(this.detailLevel)) return 0.5
+        return 1
+      }
+
       return {
         offsetY: offset(),
-        color: color()
+        color: color(),
+        scale: scale()
       }
     },
     labelOpacity: () => {
