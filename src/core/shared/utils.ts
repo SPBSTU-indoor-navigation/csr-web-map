@@ -16,13 +16,30 @@ function clamp(value: number, min: number, max: number) {
 }
 
 export class Color {
-    r: number
-    g: number
-    b: number
-    a: number
+    private _r: number
+    private _g: number
+    private _b: number
+    private _a: number
 
-    constructor(color: string) {
-        this.set(color)
+    private _hex = ''
+    private _hexDirty = true
+
+    constructor(color?: string) {
+        if (color)
+            this.set(color)
+    }
+
+    static fromRGBA(r: number, g: number, b: number, a: number): Color {
+        const c = new Color()
+        c.r = r
+        c.g = g
+        c.b = b
+        c.a = a
+        return c
+    }
+
+    copy() {
+        return Color.fromRGBA(this.r, this.g, this.b, this.a)
     }
 
     set(color: string) {
@@ -51,12 +68,19 @@ export class Color {
     }
 
     toHex() {
+
+        if (!this._hexDirty) {
+            return this._hex
+        }
+
         function componentToHex(c: number) {
             var hex = clamp(Math.round(c), 0, 255).toString(16);
             return hex.length == 1 ? "0" + hex : hex;
         }
 
-        return `#${componentToHex(this.r)}${componentToHex(this.g)}${componentToHex(this.b)}${componentToHex(this.a)}`
+        this._hex = `#${componentToHex(this.r)}${componentToHex(this.g)}${componentToHex(this.b)}${componentToHex(this.a)}`
+        this._hexDirty = false
+        return this._hex
     }
 
     get rgba() {
@@ -68,9 +92,44 @@ export class Color {
     }
 
     withAlphaComponent(alpha: number) {
-        const color = new Color(this.toRgba())
+        const color = this.copy()
         color.a = clamp(Math.round(alpha * 255), 0, 255)
 
         return color
     }
+
+
+
+    set r(value) {
+        this._r = value
+        this._hexDirty = true
+    }
+    get r() {
+        return this._r
+    }
+
+    set g(value) {
+        this._g = value
+        this._hexDirty = true
+    }
+    get g() {
+        return this._g
+    }
+
+    set b(value) {
+        this._b = value
+        this._hexDirty = true
+    }
+    get b() {
+        return this._b
+    }
+
+    set a(value) {
+        this._a = value
+        this._hexDirty = true
+    }
+    get a() {
+        return this._a
+    }
+
 }

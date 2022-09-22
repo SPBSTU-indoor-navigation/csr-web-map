@@ -1,11 +1,11 @@
-import { DetailLevelAnnotation, IGeoPosition } from '@/core/map/annotations/annotation'
 import { Vector2 } from 'three'
 import { Easing, Tween } from '@tweenjs/tween.js'
 import { DetailLevelProcessor, DetailLevelState } from '@/core/map/annotations/detailLevelProcessor'
 import { Animator } from '@/core/animator/animator'
 import { modify, Color } from '@/core/shared/utils'
-import { AnimatedAnnotation } from './animatedAnnotation'
+import { AnimatedAnnotation } from '../animatedAnnotation'
 import { clamp } from 'three/src/math/MathUtils'
+import { AnnotationImages } from '../annotationImages'
 
 enum DetailLevel {
   circlePrimary,
@@ -89,11 +89,12 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     font: '700 11px apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   }
 
+  img: HTMLImageElement | null = null
+
   constructor(localPosition: Vector2, data: any) {
     super(localPosition, data, detailLevelByCategory(data.properties.category), levelProcessor)
 
     const target = this.target
-    this.loadImg()
 
     this.selectAnimation = new Animator(this.onAnim)
       .animateSpring(0.4, 0.4, { value: this.annotationParams.point, to: () => target.mainPoint(), duration: 1000 })
@@ -115,6 +116,8 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     modify(this.annotationParams.point, target.mainPoint())
     modify(this.annotationParams.label, target.labelTransform())
     modify(this.annotationParams.label, target.labelOpacity())
+
+    this.img = AnnotationImages.Instance.getImage(data.properties.category)
   }
 
   override changeState(state: DetailLevelState): void {
@@ -142,16 +145,25 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     style.pointStroke.set(annotation.strokeColor ?? defaultStyle.strokeColor)
   }
 
-  img: any
-
-  async loadImg() {
-    this.img = new Image()
-    // @ts-ignore
-    this.img.src = (await import('@/assets/annotations/administration.png')).default
-  }
-
   override draw(ctx: CanvasRenderingContext2D): void {
     const { point, miniPoint, label, shape } = this.annotationParams
+
+    const drawImage = () => {
+      if (point.imageOpacity > 0 && this.img) {
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = 'high'
+        ctx.globalAlpha = clamp(point.imageOpacity, 0, 1)
+
+        const aspect = this.img.width / this.img.height
+        const size = 6
+        const width = this.img.width > this.img.height ? size : size * aspect
+        const height = this.img.width > this.img.height ? size / aspect : size
+
+        ctx.drawImage(this.img, -width / 2, -height / 2, width, height)
+
+        ctx.imageSmoothingEnabled = false
+      }
+    }
 
     const drawPoint = () => {
       ctx.fillStyle = this.currentStyle.pointFill.hex
@@ -168,27 +180,20 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       if (shape.progress > 0) {
         ctx.translate(0, 6.1 - (1 - shape.progress))
         ctx.scale(1 / 8, 1 / 8 * shape.progress)
-        ctx.moveTo(-10, -10)
-        ctx.bezierCurveTo(-5, -8, -3, -4, -1.5, -2)
-        ctx.bezierCurveTo(0, 0, 0, 0, 1.5, -2)
+        ctx.moveTo(-10, -15)
+        ctx.lineTo(-10, -10)
+        ctx.bezierCurveTo(-5, -8, -3, -4, -2, -2)
+        ctx.bezierCurveTo(0, 0, 0, 0, 2, -2)
         ctx.bezierCurveTo(3, -4, 5, -8, 10, -10)
+        ctx.lineTo(10, -15)
         ctx.fill()
       }
 
       ctx.restore()
 
 
-      if (point.imageOpacity > 0) {
-        ctx.globalAlpha = clamp(point.imageOpacity, 0, 1)
-        const aspect = this.img.height / this.img.width
-        const size = 7
-        ctx.imageSmoothingEnabled = true
-        ctx.imageSmoothingQuality = 'high'
 
-        ctx.drawImage(this.img, -size / 2, -size * aspect / 2, size, size * aspect)
-
-        ctx.imageSmoothingEnabled = false
-      }
+      drawImage()
 
       ctx.restore()
 
@@ -244,7 +249,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
   private target = {
     mainPoint: () => {
       let scale = () => {
-        if (this.isSelected) return 5
+        if (this.isSelected) return 5.5
         if ([DetailLevel.circleWithoutLabel].includes(this.detailLevel)) {
           switch (this.state) {
             case DetailLevelState.big: return 1.7
@@ -267,7 +272,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
 
       return {
         size: scale(),
-        offsetY: this.isSelected ? -35 : 0,
+        offsetY: this.isSelected ? -38 : 0,
         imageOpacity: imageOpacity()
       }
     },

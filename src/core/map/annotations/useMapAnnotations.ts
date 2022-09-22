@@ -2,7 +2,8 @@ import { Vector2, Vector3, Camera } from 'three';
 import { Ref, ref, UnwrapRef, watchEffect } from 'vue';
 import { MapController } from '../mapController';
 import { Annotation, IAnnotation } from './annotation';
-import Tween from '@tweenjs/tween.js'
+import Tween from '@tweenjs/tween.js';
+
 
 export interface IMapAnnotations {
   selected: Ref<UnwrapRef<IAnnotation | null>>
@@ -45,6 +46,9 @@ export default function useMapAnnotations(options: { mapController: MapControlle
   })
 
   const addAnotation = (annotation: IAnnotation | IAnnotation[]) => {
+
+    // console.log('addAnotation', annotation);
+
     const toAdd = Array.isArray(annotation) ? annotation : [annotation]
     annotations.push(...toAdd)
     toAdd.forEach(a => {
@@ -188,6 +192,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
   }
 
   updateEveryFrame()
+
 
   return {
     add: addAnotation,

@@ -24,7 +24,7 @@ import { useRoute } from 'vue-router';
 
 import { nearestBuiling } from '@/core/map/utils';
 import { DetailLevelAnnotation } from '@/core/map/annotations/annotation';
-import { OccupantAnnotation } from './annotations/occupant';
+import { OccupantAnnotation } from './annotations/renders/occupant';
 import { MapController } from '@/core/map/mapController';
 
 const mkMap = shallowRef();
