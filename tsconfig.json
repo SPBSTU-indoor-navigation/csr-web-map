@@ -8,6 +8,7 @@
         "target": "esnext",
         "moduleResolution": "node",
         "module": "esnext",
+        "allowJs": true,
         "types": [
             "vite/client",
         ]

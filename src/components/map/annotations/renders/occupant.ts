@@ -6,6 +6,7 @@ import { modify, Color } from '@/core/shared/utils'
 import { AnimatedAnnotation } from '../animatedAnnotation'
 import { clamp } from 'three/src/math/MathUtils'
 import { AnnotationImages } from '../annotationImages'
+import { TextBakery } from '@/core/map/annotations/bakery'
 
 enum DetailLevel {
   circlePrimary,
@@ -117,7 +118,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     modify(this.annotationParams.label, target.labelTransform())
     modify(this.annotationParams.label, target.labelOpacity())
 
-    this.img = AnnotationImages.Instance.getImage(data.properties.category)
+    this.img = AnnotationImages.instance.getImage(data.properties.category)
   }
 
   override changeState(state: DetailLevelState): void {
@@ -148,10 +149,8 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
   override draw(ctx: CanvasRenderingContext2D): void {
     const { point, miniPoint, label, shape } = this.annotationParams
 
-    const drawImage = () => {
+    const drawImage = (ctx: CanvasRenderingContext2D) => {
       if (point.imageOpacity > 0 && this.img) {
-        ctx.imageSmoothingEnabled = true
-        ctx.imageSmoothingQuality = 'high'
         ctx.globalAlpha = clamp(point.imageOpacity, 0, 1)
 
         const aspect = this.img.width / this.img.height
@@ -159,13 +158,13 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
         const width = this.img.width > this.img.height ? size : size * aspect
         const height = this.img.width > this.img.height ? size / aspect : size
 
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = 'high'
         ctx.drawImage(this.img, -width / 2, -height / 2, width, height)
-
-        ctx.imageSmoothingEnabled = false
       }
     }
 
-    const drawPoint = () => {
+    const drawPoint = (ctx: CanvasRenderingContext2D) => {
       ctx.fillStyle = this.currentStyle.pointFill.hex
 
       ctx.save()
@@ -191,9 +190,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
 
       ctx.restore()
 
-
-
-      drawImage()
+      drawImage(ctx)
 
       ctx.restore()
 
@@ -204,7 +201,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       }
     }
 
-    const drawMiniPoint = () => {
+    const drawMiniPoint = (ctx: CanvasRenderingContext2D) => {
       if (miniPoint.size > 0) {
         ctx.beginPath()
         ctx.arc(0, 0, miniPoint.size, 0, 2 * Math.PI)
@@ -213,7 +210,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       }
     }
 
-    const drawLabel = () => {
+    const drawLabel = (ctx: CanvasRenderingContext2D) => {
       if (label.opacity == 0) return
 
       ctx.canvas.style.letterSpacing = '-0.3px';
@@ -237,10 +234,22 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       ctx.canvas.style.letterSpacing = '0';
     }
 
-    drawMiniPoint()
-    drawPoint()
-    drawLabel()
+    drawMiniPoint(ctx)
 
+    if (this.isSelected || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.chaneStateAnimator?.isPlaying) {
+      drawPoint(ctx)
+    } else {
+      const size = { width: DEFAULT_RADIUS * point.size * 2, height: DEFAULT_RADIUS * point.size * 2 }
+      const name = `point_${this.currentStyle.pointFill.hex}_${Math.round(point.size * 1000) / 1000}_${this.data.properties.category}`
+      const img = TextBakery.instance.bakeAndReturn(name, size, ctx => {
+        ctx.translate(size.width / 2, size.height / 2)
+        drawPoint(ctx)
+      })
+
+      ctx.drawImage(img.canvas, img.rect.x, img.rect.y, img.rect.width, img.rect.height,
+        -size.width / 2, -size.height / 2, size.width, size.height)
+    }
+    drawLabel(ctx)
 
 
     super.draw(ctx)

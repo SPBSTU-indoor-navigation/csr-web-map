@@ -8,6 +8,7 @@ import { Vector2 } from "three";
 export class AnimatedAnnotation<DetailLevel extends number, DetailLevelState> extends DetailLevelAnnotation<DetailLevel, DetailLevelState> {
   selectAnimation: Animator
   deSelectAnimation: Animator
+  chaneStateAnimator: Animator | null = null
 
   protected onAnim = () => {
     this.isDirty = true
@@ -32,6 +33,8 @@ export class AnimatedAnnotation<DetailLevel extends number, DetailLevelState> ex
 
   protected animateChangeState(animator: Animator) {
     if (this.isSelected) return;
+
+    this.chaneStateAnimator = animator
 
     animator
       .addDependent(this.selectAnimation)

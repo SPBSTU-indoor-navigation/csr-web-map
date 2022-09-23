@@ -1,7 +1,11 @@
 
 
 export class AnnotationImages {
-  private static instance: AnnotationImages;
+  private static _instance: AnnotationImages;
+  static get instance() {
+    return this._instance || (this._instance = new this());
+  }
+
   private images: { [key: string]: HTMLImageElement } = {}
 
   private constructor() {
@@ -29,9 +33,5 @@ export class AnnotationImages {
 
   public getImage(name: string): HTMLImageElement {
     return this.images[name]
-  }
-
-  public static get Instance() {
-    return this.instance || (this.instance = new this());
   }
 }

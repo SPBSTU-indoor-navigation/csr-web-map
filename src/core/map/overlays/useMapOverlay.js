@@ -16,7 +16,7 @@ export default function useMapOverlay(options) {
   mapController.scene = scene
 
 
-  const renderer = new WebGLRenderer({ alpha: true, antialias: true })
+  const renderer = new WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' })
   renderer.setClearColor(0x000000, 0);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(window.devicePixelRatio)

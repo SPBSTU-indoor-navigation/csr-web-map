@@ -27,6 +27,8 @@ export default function useMapAnnotations(options: { mapController: MapControlle
 
   const canvas = document.createElement('canvas')
   const ctx = canvas.getContext('2d')!
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = 'high'
   document.querySelector('.mk-map-view')!.insertBefore(canvas, document.querySelector(".mk-map-view>.mk-map-node-element"))
 
   watchEffect(() => {

@@ -19,6 +19,7 @@
   "devDependencies": {
     "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@types/three": "^0.144.0",
+    "@types/offscreencanvas": "^2019.7.0",
     "@vitejs/plugin-vue": "^3.0.1",
     "vite": "^3.0.9"
   }
