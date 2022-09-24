@@ -1,12 +1,13 @@
-import { Vector2 } from 'three'
-import { Easing, Tween } from '@tweenjs/tween.js'
-import { DetailLevelProcessor, DetailLevelState } from '@/core/map/annotations/detailLevelProcessor'
 import { Animator } from '@/core/animator/animator'
-import { modify, Color } from '@/core/shared/utils'
-import { AnimatedAnnotation } from '../animatedAnnotation'
+import { AnnotationBakery, TextBakery } from '@/core/map/annotations/bakery'
+import { DetailLevelProcessor, DetailLevelState } from '@/core/map/annotations/detailLevelProcessor'
+import { Color } from '@/core/shared/color'
+import { applyTextParams, drawTextWithCurrentParams, modify, multiLineText } from '@/core/shared/utils'
+import { Easing } from '@tweenjs/tween.js'
+import { Vector2 } from 'three'
 import { clamp } from 'three/src/math/MathUtils'
+import { AnimatedAnnotation } from '../animatedAnnotation'
 import { AnnotationImages } from '../annotationImages'
-import { TextBakery } from '@/core/map/annotations/bakery'
 
 enum DetailLevel {
   circlePrimary,
@@ -213,44 +214,51 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     const drawLabel = (ctx: CanvasRenderingContext2D) => {
       if (label.opacity == 0) return
 
-      ctx.canvas.style.letterSpacing = '-0.3px';
-
-      ctx.fillStyle = label.color.withAlphaComponent(label.opacity).hex
-      ctx.font = this.currentStyle.font
-      ctx.textAlign = 'center'
-      ctx.lineWidth = 3
-      ctx.textBaseline = 'top'
-      ctx.strokeStyle = this.currentStyle.labelStroke.withAlphaComponent(label.opacity).hex
-
+      applyTextParams({
+        font: this.currentStyle.font,
+        fill: label.color.withAlphaComponent(label.opacity).hex,
+        stroke: this.currentStyle.labelStroke.withAlphaComponent(label.opacity).hex,
+        align: 'center',
+        strokeWidth: 3,
+        letterSpacing: -0.3,
+        textLineHeight: 11
+      }, ctx)
       ctx.lineJoin = 'round'
+      ctx.textBaseline = 'top'
+      const text = multiLineText(this.data.properties.shortName['ru'], 80, ctx)
 
-      const text = this.data.properties.shortName['ru']
       ctx.save()
       ctx.scale(label.scale, label.scale)
-      ctx.strokeText(text, 0, label.offsetY + 5)
-      ctx.fillText(text, 0, label.offsetY + 5)
+      ctx.translate(0, label.offsetY + 5)
+      drawTextWithCurrentParams(text.text, ctx)
       ctx.restore()
-
-      ctx.canvas.style.letterSpacing = '0';
     }
 
+    const isAnim = this.isSelected || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.chaneStateAnimator?.isPlaying
     drawMiniPoint(ctx)
 
-    if (this.isSelected || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.chaneStateAnimator?.isPlaying) {
+    if (isAnim) {
       drawPoint(ctx)
     } else {
-      const size = { width: DEFAULT_RADIUS * point.size * 2, height: DEFAULT_RADIUS * point.size * 2 }
-      const name = `point_${this.currentStyle.pointFill.hex}_${Math.round(point.size * 1000) / 1000}_${this.data.properties.category}`
-      const img = TextBakery.instance.bakeAndReturn(name, size, ctx => {
-        ctx.translate(size.width / 2, size.height / 2)
-        drawPoint(ctx)
+      AnnotationBakery.instance.bakeAndRender({
+        name: `point_${this.currentStyle.pointFill.hex}_${Math.round(point.size * 1000) / 1000}_${this.data.properties.category}`,
+        size: { width: DEFAULT_RADIUS * point.size * 2, height: DEFAULT_RADIUS * point.size * 2 },
+        draw: drawPoint,
+        ctx
       })
-
-      ctx.drawImage(img.canvas, img.rect.x, img.rect.y, img.rect.width, img.rect.height,
-        -size.width / 2, -size.height / 2, size.width, size.height)
     }
-    drawLabel(ctx)
 
+    if (isAnim || label.opacity != 1) {
+      drawLabel(ctx)
+    } else {
+      const text = this.data.properties.shortName['ru']
+      TextBakery.instance.bakeAndRender({
+        name: `label_${text}_${this.currentStyle.labelColor.hex}`,
+        text, ctx, maxWidth: 80,
+        params: { fill: label.color.hex, },
+        offsetY: label.offsetY + 5 - 3
+      })
+    }
 
     super.draw(ctx)
   }

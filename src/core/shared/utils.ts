@@ -1,135 +1,98 @@
 
 export function modify(obj: Object, newObj: Object, deleteOld: boolean = false) {
-    if (deleteOld) {
-        Object.keys(obj).forEach(function (key) {
-            delete obj[key];
-        });
-    }
-
-    Object.keys(newObj).forEach(function (key) {
-        obj[key] = newObj[key];
+  if (deleteOld) {
+    Object.keys(obj).forEach(function (key) {
+      delete obj[key];
     });
+  }
+
+  Object.keys(newObj).forEach(function (key) {
+    obj[key] = newObj[key];
+  });
 }
 
-function clamp(value: number, min: number, max: number) {
-    return Math.min(Math.max(value, min), max);
+export function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
 }
 
-export class Color {
-    private _r: number
-    private _g: number
-    private _b: number
-    private _a: number
+export declare type TextParams = {
+  font?: string,
+  letterSpacing?: number,
+  textLineHeight?: number
+  fill?: string,
+  stroke?: string,
+  strokeWidth?: number,
+  align?: CanvasTextAlign,
+}
 
-    private _hex = ''
-    private _hexDirty = true
+export function applyTextParams(params: TextParams, ctx: CanvasRenderingContext2D) {
+  if (params.font) ctx.font = params.font
+  if (params.letterSpacing) useLetterSpacing(ctx, params.letterSpacing)
+  if (params.fill) ctx.fillStyle = params.fill
+  if (params.stroke) ctx.strokeStyle = params.stroke
+  if (params.strokeWidth) ctx.lineWidth = params.strokeWidth
+  if (params.textLineHeight) ctx['textLineHeight'] = params.textLineHeight
+  if (params.align) ctx.textAlign = params.align
+}
 
-    constructor(color?: string) {
-        if (color)
-            this.set(color)
-    }
+export function useLetterSpacing(ctx: CanvasRenderingContext2D, letterSpacing: number) {
+  if (ctx['letterSpacing'] != undefined) {
+    ctx['letterSpacing'] = `${letterSpacing}px`
+    ctx['letterSpacing_value'] = letterSpacing
+  }
+}
 
-    static fromRGBA(r: number, g: number, b: number, a: number): Color {
-        const c = new Color()
-        c.r = r
-        c.g = g
-        c.b = b
-        c.a = a
-        return c
-    }
+export function drawText(text: string, params: TextParams, ctx: CanvasRenderingContext2D) {
+  applyTextParams(params, ctx)
+  drawTextWithCurrentParams(text, ctx)
+}
 
-    copy() {
-        return Color.fromRGBA(this.r, this.g, this.b, this.a)
-    }
+export function multiLineText(text: string, maxWidth: number, ctx: CanvasRenderingContext2D) {
+  let result = ''
+  let totalWidth = 0
 
-    set(color: string) {
-        if (color[0] == '#') {
-            this.r = parseInt(color.slice(1, 3), 16)
-            this.g = parseInt(color.slice(3, 5), 16)
-            this.b = parseInt(color.slice(5, 7), 16)
-            this.a = color.length == 9 ? parseInt(color.slice(7, 9), 16) : 255
-        } else if (color.slice(0, 4) == 'rgba') {
-            const rgba = color.slice(5, color.length - 1).split(',')
-            this.r = parseInt(rgba[0])
-            this.g = parseInt(rgba[1])
-            this.b = parseInt(rgba[2])
-            this.a = parseInt(rgba[3])
-        } else if (color.slice(0, 3) == 'rgb') {
-            const rgb = color.slice(4, color.length - 1).split(',')
-            this.r = parseInt(rgb[0])
-            this.g = parseInt(rgb[1])
-            this.b = parseInt(rgb[2])
-            this.a = 255
+  text.split('\n').forEach((line, i) => {
+    let resLine = ''
+    line.split(' ').forEach((word, j) => {
+      if (resLine == '') {
+        resLine = word
+        totalWidth = Math.max(totalWidth, ctx.measureText(resLine).width)
+      } else {
+        const w = ctx.measureText(resLine + ' ' + word).width
+        if (w <= maxWidth) {
+          resLine += ' ' + word
+          totalWidth = Math.max(totalWidth, w)
+        } else {
+          resLine += '\n' + word
+          totalWidth = Math.max(totalWidth, ctx.measureText(word).width)
         }
-    }
+      }
+    })
+    result += (result == '' ? '' : '\n') + resLine
+  })
+  return { text: result, width: totalWidth, lineCount: result.split('\n').length }
+}
 
-    get hex() {
-        return this.toHex()
-    }
+export function drawTextWithCurrentParams(text: string, ctx: CanvasRenderingContext2D) {
+  const textLineHeight = ctx['textLineHeight'] || 12
 
-    toHex() {
+  const offset = ctx['letterSpacing_value'] != undefined ? Number.parseFloat(ctx['letterSpacing_value']) / 2 : 0
+  if (offset) {
+    console.log(ctx['letterSpacing_value']);
 
-        if (!this._hexDirty) {
-            return this._hex
-        }
+    ctx.save()
+    ctx.translate(offset, 0)
+  }
 
-        function componentToHex(c: number) {
-            var hex = clamp(Math.round(c), 0, 255).toString(16);
-            return hex.length == 1 ? "0" + hex : hex;
-        }
+  const lines = text.split('\n')
 
-        this._hex = `#${componentToHex(this.r)}${componentToHex(this.g)}${componentToHex(this.b)}${componentToHex(this.a)}`
-        this._hexDirty = false
-        return this._hex
-    }
+  lines.forEach((t, i) => {
+    ctx.strokeText(t, 0, i * textLineHeight)
+  })
 
-    get rgba() {
-        return this.toRgba()
-    }
+  lines.forEach((t, i) => {
+    ctx.fillText(t, 0, i * textLineHeight)
+  })
 
-    toRgba() {
-        return 'rgba(' + this.r + ',' + this.g + ',' + this.b + ',' + this.a + ')'
-    }
-
-    withAlphaComponent(alpha: number) {
-        const color = this.copy()
-        color.a = clamp(Math.round(alpha * 255), 0, 255)
-
-        return color
-    }
-
-
-
-    set r(value) {
-        this._r = value
-        this._hexDirty = true
-    }
-    get r() {
-        return this._r
-    }
-
-    set g(value) {
-        this._g = value
-        this._hexDirty = true
-    }
-    get g() {
-        return this._g
-    }
-
-    set b(value) {
-        this._b = value
-        this._hexDirty = true
-    }
-    get b() {
-        return this._b
-    }
-
-    set a(value) {
-        this._a = value
-        this._hexDirty = true
-    }
-    get a() {
-        return this._a
-    }
-
+  if (offset) ctx.restore()
 }
