@@ -55,7 +55,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
     annotations.push(...toAdd)
     toAdd.forEach(a => {
       a.style(options.styleSheet.value.annotation)
-      a.zoom(lastZoom)
+      a.zoom(lastZoom, false)
     })
   }
 

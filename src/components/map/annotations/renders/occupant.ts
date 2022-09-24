@@ -139,8 +139,8 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     this.img = AnnotationImages.instance.getImage(data.properties.category)
   }
 
-  override changeState(state: DetailLevelState): void {
-    super.changeState(state)
+  override changeState(state: DetailLevelState, animated: boolean): void {
+    super.changeState(state, animated)
     const target = this.target
 
     const labelOpacity = target.labelOpacity()
@@ -151,7 +151,8 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       .animate({ value: this.annotationParams.label, to: () => ({ ...labelOpacity, ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.label, to: () => ({ ...labelOpacity, ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.InOut })
       .onEnd(() => { if (labelOpacity.opacity == 0) this.updateTargetBBox() })
-      .onStart(() => { if (labelOpacity.opacity != 0) this.updateTargetBBox() })
+      .onStart(() => { if (labelOpacity.opacity != 0) this.updateTargetBBox() }),
+      animated
     )
   }
 

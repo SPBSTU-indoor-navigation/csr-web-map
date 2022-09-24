@@ -31,7 +31,7 @@ export class AnimatedAnnotation<DetailLevel extends number, DetailLevelState> ex
     }
   }
 
-  protected animateChangeState(animator: Animator) {
+  protected animateChangeState(animator: Animator, animated: boolean = true) {
     if (this.isSelected) return;
 
     this.chaneStateAnimator = animator
@@ -39,7 +39,8 @@ export class AnimatedAnnotation<DetailLevel extends number, DetailLevelState> ex
     animator
       .addDependent(this.selectAnimation)
       .addDependent(this.deSelectAnimation)
-      .start()
+
+    if (animated) animator.start(); else animator.skip()
 
 
     this.isDirty = true

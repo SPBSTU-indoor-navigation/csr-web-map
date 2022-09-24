@@ -1,4 +1,5 @@
 import { Easing, Tween } from '@tweenjs/tween.js'
+import { modify } from '../shared/utils';
 import { SpringEasing } from './springAnimation';
 
 declare type Animation = {
@@ -71,10 +72,7 @@ export class Animator {
     for (const animation of this.animations) {
       const { duration, delay, to, completion, onUpdate, easing } = animation
 
-      let target = to
-      if (typeof (to) === 'function') {
-        target = to()
-      }
+      let target = (typeof (to) === 'function') ? to() : to
 
       const id = this.playedAnimations.length
       const tween = new Tween(animation.value)
@@ -103,6 +101,21 @@ export class Animator {
     }
 
     executeCallback(this.onStartCallback)
+  }
+
+  skip() {
+    this.dependents.forEach(d => d?.stop())
+
+    for (const animation of this.animations) {
+      const { to, completion } = animation
+      let target = (typeof (to) === 'function') ? to() : to
+
+      executeCallback(this.onStartCallback)
+      modify(animation.value, target)
+      this.setDirty()
+      executeCallback(this.onEndCallback)
+      completion?.()
+    }
   }
 
   stop() {

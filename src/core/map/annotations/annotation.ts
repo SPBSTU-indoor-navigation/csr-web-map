@@ -15,7 +15,7 @@ export interface IAnnotation {
   frame: Box2
   bounds: Bounds
 
-  zoom(zoom: number): void
+  zoom(zoom: number, animated?: boolean): void
   setSelected(selected: boolean, animated: boolean): void
   updateScreenPosition(pos: Vector2): void
 
@@ -72,7 +72,7 @@ export class Annotation extends Shape2D implements IAnnotation {
     this.isSelected = selected
   }
 
-  zoom(zoom: number) {
+  zoom(zoom: number, animated: boolean = true) {
     this.currentZoom = zoom
   }
 
@@ -103,15 +103,15 @@ export class DetailLevelAnnotation<DetailLevel, State> extends Annotation {
     this.evaluteDetailLevel = evaluteDetailLevel
   }
 
-  override zoom(zoom: number) {
+  override zoom(zoom: number, animated: boolean) {
     this.currentZoom = zoom
     const state = this.evaluteDetailLevel(this.detailLevel, zoom)
     if (state != this.state) {
-      this.changeState(state)
+      this.changeState(state, animated)
     }
   }
 
-  protected changeState(state: State) {
+  protected changeState(state: State, animated: boolean) {
     this.state = state
   }
 }
