@@ -21,6 +21,7 @@
         </div>
         <p>annotation c: {{renderAnnotationCount}}</p>
         <p>zoom: {{currentZoom.toFixed(4)}}</p>
+        <p>fps: {{fps}}</p>
         <hr>
         <button @click="showDebugPanel=false">close</button>
 
@@ -61,6 +62,9 @@ let mapController;
 const SHOW_ZOOM = 4;
 const HIDE_ZOOM = 3.9;
 
+let lastAnimateTime = 0
+let fps = ref("0")
+
 function mapClick(e) {
   mapController.mapAnnotations.click(new Vector2(e.clientX, e.clientY), e);
 }
@@ -70,6 +74,12 @@ function onMapReady(map) {
 }
 
 function onAnimate() {
+  const time = performance.now()
+  const delta = time - lastAnimateTime
+  const t = Math.round(1000 / delta)
+  fps.value = t < 10 ? '-' : t
+  lastAnimateTime = time
+
   mapController.render();
   const nearest = nearestBuiling(
     new Box2(new Vector2(-1, -1), new Vector2(1, 1)).expandByScalar(-0.1),
