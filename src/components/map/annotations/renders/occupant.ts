@@ -2,9 +2,9 @@ import { Animator } from '@/core/animator/animator'
 import { AnnotationBakery, TextBakery } from '@/core/map/annotations/bakery'
 import { DetailLevelProcessor, DetailLevelState } from '@/core/map/annotations/detailLevelProcessor'
 import { Color } from '@/core/shared/color'
-import { applyTextParams, drawTextWithCurrentParams, modify, multiLineText } from '@/core/shared/utils'
+import { applyTextParams, drawTextWithCurrentParams, modify, multiLineText, TextParams } from '@/core/shared/utils'
 import { Easing } from '@tweenjs/tween.js'
-import { Vector2 } from 'three'
+import { Box2, Vector2 } from 'three'
 import { clamp } from 'three/src/math/MathUtils'
 import { AnimatedAnnotation } from '../animatedAnnotation'
 import { AnnotationImages } from '../annotationImages'
@@ -78,7 +78,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       offsetY: 0,
       opacity: 1,
       color: new Color('#D6862F'),
-      scale: 1
+      scale: 1,
     }
   }
 
@@ -89,9 +89,24 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     labelStroke: new Color('#ffffff'),
     pointStrokeWidth: 0.7,
     font: '700 11px apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    labelBBox: undefined
   }
 
   img: HTMLImageElement | null = null
+
+  updateTargetBBox() {
+    if (!this.currentStyle.labelBBox) return
+
+    const h = this.currentStyle.labelBBox.height
+    const s = this.isSelected ? 70 : 20
+    const bubble = new Box2().setFromCenterAndSize(new Vector2(0, this.isSelected ? -s / 2 : 0), new Vector2(s, s))
+    const label = new Box2().setFromCenterAndSize(new Vector2(0, h / 2 + 3), new Vector2(this.currentStyle.labelBBox.width, h))
+
+    if (this.target.labelOpacity().opacity != 0) bubble.union(label)
+    const center = bubble.getCenter(new Vector2())
+    const size = bubble.getSize(new Vector2())
+    this.updateBBox(size.width, size.height, center)
+  }
 
   constructor(localPosition: Vector2, data: any) {
     super(localPosition, data, detailLevelByCategory(data.properties.category), levelProcessor)
@@ -105,6 +120,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       .animate({ value: this.annotationParams.point, to: () => target.borderOpacity(), duration: 100, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.shape, to: () => target.shapeProgress(), duration: 200, delay: 50, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.label, to: () => target.labelOpacity(), duration: 200, delay: 50, easing: Easing.Quadratic.InOut })
+      .onStart(() => { this.updateTargetBBox() })
 
     this.deSelectAnimation = new Animator(this.onAnim, [this.selectAnimation])
       .animateSpring(0.7, 0.3, { value: this.annotationParams.point, to: () => target.mainPoint(), duration: 1000 })
@@ -112,6 +128,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       .animate({ value: this.annotationParams.miniPoint, to: () => target.miniPoint(), duration: 300, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.shape, to: () => target.shapeProgress(), duration: 300, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.label, to: () => ({ ...target.labelOpacity(), ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.In })
+      .onEnd(() => { this.updateTargetBBox() })
 
     this.selectAnimation.addDependent(this.deSelectAnimation)
 
@@ -126,11 +143,15 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     super.changeState(state)
     const target = this.target
 
+    const labelOpacity = target.labelOpacity()
+
     this.animateChangeState(new Animator(this.onAnim)
       .animate({ value: this.annotationParams.point, to: () => ({ ...target.mainPoint(), ...target.borderOpacity() }), duration: 100, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.miniPoint, to: () => target.miniPoint(), duration: 300, easing: Easing.Quadratic.InOut })
-      .animate({ value: this.annotationParams.label, to: () => ({ ...target.labelOpacity(), ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.InOut })
-      .animate({ value: this.annotationParams.label, to: () => ({ ...target.labelOpacity(), ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.label, to: () => ({ ...labelOpacity, ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.label, to: () => ({ ...labelOpacity, ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.InOut })
+      .onEnd(() => { if (labelOpacity.opacity == 0) this.updateTargetBBox() })
+      .onStart(() => { if (labelOpacity.opacity != 0) this.updateTargetBBox() })
     )
   }
 
@@ -145,6 +166,25 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     style.pointFill.set(pointFill)
     style.labelColor.set(annotation.labelFill ?? pointFill)
     style.pointStroke.set(annotation.strokeColor ?? defaultStyle.strokeColor)
+  }
+
+  measureText(ctx: CanvasRenderingContext2D) {
+    if (this.currentStyle.labelBBox) return;
+
+    const params = this.textParams()
+    applyTextParams(params, ctx)
+    ctx.lineJoin = 'round'
+    ctx.textBaseline = 'top'
+    const text = multiLineText(this.data.properties.shortName['ru'], 80, ctx)
+
+    const hasSpacing = ctx['letterSpacing'] != undefined && params.letterSpacing != 0
+
+    this.currentStyle.labelBBox = {
+      width: text.width + params.strokeWidth - (hasSpacing ? params.letterSpacing : 0),
+      height: params.textLineHeight * text.lineCount + params.strokeWidth
+    }
+
+    this.updateTargetBBox()
   }
 
   override draw(ctx: CanvasRenderingContext2D): void {
@@ -214,15 +254,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     const drawLabel = (ctx: CanvasRenderingContext2D) => {
       if (label.opacity == 0) return
 
-      applyTextParams({
-        font: this.currentStyle.font,
-        fill: label.color.withAlphaComponent(label.opacity).hex,
-        stroke: this.currentStyle.labelStroke.withAlphaComponent(label.opacity).hex,
-        align: 'center',
-        strokeWidth: 3,
-        letterSpacing: -0.3,
-        textLineHeight: 11
-      }, ctx)
+      applyTextParams(this.textParams(), ctx)
       ctx.lineJoin = 'round'
       ctx.textBaseline = 'top'
       const text = multiLineText(this.data.properties.shortName['ru'], 80, ctx)
@@ -260,7 +292,21 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       })
     }
 
+    this.measureText(ctx)
+
     super.draw(ctx)
+  }
+
+  private textParams(): TextParams {
+    return {
+      font: this.currentStyle.font,
+      fill: this.annotationParams.label.color.withAlphaComponent(this.annotationParams.label.opacity).hex,
+      stroke: this.currentStyle.labelStroke.withAlphaComponent(this.annotationParams.label.opacity).hex,
+      align: 'center',
+      strokeWidth: 3,
+      letterSpacing: -0.3,
+      textLineHeight: 11
+    }
   }
 
   private target = {

@@ -1,9 +1,11 @@
-import { Vector2, Vector3, Camera } from 'three';
+import { Vector2, Vector3, Camera, Box2 } from 'three';
 import { Ref, ref, UnwrapRef, watchEffect } from 'vue';
 import { MapController } from '../mapController';
-import { Annotation, IAnnotation } from './annotation';
+import { IAnnotation, Shape2D } from './annotation';
 import Tween from '@tweenjs/tween.js';
+import { currentZoom, renderAnnotationCount, showAnnotationBBox } from '@/store/debugParams';
 
+declare type Annotation = (IAnnotation & Shape2D);
 
 export interface IMapAnnotations {
   selected: Ref<UnwrapRef<IAnnotation | null>>
@@ -15,6 +17,7 @@ export interface IMapAnnotations {
   click(pos: Vector2, e: PointerEvent): void
   zoom(zoom: number)
 }
+
 
 export default function useMapAnnotations(options: { mapController: MapController, styleSheet: Ref<UnwrapRef<any>> }): IMapAnnotations {
 
@@ -41,16 +44,13 @@ export default function useMapAnnotations(options: { mapController: MapControlle
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
   })
 
-  let annotations: IAnnotation[] = []
+  let annotations: Annotation[] = []
 
   watchEffect(() => {
     annotations.forEach(a => a.style(options.styleSheet.value.annotations))
   })
 
-  const addAnotation = (annotation: IAnnotation | IAnnotation[]) => {
-
-    // console.log('addAnotation', annotation);
-
+  const addAnotation = (annotation: Annotation | Annotation[]) => {
     const toAdd = Array.isArray(annotation) ? annotation : [annotation]
     annotations.push(...toAdd)
     toAdd.forEach(a => {
@@ -74,35 +74,66 @@ export default function useMapAnnotations(options: { mapController: MapControlle
   }) => {
     const { cam } = options
 
+    const debugDraw = (annotation: { screenPosition: Vector2, annotation: Annotation }) => {
+      if (!showAnnotationBBox.value) return
+      ctx.save()
+      ctx.translate(annotation.screenPosition.x, annotation.screenPosition.y)
+      const bounds = annotation.annotation.bounds
+      ctx.lineWidth = 1
+      ctx.strokeStyle = '#f0f'
+      ctx.strokeRect(bounds.rect.min.x, bounds.rect.min.y, bounds.size.width, bounds.size.height)
+
+      ctx.beginPath()
+      ctx.arc(0, 0, 2, 0, Math.PI * 2)
+      ctx.stroke()
+
+
+      ctx.lineWidth = 1
+      ctx.strokeStyle = 'yellow'
+      ctx.strokeRect(annotation.annotation.boundingBox.min.x,
+        annotation.annotation.boundingBox.min.y,
+        annotation.annotation.boundingBox.max.x - annotation.annotation.boundingBox.min.x,
+        annotation.annotation.boundingBox.max.y - annotation.annotation.boundingBox.min.y)
+      ctx.restore()
+    }
+
     const project = (pos: Vector2) => {
       const v = new Vector3(pos.x, pos.y, 0)
       v.project(cam)
       v.x = ((v.x + 1) / 2)
       v.y = ((-v.y + 1) / 2)
-
-
       return new Vector2(v.x * canvasSize.x, v.y * canvasSize.y)
     }
 
-    const draw = (annotation: { screenPosition: Vector2, annotation: IAnnotation }) => {
+    const draw = (annotation: { screenPosition: Vector2, annotation: Annotation }) => {
       ctx.save()
       ctx.translate(annotation.screenPosition.x, annotation.screenPosition.y)
-
       annotation.annotation.draw(ctx)
-
       ctx.restore()
+      debugDraw(annotation)
     }
 
+    const screen = new Box2(new Vector2(0, 0), canvasSize.clone())
+    const annotationsToRender = annotations
+      .map(t => {
+        const pos = project(t.scenePosition)
+        t.updateScreenPosition(pos)
+        t.isDirty = false
+        return {
+          annotation: t,
+          screenPosition: pos
+        }
+      })
+      .filter(t => {
+        const bbox = t.annotation.boundingBox
+        const bounding = new Box2(
+          new Vector2(bbox.min.x + t.screenPosition.x, bbox.min.y + t.screenPosition.y),
+          new Vector2(bbox.max.x + t.screenPosition.x, bbox.max.y + t.screenPosition.y));
 
-    const annotationsToRender = annotations.map(t => {
-      const pos = project(t.scenePosition)
-      t.updateScreenPosition(pos)
-      return {
-        annotation: t,
-        screenPosition: pos
-      }
-    })
+        return screen.intersectsBox(bounding)
+      })
 
+    renderAnnotationCount.value = annotationsToRender.length
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     let renderQueue = []
@@ -119,10 +150,10 @@ export default function useMapAnnotations(options: { mapController: MapControlle
     renderQueue.forEach(t => draw(t))
   }
 
-  const select = (annotation: IAnnotation | null, animated: boolean = true) => {
+  const select = (annotation: Annotation | null, animated: boolean = true) => {
     if (selected.value) {
       annotations = annotations.filter(t => t !== selected.value)
-      annotations.push(selected.value as IAnnotation)
+      annotations.push(selected.value as Annotation)
     }
 
     selected.value?.setSelected(false, animated)
@@ -175,7 +206,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
   }
 
   const zoom = (zoom: number) => {
-    console.log(zoom);
+    currentZoom.value = zoom
     lastZoom = zoom
     annotations.forEach(t => t.zoom(zoom))
   }

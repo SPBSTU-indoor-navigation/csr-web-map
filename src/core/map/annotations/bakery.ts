@@ -300,6 +300,8 @@ export class TextBakery extends Bakery {
     ctx.drawImage(b.canvas, b.rect.x, b.rect.y, b.rect.width, b.rect.height,
       -b.size.width / 2, 1.5, b.size.width, b.size.height)
     ctx.imageSmoothingEnabled = true
+
+    return b
   }
 
   protected override canvasProcessor(canvas: CanvasForBake): void {

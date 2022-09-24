@@ -26,9 +26,10 @@ export interface IAnnotation {
   style(styleSheet: any): void
 }
 
-class Shape2D {
+export class Shape2D {
   frame = new Box2()
   bounds = new Bounds()
+  boundingBox = new Box2(new Vector2(-10, -10), new Vector2(10, 10))
 
   constructor(width: number = 50, height: number = 50, pivot: Vector2 = new Vector2(0.5, 0.5)) {
     this.bounds = new Bounds(new Size(width, height), pivot)
@@ -37,6 +38,12 @@ class Shape2D {
   updateScreenPosition(pos: Vector2) {
     const rect = this.bounds.rect
     this.frame.set(new Vector2(rect.min.x + pos.x, rect.min.y + pos.y), new Vector2(rect.max.x + pos.x, rect.max.y + pos.y))
+  }
+
+  updateBBox(width: number, height: number, offset: { x: number, y: number } = { x: 0, y: 0 }) {
+    this.boundingBox.set(
+      new Vector2(-width / 2 + offset.x, -height / 2 + offset.y),
+      new Vector2(width / 2 + offset.x, height / 2 + offset.y))
   }
 }
 
@@ -78,21 +85,10 @@ export class Annotation extends Shape2D implements IAnnotation {
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
-    // this.drawDebug(ctx)
     this.isDirty = false
   }
 
   style(styleSheet: any): void { }
-
-  private drawDebug(ctx: CanvasRenderingContext2D): void {
-    const bounds = this.bounds
-    ctx.strokeStyle = '#f0f'
-    ctx.strokeRect(bounds.rect.min.x, bounds.rect.min.y, bounds.size.width, bounds.size.height)
-
-    ctx.beginPath()
-    ctx.arc(0, 0, 2, 0, Math.PI * 2)
-    ctx.stroke()
-  }
 
 }
 

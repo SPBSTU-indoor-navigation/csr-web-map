@@ -12,14 +12,19 @@ declare type Animation = {
   onUpdate?: (val: any) => void
 };
 
+declare type AnimationCallback = {
+  callback: () => void,
+  isSingle: boolean
+}
+
 export class Animator {
   private setDirty: () => void
   private animations: Animation[] = []
   playedAnimations: Tween<Record<string, any>>[] = []
   private dependents: Animator[] = []
 
-  private onStartCallback: () => void
-  private onEndCallback: () => void
+  private onStartCallback: AnimationCallback[] = []
+  private onEndCallback: AnimationCallback[] = []
 
 
   get isPlaying() {
@@ -50,20 +55,13 @@ export class Animator {
     return this
   }
 
-  onStart(callback: () => void) {
-    this.onStartCallback = callback
+  onStart(callback: () => void, single = false) {
+    this.onStartCallback.push({ callback, isSingle: single })
     return this
   }
 
   onEnd(callback: () => void, single = false) {
-    if (single) {
-      this.onEndCallback = () => {
-        callback()
-        this.onEndCallback = undefined
-      }
-    } else {
-      this.onEndCallback = callback
-    }
+    this.onEndCallback.push({ callback, isSingle: single })
     return this
   }
 
@@ -90,7 +88,7 @@ export class Animator {
           this.playedAnimations = this.playedAnimations.filter((a) => a['animator_id'] != id)
 
           if (this.playedAnimations.length === 0) {
-            this.onEndCallback?.()
+            executeCallback(this.onEndCallback)
           }
           completion?.()
         })
@@ -104,14 +102,21 @@ export class Animator {
 
     }
 
-    this.onStartCallback?.()
+    executeCallback(this.onStartCallback)
   }
 
   stop() {
+    if (!this.isPlaying) return
     for (const animation of this.playedAnimations) {
       animation.stop()
     }
     this.playedAnimations = []
-    this.onEndCallback?.()
+    executeCallback(this.onEndCallback)
   }
+
+}
+
+function executeCallback(callbacks: AnimationCallback[]) {
+  callbacks.forEach(c => c.callback())
+  callbacks = callbacks.filter(t => !t.isSingle)
 }

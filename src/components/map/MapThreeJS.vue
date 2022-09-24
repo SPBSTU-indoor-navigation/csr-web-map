@@ -6,7 +6,7 @@
         <LevelSwitcherVue v-if="showIndoor && currentBuilding" :levels="currentBuilding.levels"
           v-model:level="currentOrdinal" />
       </Transition>
-      <div class="debugContoll">
+      <div class="debugContoll" v-if="showDebugPanel">
         <div>
           <input type="checkbox" v-model="showBackedOutline" id="checkbox">
           <label for="checkbox">outline</label>
@@ -15,6 +15,14 @@
           <input type="checkbox" v-model="showBackedCanvas" id="checkbox2">
           <label for="checkbox2">canvas</label>
         </div>
+        <div>
+          <input type="checkbox" v-model="showAnnotationBBox" id="checkbox3">
+          <label for="checkbox3">bbox</label>
+        </div>
+        <p>annotation c: {{renderAnnotationCount}}</p>
+        <p>zoom: {{currentZoom.toFixed(4)}}</p>
+        <hr>
+        <button @click="showDebugPanel=false">close</button>
 
       </div>
     </div>
@@ -36,7 +44,7 @@ import { useRoute } from 'vue-router';
 import { nearestBuiling } from '@/core/map/utils';
 import { MapController } from '@/core/map/mapController';
 
-import { showBackedCanvas, showBackedOutline } from '@/store/debugParams'
+import { showBackedCanvas, showBackedOutline, renderAnnotationCount, currentZoom, showAnnotationBBox, showDebugPanel } from '@/store/debugParams'
 
 const mkMap = shallowRef();
 /** @type {import('vue').ShallowRef<Venue>} */
@@ -150,6 +158,7 @@ svg {
   background: rgba(255, 255, 255, 0.5);
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  width: 150px;
 }
 
 .annotation-text {
