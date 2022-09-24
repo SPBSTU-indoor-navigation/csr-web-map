@@ -78,8 +78,6 @@ export function drawTextWithCurrentParams(text: string, ctx: CanvasRenderingCont
 
   const offset = ctx['letterSpacing_value'] != undefined ? Number.parseFloat(ctx['letterSpacing_value']) / 2 : 0
   if (offset) {
-    console.log(ctx['letterSpacing_value']);
-
     ctx.save()
     ctx.translate(offset, 0)
   }

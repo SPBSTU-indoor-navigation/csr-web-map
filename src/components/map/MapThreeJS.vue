@@ -6,6 +6,17 @@
         <LevelSwitcherVue v-if="showIndoor && currentBuilding" :levels="currentBuilding.levels"
           v-model:level="currentOrdinal" />
       </Transition>
+      <div class="debugContoll">
+        <div>
+          <input type="checkbox" v-model="showBackedOutline" id="checkbox">
+          <label for="checkbox">outline</label>
+        </div>
+        <div>
+          <input type="checkbox" v-model="showBackedCanvas" id="checkbox2">
+          <label for="checkbox2">canvas</label>
+        </div>
+
+      </div>
     </div>
   </div>
 </template>
@@ -18,14 +29,14 @@ import useMapAnnotations from '@/core/map/annotations/useMapAnnotations';
 import MapKitVue from '@/core/map/mapKit/MapKit.vue';
 import useMapOverlay from '@/core/map/overlays/useMapOverlay';
 
-import { Box2, Vector2, Vector3 } from 'three';
+import { Box2, Vector2 } from 'three';
 import { defineComponent, ref, shallowRef, watch, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { nearestBuiling } from '@/core/map/utils';
-import { DetailLevelAnnotation } from '@/core/map/annotations/annotation';
-import { OccupantAnnotation } from './annotations/renders/occupant';
 import { MapController } from '@/core/map/mapController';
+
+import { showBackedCanvas, showBackedOutline } from '@/store/debugParams'
 
 const mkMap = shallowRef();
 /** @type {import('vue').ShallowRef<Venue>} */
@@ -127,6 +138,20 @@ svg {
   height: 100px;
 }
 
+.debugContoll {
+  position: absolute;
+  bottom: 100px;
+  right: 10px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
 .annotation-text {
   text-anchor: middle;
   dominant-baseline: hanging;
@@ -140,7 +165,6 @@ svg {
   font-size: 10px;
   font-weight: bold;
 }
-
 
 .circle-annotation {
   width: 100px;

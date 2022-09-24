@@ -1,4 +1,7 @@
 import { applyTextParams, drawTextWithCurrentParams, modify, multiLineText, TextParams, useLetterSpacing } from '@/core/shared/utils';
+import { showBackedCanvas, showBackedOutline } from '@/store/debugParams'
+import { watchEffect, } from 'vue';
+
 
 declare type Rect = {
   x: number,
@@ -34,6 +37,7 @@ class CanvasForBake {
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = 'high'
     ctx.scale(this.scale, this.scale)
+    ctx.strokeRect(0, 0, SIZE, SIZE)
 
     this.canvas = canvas
     this.context = ctx
@@ -84,6 +88,12 @@ export class Bakery {
 
   constructor() {
     this.canvases.push(new CanvasForBake(this.canvasProcessor))
+
+    watchEffect(() => {
+      this.canvases.forEach(c => {
+        c.canvas.style.display = showBackedCanvas.value ? 'block' : 'none'
+      })
+    })
   }
 
   protected requestSpace(size: Size): Space {
@@ -112,9 +122,11 @@ export class Bakery {
     ctx.save()
     draw(ctx)
     ctx.restore()
-    // ctx.strokeStyle = 'red'
-    // ctx.lineWidth = 1
-    // ctx.strokeRect(0, 0, space.rect.width, space.rect.height)
+    if (showBackedOutline.value) {
+      ctx.strokeStyle = 'red'
+      ctx.lineWidth = 1
+      ctx.strokeRect(0, 0, space.rect.width, space.rect.height)
+    }
     ctx.restore()
 
     this.baked[name] = {
@@ -200,7 +212,7 @@ export class TextBakery extends Bakery {
   constructor() {
     super()
     this.canvases.forEach(canvas => {
-      canvas.canvas.style.top = '512px'
+      canvas.canvas.style.top = '256px'
     })
     this.applyDefaultParams()
   }
