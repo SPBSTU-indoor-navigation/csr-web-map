@@ -33,6 +33,7 @@ class CanvasForBake {
     canvas.style.width = SIZE + 'px'
     canvas.style.height = SIZE + 'px'
     canvas.style.pointerEvents = 'none'
+    canvas.style.display = showBackedCanvas.value ? 'block' : 'none'
     const ctx = canvas.getContext('2d')!
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = 'high'
