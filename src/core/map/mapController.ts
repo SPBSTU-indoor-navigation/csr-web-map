@@ -1,4 +1,5 @@
 import { Camera, Scene } from 'three'
+import { toRaw } from 'vue';
 import { IAnnotation } from './annotations/annotation';
 import { IMapAnnotations } from './annotations/useMapAnnotations';
 
@@ -27,11 +28,11 @@ export class MapController {
     }
 
     addAnnotation(annotation: IAnnotation | IAnnotation[]) {
-        this.mapAnnotations.add(annotation)
+        this.mapAnnotations.add(toRaw(annotation))
     }
 
     removeAnnotation(annotation: IAnnotation | IAnnotation[]) {
-        this.mapAnnotations.remove(annotation)
+        this.mapAnnotations.remove(toRaw(annotation))
     }
 
     scheduleUpdate() {

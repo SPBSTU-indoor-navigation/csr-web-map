@@ -61,6 +61,14 @@ const detailLevelByCategory = (category: string): DetailLevel => {
 const DEFAULT_RADIUS = 5
 
 export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLevelState> {
+  declare data: {
+    properties?: {
+      shortName: {
+      }
+      category: string
+    }
+  }
+
   annotationParams = {
     point: {
       size: 1,

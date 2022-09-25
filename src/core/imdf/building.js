@@ -1,3 +1,4 @@
+import { AttractionAnnotation } from '@/components/map/annotations/renders/attraction'
 import { Box2, Vector2 } from 'three'
 import { polygonIntersection } from './utils'
 
@@ -6,17 +7,22 @@ export default class Building {
 
   currentOrdinal = 0
   showLevel = false
+  attractions = []
 
-  /** @type { import('three').Scene } */
+  /** @type { import('../map/mapController').MapController } */
   map = null
 
   bbox = null
   points = []
 
-  constructor(data, levels, attractions) {
+  constructor(data, levels, attractions, translate) {
     this.data = data
     this.levels = levels
-    this.attractions = attractions
+    this.attractions = attractions.map(t => {
+      const coordArray = t.geometry.coordinates
+      const pos = translate({ latitude: coordArray[1], longitude: coordArray[0] })
+      return new AttractionAnnotation(new Vector2(pos.x, pos.y), t)
+    })
 
     this.levelByOrdinal = levels.reduce((acc, level) => {
       acc[level.ordinal] = level
@@ -67,6 +73,8 @@ export default class Building {
   /** @param { import('../map/mapController').MapController } map */
   Add(map) {
     this.map = map
+    setTimeout(() => map.addAnnotation(this.attractions), 0)
+
   }
 
   /** @param { import('../map/mapController').MapController } map */
@@ -83,6 +91,7 @@ export default class Building {
     this.levelByOrdinal[this.currentOrdinal].Add(this.map)
 
     this.showLevel = true;
+    this.map.removeAnnotation(this.attractions)
   }
 
   HideIndoor() {
@@ -92,7 +101,7 @@ export default class Building {
     this.levelByOrdinal[this.currentOrdinal].Remove(this.map)
     this.showLevel = false
 
-
+    this.map.addAnnotation(this.attractions)
   }
 
   ChangeOrdinal(ordinal) {

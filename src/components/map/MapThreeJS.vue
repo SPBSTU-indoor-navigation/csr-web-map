@@ -101,6 +101,7 @@ async function load() {
   venue.value = new Venue(archive.imdf);
   mapController = new MapController(venue.value.mkGeometry);
 
+  mapController.mapAnnotations = useMapAnnotations({ mapController, styleSheet });
   const mapOverlay = useMapOverlay({
     venue,
     mkMap: mkMap.value,
@@ -109,7 +110,6 @@ async function load() {
     mapController,
   });
 
-  mapController.mapAnnotations = useMapAnnotations({ mapController, styleSheet });
 
   watchEffect(() => {
     zoom.value = mapOverlay.zoom.value;

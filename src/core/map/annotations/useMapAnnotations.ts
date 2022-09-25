@@ -29,6 +29,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
   window.addEventListener('resize', () => { screenSize.value = { width: window.innerWidth, height: window.innerHeight } }, false);
 
   const canvas = document.createElement('canvas')
+  canvas.classList.add('map-annotations')
   const ctx = canvas.getContext('2d')!
   ctx.imageSmoothingEnabled = true
   ctx.imageSmoothingQuality = 'high'
@@ -60,13 +61,13 @@ export default function useMapAnnotations(options: { mapController: MapControlle
   }
 
   const removeAnotation = (annotation: IAnnotation | IAnnotation[]) => {
-    const toRemove = new Set(Array.isArray(annotation) ? annotation : [annotation])
+    const toRemove = new Set((Array.isArray(annotation) ? annotation : [annotation]).map(t => t.id))
 
-    if (toRemove.has(selected.value as IAnnotation)) {
+    if (toRemove.has(selected.value?.id)) {
       select(null, false)
     }
 
-    annotations = annotations.filter(t => !toRemove.has(t))
+    annotations = annotations.filter(t => !toRemove.has(t.id))
   }
 
   const render = (options: {
@@ -137,22 +138,17 @@ export default function useMapAnnotations(options: { mapController: MapControlle
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     let renderQueue = []
-    for (let i = 0; i < annotationsToRender.length; i++) {
-      const annotation = annotationsToRender[i]
-
-      if (annotation.annotation.isSelected) {
-        renderQueue.push(annotationsToRender[i])
-      } else {
-        draw(annotation)
-      }
-    }
+    annotationsToRender.forEach(annotation => {
+      if (annotation.annotation.isSelected) renderQueue.push(annotation)
+      else draw(annotation)
+    })
 
     renderQueue.forEach(t => draw(t))
   }
 
   const select = (annotation: Annotation | null, animated: boolean = true) => {
     if (selected.value) {
-      annotations = annotations.filter(t => t !== selected.value)
+      annotations = annotations.filter(t => t.id !== selected.value.id)
       annotations.push(selected.value as Annotation)
     }
 

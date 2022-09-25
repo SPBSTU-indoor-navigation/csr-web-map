@@ -6,7 +6,7 @@ import { meshForFeatureCollection, outlineMeshForFeatureCollection } from './uti
 export default class Level {
   annotations = []
 
-  constructor(data, units, openings, details, amenitys, occupants, lineMeshMaterialStorage, Translate) {
+  constructor(data, units, openings, details, amenitys, occupants, lineMeshMaterialStorage, translate) {
 
     this.ordinal = data.properties.ordinal
 
@@ -21,7 +21,7 @@ export default class Level {
 
     this.annotations = occupants.map(t => {
       const coordArray = t.properties.anchor.geometry.coordinates
-      const pos = Translate({ latitude: coordArray[1], longitude: coordArray[0] })
+      const pos = translate({ latitude: coordArray[1], longitude: coordArray[0] })
       return new OccupantAnnotation(new Vector2(pos.x, pos.y), t)
     })
 

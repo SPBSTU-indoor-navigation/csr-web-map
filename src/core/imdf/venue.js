@@ -61,7 +61,8 @@ export default class Venue {
 
       return new Building(building,
         levels,
-        archive.attraction.filter(t => t.properties.building_id == building.id))
+        archive.attraction.filter(t => t.properties.building_id == building.id),
+        (p) => geoToVector(this.pivot, p))
     })
 
     // console.log('buildings', buildings);

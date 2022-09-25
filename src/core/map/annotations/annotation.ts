@@ -1,6 +1,7 @@
 import { Box2, Vector2 } from 'three'
 import { DetailLevelProcessor, DetailLevelState } from './detailLevelProcessor'
 import { Bounds, Size } from './bounds'
+import { v4 as uuidv4 } from 'uuid';
 
 export interface IGeoPosition {
   latitude: number
@@ -8,6 +9,8 @@ export interface IGeoPosition {
 }
 
 export interface IAnnotation {
+  id: string
+
   scenePosition: Vector2
   isDirty: boolean
   isSelected: boolean
@@ -48,22 +51,18 @@ export class Shape2D {
 }
 
 export class Annotation extends Shape2D implements IAnnotation {
+  id: string
   scenePosition: Vector2
 
   isDirty = true
   isSelected = false
 
   protected currentZoom: number = 0
-  protected data: {
-    properties?: {
-      shortName: {
-      }
-      category: string
-    }
-  } = {}
+  protected data: any = {}
 
   constructor(localPosition: Vector2, data: any) {
     super()
+    this.id = uuidv4()
     this.scenePosition = localPosition
     this.data = data
   }
