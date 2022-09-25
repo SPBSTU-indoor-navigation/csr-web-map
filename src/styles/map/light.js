@@ -1,7 +1,7 @@
 export default {
   imdf: {
     venue: {
-      fillColor: '#F6F4EC'
+      fillColor: '#F7F4EB'
     },
     'building.footprint': {
       fillColor: '#DDDDDD',
@@ -10,37 +10,37 @@ export default {
     },
     environment: {
       grass: {
-        fillColor: '#C4ED9D',
+        fillColor: '#B9EE93',
       },
       'grass.stadion': {
-        fillColor: '#C4ED9C',
+        fillColor: '#B9EE92',
       },
       forest: {
-        fillColor: '#ABDB7B',
+        fillColor: '#9EDC6E',
       },
       tree: {
-        fillColor: '#B9E28A',
+        fillColor: '#AEE37F',
       },
       'road.main': {
-        fillColor: '#8E9194',
+        fillColor: '#8D9194',
       },
       'road.dirt': {
-        fillColor: '#F1EDC8',
+        fillColor: '#F2EDC4',
       },
       'road.pedestrian.main': {
         fillColor: '#FDFDFD',
       },
       'road.pedestrian.second': {
-        fillColor: '#F6F6F1',
+        fillColor: '#F6F6F0',
       },
       'road.pedestrian.treadmill': {
-        fillColor: '#D6AAA3',
+        fillColor: '#DFA8A1',
       },
       water: {
-        fillColor: '#9BD5F1',
+        fillColor: '#89D7F4',
       },
       sand: {
-        fillColor: '#F9F4DA',
+        fillColor: '#FAF4D7',
       },
 
       crosswalk: {
@@ -97,6 +97,9 @@ export default {
       restricted: {
         fillColor: '#CFCFCF'
       },
+      elevator: {
+        fillColor: '#99B9C2'
+      },
       outline: {
         strokeColor: '#A1A1A1',
         lineWidth: 2
@@ -105,10 +108,10 @@ export default {
         fillColor: '#FEFEFE'
       },
       stairs: {
-        fillColor: '#C8D9DE'
+        fillColor: '#C4DADF'
       },
       restroom: {
-        fillColor: '#E5DFEC'
+        fillColor: '#E7DFED'
       }
     }
   },
