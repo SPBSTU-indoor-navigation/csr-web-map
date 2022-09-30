@@ -66,7 +66,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
 
     const s = this.isSelected ? 70 : this.target.mainPointScale() * DEFAULT_RADIUS * 2
     const bubble = new Box2().setFromCenterAndSize(new Vector2(0, this.isSelected ? -s / 2 : 0), new Vector2(s, s))
-    const label = new Box2().setFromCenterAndSize(new Vector2(0, h / 2 + 20), new Vector2(this.currentStyle.labelBBox.width, h))
+    const label = new Box2().setFromCenterAndSize(new Vector2(0, (h + 3) / 2 + 20), new Vector2(this.currentStyle.labelBBox.width, h))
 
     if (this.target.labelOpacity().opacity != 0) bubble.union(label)
     const center = bubble.getCenter(new Vector2())
@@ -208,7 +208,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
       applyTextParams(this.textParams(), ctx)
       ctx.lineJoin = 'round'
       ctx.textBaseline = 'top'
-      const text = multiLineText(this.data.properties.name['ru'], 90, ctx)
+      const text = multiLineText(this.data.properties.name['ru'], 100, ctx)
 
       ctx.save()
       ctx.translate(0, label.offsetY + 20)
