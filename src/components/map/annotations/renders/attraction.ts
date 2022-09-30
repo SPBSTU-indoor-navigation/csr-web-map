@@ -1,7 +1,8 @@
 import { Animator } from "@/core/animator/animator";
+import { AnnotationBakery, TextBakery } from "@/core/map/annotations/bakery";
 import { DetailLevelProcessor, DetailLevelState } from "@/core/map/annotations/detailLevelProcessor";
 import { Color } from "@/core/shared/color";
-import { drawText, modify } from "@/core/shared/utils";
+import { applyTextParams, drawTextWithCurrentParams, modify, multiLineText, TextParams } from "@/core/shared/utils";
 import { Easing } from "@tweenjs/tween.js";
 import { Box2, Vector2 } from "three";
 import { AnimatedAnnotation } from "../animatedAnnotation";
@@ -34,15 +35,24 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
       offsetY: 0,
       contentOpacity: 1,
     },
+    miniPoint: {
+      size: 0,
+    },
     shape: {
       progress: 0,
     },
+    label: {
+      offsetY: 0,
+      opacity: 1,
+      color: new Color('#D6862F'),
+      scale: 1,
+    }
   }
 
   currentStyle = {
     pointFill: new Color('#4593CF'),
     pointStroke: new Color('#ffffff'),
-    labelColor: new Color('#D6862F'),
+    labelColor: new Color('#434343'),
     labelStroke: new Color('#ffffff'),
     font: '700 11px apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     inlineFont: '800 14px apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
@@ -50,19 +60,21 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
   }
 
   updateTargetBBox() {
-    // if (!this.currentStyle.labelBBox) return
+    if (!this.currentStyle.labelBBox) return
 
-    // const h = this.currentStyle.labelBBox.height
+    const h = this.currentStyle.labelBBox.height
 
     const s = this.isSelected ? 70 : this.target.mainPointScale() * DEFAULT_RADIUS * 2
     const bubble = new Box2().setFromCenterAndSize(new Vector2(0, this.isSelected ? -s / 2 : 0), new Vector2(s, s))
-    // const label = new Box2().setFromCenterAndSize(new Vector2(0, h / 2 + 3), new Vector2(this.currentStyle.labelBBox.width, h))
+    const label = new Box2().setFromCenterAndSize(new Vector2(0, h / 2 + 20), new Vector2(this.currentStyle.labelBBox.width, h))
 
-    // if (this.target.labelOpacity().opacity != 0) bubble.union(label)
+    if (this.target.labelOpacity().opacity != 0) bubble.union(label)
     const center = bubble.getCenter(new Vector2())
     const size = bubble.getSize(new Vector2())
     this.updateBBox(size.width, size.height, center)
   }
+
+  contentImg: HTMLImageElement | null = null
 
   constructor(localPosition: Vector2, data: any) {
     super(localPosition, data, 0, levelProcessor)
@@ -71,24 +83,27 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
 
     this.selectAnimation = new Animator(this.onAnim)
       .animateSpring(0.4, 0.4, { value: this.annotationParams.point, to: () => target.point(), duration: 1000 })
-      // .animateSpring(0.6, 0.4, { value: this.annotationParams.label, to: () => target.labelTransform(), duration: 1000 })
-      // .animateSpring(0.7, 0.3, { value: this.annotationParams.miniPoint, to: () => target.miniPoint(), duration: 1000, delay: 250 })
-      // .animate({ value: this.annotationParams.point, to: () => target.borderOpacity(), duration: 100, easing: Easing.Quadratic.InOut })
+      .animateSpring(0.4, 0.4, { value: this.annotationParams.label, to: () => target.labelTransform(), duration: 1000 })
+      .animateSpring(0.7, 0.3, { value: this.annotationParams.miniPoint, to: () => target.miniPoint(), duration: 1000, delay: 250 })
       .animate({ value: this.annotationParams.shape, to: () => target.shapeProgress(), duration: 200, delay: 50, easing: Easing.Quadratic.InOut })
-      // .animate({ value: this.annotationParams.label, to: () => target.labelOpacity(), duration: 200, delay: 50, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.label, to: () => target.labelOpacity(), duration: 200, delay: 50, easing: Easing.Quadratic.InOut })
       .onStart(() => { this.updateTargetBBox() })
 
     this.deSelectAnimation = new Animator(this.onAnim, [this.selectAnimation])
       .animateSpring(0.7, 0.3, { value: this.annotationParams.point, to: () => target.point(), duration: 1000 })
-      // .animate({ value: this.annotationParams.point, to: () => target.borderOpacity(), duration: 300, easing: Easing.Quadratic.InOut })
-      // .animate({ value: this.annotationParams.miniPoint, to: () => target.miniPoint(), duration: 300, easing: Easing.Quadratic.InOut })
+      .animateSpring(0.7, 0.3, { value: this.annotationParams.label, to: () => target.labelTransform(), duration: 1000 })
+      .animate({ value: this.annotationParams.miniPoint, to: () => target.miniPoint(), duration: 300, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.shape, to: () => target.shapeProgress(), duration: 100, easing: Easing.Quadratic.InOut })
-      // .animate({ value: this.annotationParams.label, to: () => ({ ...target.labelOpacity(), ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.In })
+      .animate({ value: this.annotationParams.label, to: () => target.labelOpacity(), duration: 150, easing: Easing.Quadratic.In })
       .onEnd(() => { this.updateTargetBBox() })
 
     this.selectAnimation.addDependent(this.deSelectAnimation)
 
     modify(this.annotationParams.point, target.point())
+
+
+    this.contentImg = new Image()
+    this.contentImg.src = `https://via.placeholder.com/256x256/${Math.floor(Math.random() * 16777215).toString(16)}`
   }
 
   override changeState(state: DetailLevelState, animated: boolean): void {
@@ -101,17 +116,38 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
 
     this.animateChangeState(new Animator(this.onAnim)
       .animate({ value: this.annotationParams.point, to: () => ({ ...target.point() }), duration: 200, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.label, to: () => ({ ...target.labelOpacity(), ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.InOut })
       .onEnd(() => this.updateTargetBBox())
       .onStart(() => this.updateTargetBBox()),
       animated
     )
   }
 
+  measureText(ctx: CanvasRenderingContext2D) {
+    if (this.currentStyle.labelBBox) return;
+
+    const params = this.textParams()
+    applyTextParams(params, ctx)
+    ctx.lineJoin = 'round'
+    ctx.textBaseline = 'top'
+    const text = multiLineText(this.data.properties.name['ru'], 100, ctx)
+
+    const hasSpacing = ctx['letterSpacing'] != undefined && params.letterSpacing != 0
+
+    this.currentStyle.labelBBox = {
+      width: text.width + params.strokeWidth - (hasSpacing ? params.letterSpacing : 0),
+      height: params.textLineHeight * text.lineCount + params.strokeWidth
+    }
+
+    this.updateTargetBBox()
+  }
+
   override draw(ctx: CanvasRenderingContext2D): void {
-    const { point, shape } = this.annotationParams
+    const { point, miniPoint, shape, label } = this.annotationParams
 
     const drawPoint = (ctx: CanvasRenderingContext2D) => {
 
+      ctx.save()
       ctx.translate(0, point.offsetY)
       ctx.scale(point.size, point.size)
       ctx.beginPath()
@@ -138,7 +174,8 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
       ctx.beginPath()
       ctx.fillStyle = this.currentStyle.pointFill.hex
       ctx.arc(0, 0, (DEFAULT_RADIUS - 2), 0, 2 * Math.PI)
-      ctx.fill()
+      if (point.contentOpacity <= 0 || this.data.properties.short_name?.['ru'] || !this.contentImg.complete)
+        ctx.fill()
 
       if (point.contentOpacity > 0) {
         ctx.fillStyle = this.currentStyle.pointStroke.withAlphaComponent(point.contentOpacity).hex
@@ -148,11 +185,77 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
 
         if (this.data.properties.short_name?.['ru']) {
           ctx.fillText(this.data.properties.short_name['ru'], 0, 0)
+        } else {
+          ctx.clip()
+          ctx.drawImage(this.contentImg, -DEFAULT_RADIUS, -DEFAULT_RADIUS, DEFAULT_RADIUS * 2, DEFAULT_RADIUS * 2)
         }
+      }
+      ctx.restore()
+    }
+
+    const drawMiniPoint = (ctx: CanvasRenderingContext2D) => {
+      if (miniPoint.size > 0) {
+        ctx.beginPath()
+        ctx.arc(0, 0, miniPoint.size, 0, 2 * Math.PI)
+        ctx.fillStyle = this.currentStyle.pointStroke.hex
+        ctx.fill()
       }
     }
 
-    drawPoint(ctx)
+    const drawLabel = (ctx: CanvasRenderingContext2D) => {
+      if (label.opacity == 0) return
+
+      applyTextParams(this.textParams(), ctx)
+      ctx.lineJoin = 'round'
+      ctx.textBaseline = 'top'
+      const text = multiLineText(this.data.properties.name['ru'], 90, ctx)
+
+      ctx.save()
+      ctx.translate(0, label.offsetY + 20)
+      drawTextWithCurrentParams(text.text, ctx)
+      ctx.restore()
+    }
+
+    const isAnim = this.isSelected || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.chaneStateAnimator?.isPlaying
+    drawMiniPoint(ctx)
+
+    if (isAnim) {
+      drawPoint(ctx)
+    } else {
+      const text = this.data.properties.short_name?.['ru'] || (this.contentImg?.complete ? this.contentImg.src : '-')
+      AnnotationBakery.instance.bakeAndRender({
+        name: `point_${text}_${this.currentStyle.pointFill.hex}_${Math.round(point.size * 1000) / 1000}_${this.data.properties.category}`,
+        size: { width: DEFAULT_RADIUS * point.size * 2, height: DEFAULT_RADIUS * point.size * 2 },
+        draw: drawPoint,
+        ctx
+      })
+    }
+
+    if (isAnim || label.opacity != 1) {
+      drawLabel(ctx)
+    } else {
+      const text = this.data.properties.name['ru']
+      TextBakery.instance.bakeAndRender({
+        name: `label_${text}_${this.currentStyle.labelColor.hex}`,
+        text, ctx, maxWidth: 100,
+        params: { fill: label.color.hex, },
+        offsetY: label.offsetY + 20 - 3
+      })
+    }
+
+    this.measureText(ctx)
+  }
+
+  private textParams(): TextParams {
+    return {
+      font: this.currentStyle.font,
+      fill: this.annotationParams.label.color.withAlphaComponent(this.annotationParams.label.opacity).hex,
+      stroke: this.currentStyle.labelStroke.withAlphaComponent(this.annotationParams.label.opacity).hex,
+      align: 'center',
+      strokeWidth: 3,
+      letterSpacing: -0.3,
+      textLineHeight: 11
+    }
   }
 
   private target = {
@@ -176,6 +279,40 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
         offsetY: this.isSelected ? -38 : 0
       }
     },
+    miniPoint: () => {
+      const size = () => {
+        if (this.isSelected) return 2
+        return 0
+      }
+
+      return { size: size() }
+    },
     shapeProgress: () => ({ progress: this.isSelected ? 1 : 0 }),
+    labelTransform: () => {
+      const color = () => {
+        if (this.isSelected) return new Color('#000000')
+        return new Color(this.currentStyle.labelColor.hex)
+      }
+
+      const offset = () => {
+        if (this.isSelected) return -15
+        return -(1 - this.target.mainPointScale()) * DEFAULT_RADIUS
+      }
+
+      return {
+        offsetY: offset(),
+        color: color(),
+      }
+    },
+    labelOpacity: () => {
+      const opacity = () => {
+        if (this.isSelected) return 1
+        return [DetailLevelState.big].includes(this.state) ? 1 : 0
+      }
+
+      return {
+        opacity: opacity(),
+      }
+    }
   }
 }

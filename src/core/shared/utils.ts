@@ -53,21 +53,24 @@ export function multiLineText(text: string, maxWidth: number, ctx: CanvasRenderi
 
   text.split('\n').forEach((line, i) => {
     let resLine = ''
-    line.split(' ').forEach((word, j) => {
-      if (resLine == '') {
-        resLine = word
-        totalWidth = Math.max(totalWidth, ctx.measureText(resLine).width)
-      } else {
-        const w = ctx.measureText(resLine + ' ' + word).width
-        if (w <= maxWidth) {
-          resLine += ' ' + word
-          totalWidth = Math.max(totalWidth, w)
+    line
+      .split(' ').map(t => ({ word: t, space: '' }))
+      .flatMap(t => t.word.split('-').length > 1 ? t.word.split('-').map(w => ({ word: w, space: '-' })) : [t])
+      .forEach(word => {
+        if (resLine == '') {
+          resLine = word.word
+          totalWidth = Math.max(totalWidth, ctx.measureText(resLine).width)
         } else {
-          resLine += '\n' + word
-          totalWidth = Math.max(totalWidth, ctx.measureText(word).width)
+          const w = ctx.measureText(resLine + word.space + word.word).width
+          if (w <= maxWidth) {
+            resLine += (word.space || ' ') + word.word
+            totalWidth = Math.max(totalWidth, w)
+          } else {
+            resLine += word.space + '\n' + word.word
+            totalWidth = Math.max(totalWidth + ctx.measureText(word.space).width, ctx.measureText(word.word).width)
+          }
         }
-      }
-    })
+      })
     result += (result == '' ? '' : '\n') + resLine
   })
   return { text: result, width: totalWidth, lineCount: result.split('\n').length }

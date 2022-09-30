@@ -157,7 +157,6 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       .animate({ value: this.annotationParams.point, to: () => ({ ...target.mainPoint(), ...target.borderOpacity() }), duration: 100, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.miniPoint, to: () => target.miniPoint(), duration: 300, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.label, to: () => ({ ...labelOpacity, ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.InOut })
-      .animate({ value: this.annotationParams.label, to: () => ({ ...labelOpacity, ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.InOut })
       .onEnd(() => { if (labelOpacity.opacity == 0) this.updateTargetBBox() })
       .onStart(() => { if (labelOpacity.opacity != 0) this.updateTargetBBox() }),
       animated
