@@ -74,7 +74,6 @@ export default class Building {
   Add(map) {
     this.map = map
     setTimeout(() => map.addAnnotation(this.attractions), 0)
-
   }
 
   /** @param { import('../map/mapController').MapController } map */

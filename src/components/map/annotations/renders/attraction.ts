@@ -224,7 +224,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
     } else {
       const text = this.data.properties.short_name?.['ru'] || (this.contentImg?.complete ? this.contentImg.src : '-')
       AnnotationBakery.instance.bakeAndRender({
-        name: `point_${text}_${this.currentStyle.pointFill.hex}_${Math.round(point.size * 1000) / 1000}_${this.data.properties.category}`,
+        name: `point_${point.contentOpacity <= Number.MIN_VALUE ? '' : text}_${this.currentStyle.pointFill.hex}_${Math.round(point.size * 1000) / 1000}`,
         size: { width: DEFAULT_RADIUS * point.size * 2, height: DEFAULT_RADIUS * point.size * 2 },
         draw: drawPoint,
         ctx

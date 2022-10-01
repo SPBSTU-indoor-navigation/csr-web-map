@@ -125,14 +125,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
           screenPosition: pos
         }
       })
-      .filter(t => {
-        const bbox = t.annotation.boundingBox
-        const bounding = new Box2(
-          new Vector2(bbox.min.x + t.screenPosition.x, bbox.min.y + t.screenPosition.y),
-          new Vector2(bbox.max.x + t.screenPosition.x, bbox.max.y + t.screenPosition.y));
-
-        return screen.intersectsBox(bounding)
-      })
+      .filter(t => t.annotation.shouldDraw(screen))
 
     renderAnnotationCount.value = annotationsToRender.length
     ctx.clearRect(0, 0, canvas.width, canvas.height)

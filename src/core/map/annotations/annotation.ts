@@ -26,6 +26,7 @@ export interface IAnnotation {
   intersect(rect: Box2): boolean
 
   draw(ctx: CanvasRenderingContext2D): void
+  shouldDraw(screen: Box2): boolean
   style(styleSheet: any): void
 }
 
@@ -33,6 +34,7 @@ export class Shape2D {
   frame = new Box2()
   bounds = new Bounds()
   boundingBox = new Box2(new Vector2(-10, -10), new Vector2(10, 10))
+  screenPosition = new Vector2()
 
   constructor(width: number = 50, height: number = 50, pivot: Vector2 = new Vector2(0.5, 0.5)) {
     this.bounds = new Bounds(new Size(width, height), pivot)
@@ -41,6 +43,7 @@ export class Shape2D {
   updateScreenPosition(pos: Vector2) {
     const rect = this.bounds.rect
     this.frame.set(new Vector2(rect.min.x + pos.x, rect.min.y + pos.y), new Vector2(rect.max.x + pos.x, rect.max.y + pos.y))
+    this.screenPosition = pos
   }
 
   updateBBox(width: number, height: number, offset: { x: number, y: number } = { x: 0, y: 0 }) {
@@ -81,6 +84,13 @@ export class Annotation extends Shape2D implements IAnnotation {
 
   intersect(rect: Box2): boolean {
     return this.frame.intersectsBox(rect)
+  }
+
+  shouldDraw(screen: Box2): boolean {
+    const bounding = new Box2(
+      new Vector2(this.boundingBox.min.x + this.screenPosition.x, this.boundingBox.min.y + this.screenPosition.y),
+      new Vector2(this.boundingBox.max.x + this.screenPosition.x, this.boundingBox.max.y + this.screenPosition.y));
+    return screen.intersectsBox(bounding)
   }
 
   draw(ctx: CanvasRenderingContext2D): void {

@@ -1,3 +1,5 @@
+import { AmenityAnnotation } from "@/components/map/annotations/renders/amenity";
+import { Vector2 } from "three";
 import Building from "./building";
 import Environments from "./environment";
 import Level from "./level";
@@ -13,7 +15,10 @@ export default class Venue {
 
   /** @type {Building[]} */
   buildings = []
+  /** @type {AmenityAnnotation[]} */
+  enviromentAmenity = []
   archive = {}
+
 
   constructor(archive) {
     this.lineMeshMaterialStorage = new LineMeshMaterialStorage()
@@ -65,7 +70,12 @@ export default class Venue {
         (p) => geoToVector(this.pivot, p))
     })
 
-    // console.log('buildings', buildings);
+
+    this.enviromentAmenity = archive.enviromentAmenity.map(t => {
+      const coordArray = t.geometry.coordinates
+      const pos = geoToVector(this.pivot, { latitude: coordArray[1], longitude: coordArray[0] })
+      return new AmenityAnnotation(new Vector2(pos.x, pos.y), t)
+    })
 
     this.environments = new Environments(archive.enviroment, archive.detail, this.lineMeshMaterialStorage)
     this.mesh = meshForFeatureCollection(archive.venue, -2)
@@ -80,8 +90,8 @@ export default class Venue {
       .forEach(mesh => map.addOverlay(mesh))
 
     this.environments.Add(map)
-
     this.buildings.forEach(building => building.Add(map))
+    setTimeout(() => map.addAnnotation(this.enviromentAmenity), 0)
   }
 
   /** @param { import('../map/mapController').MapController } map */
