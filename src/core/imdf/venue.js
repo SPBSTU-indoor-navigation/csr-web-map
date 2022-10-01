@@ -57,7 +57,7 @@ export default class Venue {
 
           const openings = archive.opening.filter(t => t.properties.level_id == level.id)
           const details = archive.detail.filter(t => t.properties.level_id == level.id)
-          const amenitys = archive.amenity.filter(t => t.properties.unit_ids.filter(Set.prototype.has, unitsIds).size != 0)
+          const amenitys = archive.amenity.filter(t => t.properties.unit_ids.filter(Set.prototype.has, unitsIds).length != 0)
           const occupants = archive.occupant.filter(t => unitsIds.has(t.properties.anchor.properties.unit_id))
 
           return new Level(level, units, openings, details, amenitys, occupants, this.lineMeshMaterialStorage, (p) => geoToVector(this.pivot, p))

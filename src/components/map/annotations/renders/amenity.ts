@@ -6,6 +6,7 @@ import { Easing } from "@tweenjs/tween.js";
 import { Box2, Vector2 } from "three";
 import { AnimatedAnnotation } from "../animatedAnnotation";
 import { AnnotationImages } from "../annotationImages";
+import { AnnotationBakery } from '@/core/map/annotations/bakery'
 
 enum DetailLevel {
   alwaysShowBig = 0,
@@ -42,7 +43,6 @@ const levelProcessor = new DetailLevelProcessor<DetailLevel, DetailLevelState>()
   ])
   .addLevel(DetailLevel.alwaysShowMin, [
     { state: DetailLevelState.normal, size: 0 },
-    { state: DetailLevelState.big, size: 22 },
   ])
 
 const DEFAULT_RADIUS = 10
@@ -144,6 +144,9 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
   override changeState(state: DetailLevelState, animated: boolean): void {
     super.changeState(state, animated)
     const target = this.target
+
+    const size = Math.max(15, this.target.mainPointScale() * DEFAULT_RADIUS * 2)
+    this.bounds.setSize({ width: size, height: size })
 
     this.animateChangeState(new Animator(this.onAnim)
       .animate({ value: this.annotationParams.point, to: () => ({ ...target.point(), ...target.contentOpacity() }), duration: 300, easing: Easing.Quadratic.InOut })
@@ -267,7 +270,20 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
 
     drawMiniPoint(ctx)
     drawLabel(ctx)
-    drawPoint(ctx)
+
+    const isAnim = this.isSelected || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.chaneStateAnimator?.isPlaying
+    if (isAnim) {
+      drawPoint(ctx)
+    } else {
+      const imgKey = (point.contentOpacity > 0 && this.img && this.img.complete && this.img.width > 0) ? this.data.properties.category : ''
+
+      AnnotationBakery.instance.bakeAndRender({
+        name: `amenity_${this.currentStyle.pointFill.hex}_${Math.round(point.size * 1000) / 1000}_${imgKey}`,
+        size: { width: DEFAULT_RADIUS * point.size * 2, height: DEFAULT_RADIUS * point.size * 2 },
+        draw: drawPoint,
+        ctx
+      })
+    }
 
     this.measureText(ctx)
     super.draw(ctx)
@@ -286,15 +302,18 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
   }
 
   private target = {
+    mainPointScale: () => {
+      switch (this.state) {
+        case DetailLevelState.big: return 1
+        case DetailLevelState.normal: return 0.7
+        case DetailLevelState.min: return 0.2
+        case DetailLevelState.hide: return 0
+      }
+    },
     point: () => {
       const scale = () => {
         if (this.isSelected) return 2.2
-        switch (this.state) {
-          case DetailLevelState.big: return 1.2
-          case DetailLevelState.normal: return 0.8
-          case DetailLevelState.min: return 0.3
-          case DetailLevelState.hide: return 0
-        }
+        return this.target.mainPointScale()
       }
 
       const cornerRadius = () => {

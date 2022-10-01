@@ -1,3 +1,4 @@
+import { AmenityAnnotation } from '@/components/map/annotations/renders/amenity'
 import { OccupantAnnotation } from '@/components/map/annotations/renders/occupant'
 import { Group, Vector2 } from 'three'
 import { meshForFeatureCollection, outlineMeshForFeatureCollection } from './utils'
@@ -24,6 +25,12 @@ export default class Level {
       const pos = translate({ latitude: coordArray[1], longitude: coordArray[0] })
       return new OccupantAnnotation(new Vector2(pos.x, pos.y), t)
     })
+
+    this.annotations.push(...amenitys.map(t => {
+      const coordArray = t.geometry.coordinates
+      const pos = translate({ latitude: coordArray[1], longitude: coordArray[0] })
+      return new AmenityAnnotation(new Vector2(pos.x, pos.y), t)
+    }))
 
     const groupedUnits = units.groupBy(t => {
       const restriction = t.properties.restriction
