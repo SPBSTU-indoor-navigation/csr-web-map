@@ -30,6 +30,7 @@ export interface IAnnotation {
   style(styleSheet: any): void
 
   get renderOrder(): number
+  get shouldSelectOnTap(): boolean
 }
 
 export class Shape2D {
@@ -74,6 +75,10 @@ export class Annotation extends Shape2D implements IAnnotation {
 
   get renderOrder(): number {
     return 0
+  }
+
+  get shouldSelectOnTap(): boolean {
+    return true
   }
 
   setSelected(selected: boolean, animated: boolean): void {

@@ -175,6 +175,7 @@ export default function useMapAnnotations(options: { mapController: MapControlle
       const annotation = annotations[i];
 
       if (annotation.isSelected) continue
+      if (!annotation.shouldSelectOnTap) continue
 
       if (annotation.pointInside(pos)) {
         selected = true

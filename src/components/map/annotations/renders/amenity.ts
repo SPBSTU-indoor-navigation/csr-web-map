@@ -131,9 +131,9 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
     this.img = AnnotationImages.instance.getImage(data.properties.category)
   }
 
-  override pointInside(pos: Vector2): boolean {
+  override get shouldSelectOnTap(): boolean {
     const isAnim = this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.chaneStateAnimator.isPlaying
-    return (this.state != DetailLevelState.hide || isAnim || this.isSelected) && super.pointInside(pos)
+    return (this.state != DetailLevelState.hide || isAnim || this.isSelected) && super.shouldSelectOnTap
   }
 
   override shouldDraw(screen: Box2): boolean {
