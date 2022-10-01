@@ -28,6 +28,8 @@ export interface IAnnotation {
   draw(ctx: CanvasRenderingContext2D): void
   shouldDraw(screen: Box2): boolean
   style(styleSheet: any): void
+
+  get renderOrder(): number
 }
 
 export class Shape2D {
@@ -68,6 +70,10 @@ export class Annotation extends Shape2D implements IAnnotation {
     this.id = uuidv4()
     this.scenePosition = localPosition
     this.data = data
+  }
+
+  get renderOrder(): number {
+    return 0
   }
 
   setSelected(selected: boolean, animated: boolean): void {

@@ -106,6 +106,10 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
     this.contentImg.src = `https://via.placeholder.com/256x256/${Math.floor(Math.random() * 16777215).toString(16)}`
   }
 
+  override get renderOrder(): number {
+    return 100
+  }
+
   override changeState(state: DetailLevelState, animated: boolean): void {
     super.changeState(state, animated)
     const target = this.target

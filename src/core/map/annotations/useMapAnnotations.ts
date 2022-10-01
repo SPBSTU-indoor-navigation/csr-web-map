@@ -4,6 +4,7 @@ import { MapController } from '../mapController';
 import { IAnnotation, Shape2D } from './annotation';
 import Tween from '@tweenjs/tween.js';
 import { currentZoom, renderAnnotationCount, showAnnotationBBox } from '@/store/debugParams';
+import { groupBy } from '../../shared/utils';
 
 declare type Annotation = (IAnnotation & Shape2D);
 
@@ -114,6 +115,13 @@ export default function useMapAnnotations(options: { mapController: MapControlle
       debugDraw(annotation)
     }
 
+    const renderWithOrder = (annotations: { screenPosition: Vector2, annotation: Annotation }[]) => {
+      const grouped = groupBy(annotations, a => a.annotation.renderOrder)
+      Array.from(grouped.keys()).sort().forEach(key => {
+        grouped.get(key)!.forEach(draw)
+      })
+    }
+
     const screen = new Box2(new Vector2(0, 0), canvasSize.clone())
     const annotationsToRender = annotations
       .map(t => {
@@ -131,12 +139,13 @@ export default function useMapAnnotations(options: { mapController: MapControlle
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     let renderQueue = []
-    annotationsToRender.forEach(annotation => {
-      if (annotation.annotation.isSelected) renderQueue.push(annotation)
-      else draw(annotation)
-    })
+    renderQueue.push(...annotationsToRender.filter(t => t.annotation.isSelected))
 
-    renderQueue.forEach(t => draw(t))
+    const renderQueueSet = new Set(renderQueue.map(t => t.annotation.id))
+
+    renderWithOrder(annotationsToRender.filter(t => !renderQueueSet.has(t.annotation.id)))
+    renderWithOrder(renderQueue)
+
   }
 
   const select = (annotation: Annotation | null, animated: boolean = true) => {
