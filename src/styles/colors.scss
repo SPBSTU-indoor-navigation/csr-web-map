@@ -1,0 +1,44 @@
+@import './variables.scss';
+
+.background {
+  background-color: $background;
+}
+.secondary-background {
+  background-color: $secondary-background;
+}
+.tertiary-background {
+  background-color: $tertiary-background;
+}
+.grouped-background {
+  background-color: $grouped-background;
+}
+.secondary-grouped-background {
+  background-color: $secondary-grouped-background;
+}
+.tertiary-grouped-background {
+  background-color: $tertiary-grouped-background;
+}
+
+.label {
+  color: $label;
+}
+.secondary-label {
+  color: $secondary-label;
+}
+.tertiary-label {
+  color: $tertiary-label;
+}
+.quaternary-label {
+  color: $quaternary-label;
+}
+
+.placeholder {
+  background-color: $placeholder;
+}
+
+.separator {
+  background-color: $separator;
+}
+.opaque-separator {
+  background-color: $opaque-separator;
+}

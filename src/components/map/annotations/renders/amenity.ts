@@ -84,7 +84,7 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
     pointFill: new Color('#007AFF'),
     labelColor: new Color('#000000'),
     labelStroke: new Color('#ffffff'),
-    font: '700 11px apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    font: '700 11px apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     labelBBox: undefined
   }
 

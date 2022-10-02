@@ -3,23 +3,22 @@
 </template>
 
 <style lang="scss">
+@import '@/styles/shared.scss';
+@import '@/styles/variables.scss';
+
 #app {
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu;
+  font-family: $font-family;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  color: #000000;
 }
 
 * {
   margin: 0;
   padding: 0;
-}
 
-.abs-full {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  &:focus {
+    outline: none;
+  }
 }
 </style>

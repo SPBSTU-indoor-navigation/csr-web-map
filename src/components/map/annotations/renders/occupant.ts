@@ -96,7 +96,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     labelColor: new Color('#D6862F'),
     labelStroke: new Color('#ffffff'),
     pointStrokeWidth: 0.7,
-    font: '700 11px apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    font: '700 11px apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     labelBBox: undefined
   }
 

@@ -1,7 +1,7 @@
 <template>
   <div>
     <MapKitVue @map-ready="onMapReady" @singleClick="mapClick" />
-    <div class="abs-full container-map-ui">
+    <div class="abs-full container-map-ui non-block" @wheel.prevent>
       <Transition name="slide-fade">
         <LevelSwitcherVue v-if="showIndoor && currentBuilding" :levels="currentBuilding.levels"
           v-model:level="currentOrdinal" />
@@ -22,6 +22,7 @@
         <p>annotation c: {{renderAnnotationCount}}</p>
         <p>zoom: {{currentZoom.toFixed(4)}}</p>
         <p>fps: {{fps}}</p>
+        <p>fps2: {{fps2}}</p>
         <hr>
         <button @click="showDebugPanel=false">close</button>
 
@@ -41,6 +42,7 @@ import useMapOverlay from '@/core/map/overlays/useMapOverlay';
 import { Box2, Vector2 } from 'three';
 import { defineComponent, ref, shallowRef, watch, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
+import { useFps } from '@vueuse/core'
 
 import { nearestBuiling } from '@/core/map/utils';
 import { MapController } from '@/core/map/mapController';
@@ -59,11 +61,14 @@ const currentOrdinal = ref(0);
 /** @type {MapController} */
 let mapController;
 
+
+
 const SHOW_ZOOM = 4;
 const HIDE_ZOOM = 3.9;
 
 let lastAnimateTime = 0
 let fps = ref("0")
+const fps2 = useFps()
 
 function mapClick(e) {
   mapController.mapAnnotations.click(new Vector2(e.clientX, e.clientY), e);
@@ -151,11 +156,6 @@ defineComponent([MapKitVue, LevelSwitcherVue]);
 </script>
 
 <style lang="scss">
-svg {
-  width: 100px;
-  height: 100px;
-}
-
 .debugContoll {
   position: absolute;
   bottom: 100px;
@@ -171,59 +171,13 @@ svg {
   width: 150px;
 }
 
-.annotation-text {
-  text-anchor: middle;
-  dominant-baseline: hanging;
-  fill: #000;
-  stroke-width: 2;
-  stroke: #fff;
-  paint-order: stroke;
-  transform: translate(50px, 55px);
-  color: #000;
-
-  font-size: 10px;
-  font-weight: bold;
-}
-
-.circle-annotation {
-  width: 100px;
-  height: 100px;
-
-  // background: rgba(204, 204, 204, 0.209);
-  // border-radius: 50px;
-  transform: translateY(50px);
-  cursor: default !important;
-}
-
 .container-map-ui {
-  pointer-events: none;
   overflow: hidden;
-
-  >* {
-    pointer-events: auto;
-  }
 }
 
-.slider {
-  width: 300px;
-}
-
-.point {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  background-color: red;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-}
-
-.slide-fade-enter-active {
-  transition: all 0.15s ease-in;
-}
-
+.slide-fade-enter-active,
 .slide-fade-leave-active {
-  transition: all 0.15s ease-out;
+  transition: all 0.15s ease-in;
 }
 
 .slide-fade-enter-from,

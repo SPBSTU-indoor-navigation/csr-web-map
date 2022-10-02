@@ -54,8 +54,8 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
     pointStroke: new Color('#ffffff'),
     labelColor: new Color('#434343'),
     labelStroke: new Color('#ffffff'),
-    font: '700 11px apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    inlineFont: '800 14px apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    font: '700 11px apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    inlineFont: '800 14px apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     labelBBox: undefined
   }
 
