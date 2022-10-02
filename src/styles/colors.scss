@@ -35,10 +35,32 @@
 .placeholder {
   background-color: $placeholder;
 }
+.placeholder-text {
+  color: $placeholder;
+}
 
 .separator {
   background-color: $separator;
 }
 .opaque-separator {
   background-color: $opaque-separator;
+}
+
+.gray {
+  background-color: $gray;
+}
+.gray2 {
+  background-color: $gray2;
+}
+.gray3 {
+  background-color: $gray3;
+}
+.gray4 {
+  background-color: $gray4;
+}
+.gray5 {
+  background-color: $gray5;
+}
+.gray6 {
+  background-color: $gray6;
 }

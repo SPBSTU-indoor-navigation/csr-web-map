@@ -22,6 +22,7 @@ const fullHeight = computed(() => {
 
 .container {
   width: 300px;
+  touch-action: none;
 
   @media (max-width: $phone-width) {
     width: 100%;

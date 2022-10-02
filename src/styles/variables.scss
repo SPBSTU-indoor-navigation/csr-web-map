@@ -1,22 +1,26 @@
-
-
 $phone-width: 500px;
-$font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu;
+$font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu;
 
-$background: #FFFFFFFF;
-$secondary-background: #F2F2F7FF;
-$tertiary-background: #FFFFFFFF;
-$grouped-background: #F2F2F7FF;
-$secondary-grouped-background: #FFFFFFFF;
-$tertiary-grouped-background: #F2F2F7FF;
+$background: #ffffffff;
+$secondary-background: #f2f2f7ff;
+$tertiary-background: #ffffffff;
+$grouped-background: #f2f2f7ff;
+$secondary-grouped-background: #ffffffff;
+$tertiary-grouped-background: #f2f2f7ff;
 
+$label: #000000ff;
+$secondary-label: #3c3c4399;
+$tertiary-label: #3c3c434d;
+$quaternary-label: #3c3c432e;
 
-$label: #000000FF;
-$secondary-label: #3C3C4399;
-$tertiary-label: #3C3C434D;
-$quaternary-label: #3C3C432E;
+$placeholder: #3c3c434d;
 
-$placeholder: #3C3C434D;
+$separator: #3c3c434a;
+$opaque-separator: #c6c6c8ff;
 
-$separator: #3C3C434A;
-$opaque-separator: #C6C6C8FF;
+$gray: #8e8e93ff;
+$gray2: #aeaeb2ff;
+$gray3: #c7c7ccff;
+$gray4: #d1d1d6ff;
+$gray5: #e5e5eaff;
+$gray6: #f2f2f7ff;

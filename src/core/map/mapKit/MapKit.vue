@@ -1,5 +1,5 @@
 <template>
-  <div id="mapKitContainer" @pointerdown="pointerdown" @pointerup="pointerup"></div>
+  <div id="mapKitContainer" @pointerdown="pointerdown" @pointerup="pointerup" ref="mapKitContainer"></div>
 </template>
 
 <script>
@@ -28,6 +28,7 @@ export default {
   methods: {
     pointerdown(e) {
       this.downEvent = e
+      document.activeElement.blur()
     },
     pointerup(e) {
       if (!this.downEvent) return

@@ -1,7 +1,7 @@
 
 <template>
 
-  <div class="level-switcher">
+  <div class="level-switcher highlight-disable">
     <div class="levels card-blur card-shadow">
       <div v-for="level in levels" class="level" @click="$emit('update:level', level.ordinal)">{{ level.name.ru }}
       </div>
@@ -43,9 +43,6 @@ $level-size: 3rem;
   top: 5px;
   user-select: none;
   touch-action: none;
-
-  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
-  -webkit-tap-highlight-color: transparent;
 
   .levels {
     // background-color: rgba(255, 255, 255, .75);

@@ -317,10 +317,10 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
       }
 
       const cornerRadius = () => {
-        if (this.isSelected) return 0.3
+        if (this.isSelected) return 0.25
         switch (this.state) {
           case DetailLevelState.min: return 0.5
-          default: return 0.2
+          default: return 0.25
         }
       }
 

@@ -24,7 +24,7 @@
 }
 
 .card-shadow {
-  box-shadow: 0 0 4px 2px rgb(0 0 0 / 5%);
+  box-shadow: 0 0 8px 0px rgba(0, 0, 0, 0.2);
 }
 
 .card {
@@ -37,3 +37,12 @@
   display: flex;
 }
 
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.highlight-disable {
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  -webkit-tap-highlight-color: transparent;
+}
