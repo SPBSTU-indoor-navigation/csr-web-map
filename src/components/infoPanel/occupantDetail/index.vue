@@ -113,12 +113,13 @@ useGesture({
     background-color: #ffffff;
 
     .scroll {
-      overflow-x: scroll;
+      overflow-y: scroll;
     }
   }
 
   .content {
-    flex-direction: row;
+    flex-direction: column;
+    max-height: 400px;
 
     .mincard {
       min-width: 80px;
