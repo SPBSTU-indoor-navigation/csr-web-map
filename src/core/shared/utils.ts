@@ -63,7 +63,7 @@ export function multiLineText(text: string, maxWidth: number, ctx: CanvasRenderi
       } else {
         const w = ctx.measureText(line + ' ' + word).width
         if (w <= maxWidth || w <= totalWidth) {
-          line += (line.at(line.length - 1) == '-' ? '' : ' ') + word
+          line += (line[line.length - 1] == '-' ? '' : ' ') + word
           totalWidth = Math.max(totalWidth, w)
         } else {
           resLine += (resLine == '' ? '' : '\n') + line
