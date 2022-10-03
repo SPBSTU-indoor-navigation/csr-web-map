@@ -13,6 +13,10 @@
   color: #000000;
 }
 
+// :root {
+//   --phone-width: #{$phone-width};
+// }
+
 * {
   margin: 0;
   padding: 0;

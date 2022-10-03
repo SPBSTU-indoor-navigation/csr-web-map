@@ -51,26 +51,28 @@ export function multiLineText(text: string, maxWidth: number, ctx: CanvasRenderi
   let result = ''
   let totalWidth = 0
 
-  text.split('\n').forEach((line, i) => {
+  text.split('\n').forEach((txt, i) => {
+    const splitted = txt.replaceAll('-', '- ').split(' ')
+    //TODO: вот тут надо починить алгоримт, чтоб не было костыля с line.at(-1)
     let resLine = ''
-    line
-      .split(' ').map(t => ({ word: t, space: '' }))
-      .flatMap(t => t.word.split('-').length > 1 ? t.word.split('-').map(w => ({ word: w, space: '-' })) : [t])
-      .forEach(word => {
-        if (resLine == '') {
-          resLine = word.word
-          totalWidth = Math.max(totalWidth, ctx.measureText(resLine).width)
+    let line = ''
+    splitted.forEach(word => {
+      if (line == '') {
+        line = word
+        totalWidth = Math.max(totalWidth, ctx.measureText(line).width)
+      } else {
+        const w = ctx.measureText(line + ' ' + word).width
+        if (w <= maxWidth || w <= totalWidth) {
+          line += (line.at(-1) == '-' ? '' : ' ') + word
+          totalWidth = Math.max(totalWidth, w)
         } else {
-          const w = ctx.measureText(resLine + word.space + word.word).width
-          if (w <= maxWidth) {
-            resLine += (word.space || ' ') + word.word
-            totalWidth = Math.max(totalWidth, w)
-          } else {
-            resLine += word.space + '\n' + word.word
-            totalWidth = Math.max(totalWidth + ctx.measureText(word.space).width, ctx.measureText(word.word).width)
-          }
+          resLine += (resLine == '' ? '' : '\n') + line
+          line = word
+          totalWidth = Math.max(totalWidth, ctx.measureText(word).width)
         }
-      })
+      }
+    })
+    resLine += (resLine == '' ? '' : '\n') + line
     result += (result == '' ? '' : '\n') + resLine
   })
   return { text: result, width: totalWidth, lineCount: result.split('\n').length }

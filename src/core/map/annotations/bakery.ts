@@ -198,7 +198,7 @@ export class TextBakery extends Bakery {
   }
 
   private defaultParams: TextParams = {
-    font: '700 11px apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    font: '700 11px apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     letterSpacing: -0.3,
     fill: 'black',
     stroke: 'white',

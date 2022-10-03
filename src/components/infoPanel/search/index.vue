@@ -45,7 +45,12 @@ const search = () => {
 .search {
   margin: 10px;
   padding: 0 10px;
-  height: 40px;
+  height: 2.5rem;
+
+  @media (max-width: $phone-width) {
+    height: 3rem;
+  }
+
   align-items: center;
   position: relative;
 

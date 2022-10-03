@@ -30,7 +30,7 @@
 .card {
   @extend .card-blur;
   @extend .card-shadow;
-  border-radius: 0.5rem;
+  border-radius: 10px;
 }
 
 .flex {
