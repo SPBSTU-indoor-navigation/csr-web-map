@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <MapVue />
-    <div class="abs-full non-block" @wheel.prevent>
+    <div class="abs-full non-block" @wheel="onScroll">
       <InfoPanelVue />
     </div>
   </div>
@@ -10,6 +10,13 @@
 <script setup>
 import MapVue from "../components/map/MapThreeJS.vue";
 import InfoPanelVue from "@/components/infoPanel/index.vue";
+
+const onScroll = (e) => {
+  if (e.ctrlKey) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+};
 </script>
 
 <style scoped>
