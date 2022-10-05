@@ -121,3 +121,9 @@ export function groupBy<K, V>(list: Array<V>, keyGetter: (input: V) => K): Map<K
   });
   return map;
 }
+
+
+export function project(params: { velocity: number, position: number, decelerationRate: number }): number {
+  const factor = -1 / (1000 * Math.log(params.decelerationRate))
+  return params.position + factor * params.velocity
+}

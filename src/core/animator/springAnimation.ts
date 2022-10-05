@@ -1,8 +1,8 @@
 
 
-export function SpringEasing(dampingRatio: number, frequencyResponse: number, duration: number = 1) {
+export function SpringEasing(dampingRatio: number, frequencyResponse: number, duration: number = 1, velocity: number = 0) {
   const spring = new DampedHarmonicSpring(dampingRatio, frequencyResponse)
-  return (progress: number) => 1 - spring.position(progress * duration)
+  return (progress: number) => 1 - spring.position(progress * duration, 1, velocity)
 }
 
 export class DampedHarmonicSpring {

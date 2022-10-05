@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container non-block">
+  <div class="page-container non-block" ref="pageContainer">
     <div class="page card" ref="page" :style="{transform: `translateY(${offsetY}px)`}">
       <div class="header">
         <div class="line"></div>
@@ -17,18 +17,19 @@
 
 <script setup>
 import { ref } from '@vue/reactivity';
-import { useMediaQuery } from '@vueuse/core';
-import { useGesture } from '@vueuse/gesture';
+import { useElementSize, useMediaQuery } from '@vueuse/core';
 import { phoneWidth } from '@/styles/variables.ts';
 
 import { useBottomSheetGesture } from './useBottomSheetGesture'
-import { watch, watchEffect } from 'vue';
+import { watch } from 'vue';
 
 const page = ref(null)
 const scrollElement = ref(null)
+const pageContainer = ref(null)
 const isPhone = useMediaQuery(`(max-width: ${phoneWidth})`)
+const { height } = useElementSize(pageContainer)
 
-const { offsetY, contentOpacity, progress, reset } = useBottomSheetGesture(page, scrollElement, isPhone)
+const { offsetY, contentOpacity, progress, reset } = useBottomSheetGesture(page, scrollElement, height, isPhone)
 
 watch(isPhone, (isPhone) => {
   if (!isPhone) {
@@ -72,16 +73,16 @@ watch(isPhone, (isPhone) => {
   }
 
   .header {
-    padding-top: 2px;
+    padding-top: 3px;
 
     .line {
       position: fixed;
       left: calc(50% - 20px);
-      top: 2px;
+      top: 3px;
       width: 40px;
-      height: 4px;
-      border-radius: 2px;
-      background-color: $gray5;
+      height: 6px;
+      border-radius: 3px;
+      background-color: $gray;
     }
   }
 

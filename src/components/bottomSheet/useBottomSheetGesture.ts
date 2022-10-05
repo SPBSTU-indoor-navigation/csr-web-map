@@ -1,60 +1,128 @@
 import { Ref, ref, computed } from '@vue/reactivity';
 import { useGesture } from '@vueuse/gesture';
 import { Easing, Group, Tween } from '@tweenjs/tween.js'
-import { lerp } from '@/core/shared/utils';
+import { lerp, project } from '@/core/shared/utils';
+import { SpringEasing } from '@/core/animator/springAnimation';
 
 export enum State {
-  small,
-  middle,
-  big
+  small = 0,
+  middle = 1,
+  big = 2
 }
 
-export function useBottomSheetGesture(page, scroll, enabled: Ref<boolean>) {
+function expLimit(x: number, maxVal: number): number {
+  return (1 - Math.exp(-x / maxVal)) * maxVal
+}
+
+export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>, enabled: Ref<boolean>) {
   const state = ref(State.big)
   const tweenGroup = new Group()
   const targetY = ref(0)
 
   let isScrollDragBegin = false
   let isScrollPage = false
+  let currentTween = null
+  let movedByUser = false
 
   const offsetY = computed(() => {
-    const h = document.querySelector('.abs-full')?.clientHeight
-    return Math.max(Math.min(targetY.value, h - 120), 0)
+    if (!movedByUser) return targetY.value
+
+    const smallerPos = positionForState(State.small)
+    const biggerPos = positionForState(State.big)
+    if (biggerPos < targetY.value && targetY.value < smallerPos) {
+      return targetY.value
+    } else if (targetY.value > smallerPos) {
+      let delta = targetY.value - smallerPos
+      return smallerPos + expLimit(delta, 20)
+    } else if (targetY.value < biggerPos) {
+      let delta = biggerPos - targetY.value
+      return biggerPos - expLimit(delta, 20)
+    }
   })
 
-  const progress = computed(() => {
-    const h = (document.querySelector('.abs-full')?.clientHeight || 0) - 120
-    return 1 - offsetY.value / h
-  })
+  const smallOffset = computed(() => containerHeight.value - 80)
+  const mediumOffset = computed(() => containerHeight.value - 320)
+
+  const progress = computed(() => 1 - offsetY.value / smallOffset.value)
 
   const contentOpacity = computed(() => {
-    if (progress.value > 0.05) return 1
-    return lerp(0, 1, progress.value / 0.05)
+    const p = progress.value - 0.025
+    if (p > 0.1) return 1
+    return lerp(0, 1, p / 0.1)
   })
+
+  const positionForState = (state: State) => {
+    switch (state) {
+      case State.small: return smallOffset.value
+      case State.middle: return mediumOffset.value
+      case State.big: return 0
+    }
+  }
+
+  function nextState(velocity: number): State {
+    const nearestState = (pos: number, possibleStates: State[]) => {
+      var nearestDistance = Number.MAX_VALUE
+      var nearestState = State.small
+
+      for (let i = 0; i < possibleStates.length; i++) {
+        const state = possibleStates[i];
+        const distance = Math.abs(positionForState(state) - pos)
+        if (distance < nearestDistance) {
+          nearestState = state
+          nearestDistance = distance
+        }
+      }
+
+      return nearestState
+    }
+
+    let singlePosible: State[] = []
+    switch (state.value) {
+      case State.small:
+        singlePosible = [State.small, State.middle]
+        break;
+      case State.middle:
+        singlePosible = [State.small, State.big, State.middle]
+        break;
+      case State.big:
+        singlePosible = [State.big, State.middle]
+        break;
+    }
+
+    let nearestSingle = nearestState(project({ velocity: velocity * 1000, position: targetY.value, decelerationRate: 0.995 }), singlePosible)
+    let nearestMulty = nearestState(project({ velocity: velocity * 1000, position: targetY.value, decelerationRate: 0.99 }), [State.small, State.big, State.middle])
+
+    return Math.abs(state.value - nearestMulty) > 1 ? nearestMulty : nearestSingle
+  }
 
   const endAnimation = (y) => {
     if (!enabled.value) return
-    const h = document.querySelector('.abs-full').clientHeight
+    state.value = nextState(y)
 
-    let target = 0;
-    if (h / 2 - y * 200 > targetY.value) {
-      target = 0
-      state.value = State.big
-    } else {
-      target = h - 120
-      state.value = State.small
+    const delta = positionForState(state.value) - targetY.value
+    let initialVelocity = Math.abs(1000 * y / delta)
+
+    if (targetY.value < positionForState(State.big)) {
+      targetY.value = offsetY.value
+      initialVelocity = 0
+    } else if (targetY.value > positionForState(State.small)) {
+      targetY.value = offsetY.value
+      initialVelocity = 0
     }
 
-    const t = new Tween({ y: targetY.value }, tweenGroup)
-      .to({ y: target }, 200)
-      .easing(Easing.Quadratic.Out)
+
+    console.log(initialVelocity);
+    currentTween = new Tween({ y: targetY.value }, tweenGroup)
+      .to({ y: positionForState(state.value) }, 1000)
+      .easing(SpringEasing(initialVelocity > 0.01 ? 0.8 : 1, 0.35, 1, -initialVelocity))
       .onUpdate(({ y }) => {
         targetY.value = y
       })
       .onComplete(() => {
-        tweenGroup.remove(t)
+        tweenGroup.remove(currentTween)
       })
       .start()
+
   }
 
   const moveTo = (dy: number) => {
@@ -85,9 +153,18 @@ export function useBottomSheetGesture(page, scroll, enabled: Ref<boolean>) {
     event.stopPropagation()
   }
 
+  const beginDrag = () => {
+    movedByUser = true
+    currentTween?.stop()
+  }
+
   useGesture({
     onDrag: ({ delta: [dx, dy] }) => moveTo(dy),
-    onDragEnd: ({ velocities: [x, y] }) => endAnimation(y),
+    onDragStart: beginDrag,
+    onDragEnd: ({ velocities: [x, y] }) => {
+      movedByUser = false
+      endAnimation(y)
+    },
   }, {
     domTarget: page,
     eventOptions: {
@@ -97,9 +174,13 @@ export function useBottomSheetGesture(page, scroll, enabled: Ref<boolean>) {
 
   useGesture({
     onDrag: dragHandler,
-    onDragStart: () => isScrollDragBegin = true,
+    onDragStart: () => {
+      isScrollDragBegin = true
+      beginDrag()
+    },
     onDragEnd: ({ velocities: [x, y] }) => {
       if (isScrollPage) {
+        movedByUser = false
         isScrollPage = false
         endAnimation(y)
       }

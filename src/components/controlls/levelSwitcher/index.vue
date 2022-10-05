@@ -15,6 +15,8 @@
 import { computed, ref } from '@vue/reactivity';
 import { watchEffect } from 'vue';
 import { useMediaQuery } from '@vueuse/core';
+import { phoneWidth } from '@/styles/variables';
+
 
 const props = defineProps(['levels', 'level'])
 const emit = defineEmits(['update:level'])
@@ -24,7 +26,7 @@ const levels = computed(() => {
   return props.levels.map(t => ({ ordinal: t.ordinal, name: t.data.properties.short_name })).sort((a, b) => b.ordinal - a.ordinal)
 })
 
-const isPhone = useMediaQuery('(max-width: 500px)')
+const isPhone = useMediaQuery(`(max-width: ${phoneWidth})`)
 
 const offset = computed(() => levels.value.map(t => t.ordinal).indexOf(props.level) * (isPhone.value ? 3 : 2.5))
 
