@@ -2,7 +2,7 @@ import { Animator } from "@/core/animator/animator";
 import { AnnotationBakery, TextBakery } from "@/core/map/annotations/bakery";
 import { DetailLevelProcessor, DetailLevelState } from "@/core/map/annotations/detailLevelProcessor";
 import { Color } from "@/core/shared/color";
-import { applyTextParams, drawTextWithCurrentParams, modify, multiLineText, TextParams } from "@/core/shared/utils";
+import { applyTextParams, clamp, drawTextWithCurrentParams, modify, multiLineText, TextParams } from "@/core/shared/utils";
 import { Easing } from "@tweenjs/tween.js";
 import { Box2, Vector2 } from "three";
 import { AnimatedAnnotation } from "../animatedAnnotation";
@@ -178,7 +178,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
       ctx.beginPath()
       ctx.fillStyle = this.currentStyle.pointFill.hex
       ctx.arc(0, 0, (DEFAULT_RADIUS - 2), 0, 2 * Math.PI)
-      if (point.contentOpacity <= 0 || this.data.properties.short_name?.['ru'] || !this.contentImg.complete)
+      if (point.contentOpacity != 0 || this.data.properties.short_name?.['ru'] || !this.contentImg.complete)
         ctx.fill()
 
       if (point.contentOpacity > 0) {
@@ -191,6 +191,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
           ctx.fillText(this.data.properties.short_name['ru'], 0, 0)
         } else {
           ctx.clip()
+          ctx.globalAlpha = clamp(point.contentOpacity, 0, 1)
           ctx.drawImage(this.contentImg, -DEFAULT_RADIUS, -DEFAULT_RADIUS, DEFAULT_RADIUS * 2, DEFAULT_RADIUS * 2)
         }
       }
@@ -265,7 +266,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
   private target = {
     mainPointScale: () => {
       switch (this.state) {
-        case DetailLevelState.hide: return 0
+        case DetailLevelState.hide: return 0.2
         case DetailLevelState.min: return 0.2
         case DetailLevelState.normal: return 1
         case DetailLevelState.big: return 1.2
