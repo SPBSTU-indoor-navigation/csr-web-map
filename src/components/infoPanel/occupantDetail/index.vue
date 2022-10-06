@@ -1,7 +1,7 @@
 <template>
   <BottomSheetVue>
     <template #header>
-      <h1>T:{{title}}</h1>
+      <h1>T{{title}}</h1>
     </template>
 
     <template #content>

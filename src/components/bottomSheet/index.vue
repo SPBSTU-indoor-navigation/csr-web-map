@@ -56,11 +56,6 @@ watch(isPhone, (isPhone) => {
     margin-bottom: max(10px, env(safe-area-inset-bottom));
   }
 
-  // @media (min-width: $phone-width) {
-
-  //   margin-bottom: 10px;
-  // }
-
   @media (max-width: $phone-width) {
     margin-top: 30px;
     margin-bottom: 0;
@@ -80,20 +75,27 @@ watch(isPhone, (isPhone) => {
   @media (max-width: $phone-width) {
     margin: 0px;
     padding-bottom: 50px;
-    // height: calc(100vh - 30px);
   }
 
   .header {
-    padding-top: 3px;
+    padding-top: 8px;
 
     .line {
       position: fixed;
       left: calc(50% - 20px);
-      top: 3px;
+      top: 5px;
       width: 40px;
-      height: 6px;
-      border-radius: 3px;
-      background-color: $gray;
+      height: 5px;
+      border-radius: 2.5px;
+      background-color: $gray2;
+    }
+
+    @media (min-width: $phone-width) {
+      padding-top: 5px;
+
+      .line {
+        background-color: #0000;
+      }
     }
   }
 
