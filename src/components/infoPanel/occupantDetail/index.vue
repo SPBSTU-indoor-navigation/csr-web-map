@@ -61,6 +61,7 @@
 import BottomSheetVue from "@/components/bottomSheet/index.vue";
 
 const { title } = defineProps(['title'])
+
 </script>
 
 <style lang="scss">
