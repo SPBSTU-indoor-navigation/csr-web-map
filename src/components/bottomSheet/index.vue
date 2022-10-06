@@ -50,17 +50,28 @@ watch(isPhone, (isPhone) => {
   left: 0;
   right: 0;
   will-change: transform;
-  margin-top: 10px;
+  margin-top: 20px;
+
+  @supports(margin-bottom: max(0px)) {
+    margin-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  // @media (min-width: $phone-width) {
+
+  //   margin-bottom: 10px;
+  // }
 
   @media (max-width: $phone-width) {
     margin-top: 30px;
+    margin-bottom: 0;
   }
 }
 
 .page {
   margin: 0 10px;
-  height: calc(100vh - 20px);
-  padding: 0 10px;
+  // height: calc(100vh - 20px);
+  height: 100%;
+  padding: 0 12px;
   will-change: transform;
 
   display: flex;
@@ -69,7 +80,7 @@ watch(isPhone, (isPhone) => {
   @media (max-width: $phone-width) {
     margin: 0px;
     padding-bottom: 50px;
-    height: calc(100vh - 30px);
+    // height: calc(100vh - 30px);
   }
 
   .header {

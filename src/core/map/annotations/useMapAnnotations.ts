@@ -5,6 +5,7 @@ import { IAnnotation, Shape2D } from './annotation';
 import Tween from '@tweenjs/tween.js';
 import { currentZoom, renderAnnotationCount, showAnnotationBBox } from '@/store/debugParams';
 import { groupBy } from '../../shared/utils';
+import { useElementSize } from '@vueuse/core';
 
 declare type Annotation = (IAnnotation & Shape2D);
 
@@ -20,14 +21,17 @@ export interface IMapAnnotations {
 }
 
 
-export default function useMapAnnotations(options: { mapController: MapController, styleSheet: Ref<UnwrapRef<any>> }): IMapAnnotations {
+export default function useMapAnnotations(options: {
+  mapController: MapController,
+  styleSheet: Ref<UnwrapRef<any>>,
+  mapContainer: Ref<UnwrapRef<HTMLElement>>
+}): IMapAnnotations {
 
   let canvasSize: Vector2
   let lastZoom: number = 0
   const selected = ref<IAnnotation | null>(null)
 
-  const screenSize = ref({ width: window.innerWidth, height: window.innerHeight })
-  window.addEventListener('resize', () => { screenSize.value = { width: window.innerWidth, height: window.innerHeight } }, false);
+  const screenSize = useElementSize(options.mapContainer)
 
   const canvas = document.createElement('canvas')
   canvas.classList.add('map-annotations')
@@ -37,7 +41,9 @@ export default function useMapAnnotations(options: { mapController: MapControlle
   document.querySelector('.mk-map-view')!.insertBefore(canvas, document.querySelector(".mk-map-view>.mk-map-node-element"))
 
   watchEffect(() => {
-    const { width, height } = screenSize.value
+    const width = screenSize.width.value
+    const height = screenSize.height.value
+
     canvas.width = width * window.devicePixelRatio
     canvas.height = height * window.devicePixelRatio
     canvas.style.width = `${width}px`

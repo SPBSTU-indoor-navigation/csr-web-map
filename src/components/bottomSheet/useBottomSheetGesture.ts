@@ -3,6 +3,7 @@ import { useGesture } from '@vueuse/gesture';
 import { Easing, Group, Tween } from '@tweenjs/tween.js'
 import { lerp, project } from '@/core/shared/utils';
 import { SpringEasing } from '@/core/animator/springAnimation';
+import { watch, watchEffect } from 'vue';
 
 export enum State {
   small = 0,
@@ -142,6 +143,12 @@ export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>
         } else {
           isScrollPage = true
         }
+
+        const toBottom = scroll.value.scrollHeight - scroll.value.clientHeight - scroll.value.scrollTop
+        if (toBottom == 0 && dy < 0) {
+          event.preventDefault()
+        }
+
       }
     }
 
@@ -191,6 +198,16 @@ export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>
       passive: false
     }
   })
+
+  watch(containerHeight, (val, old) => {
+    if (!enabled.value) return
+    if (val == old) return
+
+    currentTween?.stop()
+    targetY.value = positionForState(state.value)
+    console.log("containerHeight.value", { val, old });
+  })
+
 
   const update = () => {
     requestAnimationFrame(update)

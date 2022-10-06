@@ -2,11 +2,12 @@ import { OrthographicCamera, Scene, Vector2, WebGLRenderer } from 'three';
 import { ref, watch, watchEffect } from "vue";
 
 import { geoToVector } from '@/core/imdf/utils';
+import { useElementSize, useWindowSize } from '@vueuse/core';
 
 export default function useMapOverlay(options) {
-  const { venue, mkMap, styleSheet, onAnimate, mapController } = options
+  const { venue, mkMap, styleSheet, onAnimate, mapController, mapContainer } = options
 
-  const screenSize = ref({ width: window.innerWidth, height: window.innerHeight })
+  const screenSize = useElementSize(mapContainer)
   const zoom = ref(0)
 
   const scene = new Scene()
@@ -22,16 +23,19 @@ export default function useMapOverlay(options) {
   renderer.setPixelRatio(window.devicePixelRatio)
   document.querySelector('.mk-map-view').insertBefore(renderer.domElement, document.querySelector(".mk-map-view>.map-annotations"))
 
-  window.addEventListener('resize', () => { screenSize.value = { width: window.innerWidth, height: window.innerHeight } }, false);
-
   // ScreenSize
   watchEffect(() => {
-    const { width, height } = screenSize.value
+    const width = screenSize.width.value
+    const height = screenSize.height.value
+
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
 
-    venue.value.OnResolutionChange(screenSize.value)
+    venue.value.OnResolutionChange({ width: screenSize.width.value, height: screenSize.height.value })
+
+    mapController.scheduleUpdate()
+    renderer.render(scene, camera);
   })
 
   // Venue

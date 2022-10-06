@@ -10,6 +10,7 @@
 <script setup>
 import MapVue from "../components/map/MapThreeJS.vue";
 import InfoPanelVue from "@/components/infoPanel/index.vue";
+import { useFullscreenScrollFix } from "@/core/shared/composition/useFullscreenScrollFix";
 
 const onScroll = (e) => {
   if (e.ctrlKey) {
@@ -17,6 +18,8 @@ const onScroll = (e) => {
     e.stopPropagation()
   }
 };
+
+useFullscreenScrollFix()
 </script>
 
 <style scoped>

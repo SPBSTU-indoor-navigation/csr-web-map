@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="abs-full" ref="mapContainer">
     <MapKitVue @map-ready="onMapReady" @singleClick="mapClick" />
     <div class="abs-full container-map-ui non-block" @wheel.prevent>
       <Transition name="slide-fade">
@@ -49,6 +49,8 @@ import { MapController } from '@/core/map/mapController';
 
 import { showBackedCanvas, showBackedOutline, renderAnnotationCount, currentZoom, showAnnotationBBox, showDebugPanel } from '@/store/debugParams'
 
+const mapContainer = ref(null)
+
 const mkMap = shallowRef();
 /** @type {import('vue').ShallowRef<Venue>} */
 const venue = shallowRef();
@@ -60,7 +62,6 @@ const currentOrdinal = ref(0);
 
 /** @type {MapController} */
 let mapController;
-
 
 
 const SHOW_ZOOM = 4;
@@ -106,13 +107,14 @@ async function load() {
   venue.value = new Venue(archive.imdf);
   mapController = new MapController(venue.value.mkGeometry);
 
-  mapController.mapAnnotations = useMapAnnotations({ mapController, styleSheet });
+  mapController.mapAnnotations = useMapAnnotations({ mapController, styleSheet, mapContainer });
   const mapOverlay = useMapOverlay({
     venue,
     mkMap: mkMap.value,
     styleSheet,
     onAnimate,
     mapController,
+    mapContainer
   });
 
 
