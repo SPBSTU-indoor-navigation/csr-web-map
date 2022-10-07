@@ -1,11 +1,12 @@
 <template>
   <div class="page-container non-block" ref="pageContainer">
     <div class="page card" ref="page" :style="{transform: `translateY(${offsetY}px)`}">
-      <div class="header">
+      <div class="header" v-if="showHeader" :class="cloaseble ? 'cloaseble' : ''">
         <div class="line"></div>
+        <CloseButtonVue v-if="cloaseble" class="close" @close="$emit('close')" />
         <slot name="header"></slot>
       </div>
-      <hr>
+      <hr v-if="showHeader">
       <div class="content-container" ref="scrollElement" :style="{opacity: contentOpacity}">
         <div class="content">
           <slot name="content"></slot>
@@ -19,9 +20,10 @@
 import { ref } from '@vue/reactivity';
 import { useElementSize, useMediaQuery } from '@vueuse/core';
 import { phoneWidth } from '@/styles/variables.ts';
+import CloseButtonVue from '../shared/closeButton.vue';
 
 import { useBottomSheetGesture } from './useBottomSheetGesture'
-import { watch } from 'vue';
+import { watch, inject } from 'vue';
 
 const page = ref(null)
 const scrollElement = ref(null)
@@ -29,7 +31,22 @@ const pageContainer = ref(null)
 const isPhone = useMediaQuery(`(max-width: ${phoneWidth})`)
 const { height } = useElementSize(pageContainer)
 
-const { offsetY, contentOpacity, progress, reset } = useBottomSheetGesture(page, scrollElement, height, isPhone)
+const { cloaseble, showHeader } = defineProps({
+  cloaseble: {
+    type: Boolean,
+    required: false,
+    default: true
+  },
+  showHeader: {
+    type: Boolean,
+    required: false,
+    default: true
+  }
+})
+
+const offsetY = inject('offsetY')
+const state = inject('state')
+const { contentOpacity, reset } = useBottomSheetGesture(page, scrollElement, height, isPhone, offsetY, state)
 
 watch(isPhone, (isPhone) => {
   if (!isPhone) {
@@ -40,7 +57,7 @@ watch(isPhone, (isPhone) => {
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '@/styles/variables.scss';
 
 .page-container {
@@ -79,6 +96,11 @@ watch(isPhone, (isPhone) => {
 
   .header {
     padding-top: 8px;
+    position: relative;
+
+    &.cloaseble {
+      padding-right: 30px;
+    }
 
     .line {
       position: fixed;
@@ -96,6 +118,12 @@ watch(isPhone, (isPhone) => {
       .line {
         background-color: #0000;
       }
+    }
+
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 0;
     }
   }
 

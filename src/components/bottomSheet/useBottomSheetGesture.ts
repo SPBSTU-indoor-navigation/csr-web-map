@@ -15,31 +15,15 @@ function expLimit(x: number, maxVal: number): number {
   return (1 - Math.exp(-x / maxVal)) * maxVal
 }
 
-export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>, enabled: Ref<boolean>) {
-  const state = ref(State.big)
+export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>, enabled: Ref<boolean>, offsetY: Ref<number>, state: Ref<State>) {
   const tweenGroup = new Group()
-  const targetY = ref(0)
+  const targetY = ref(offsetY.value)
+
 
   let isScrollDragBegin = false
   let isScrollPage = false
   let currentTween = null
   let movedByUser = false
-
-  const offsetY = computed(() => {
-    if (!movedByUser) return targetY.value
-
-    const smallerPos = positionForState(State.small)
-    const biggerPos = positionForState(State.big)
-    if (biggerPos < targetY.value && targetY.value < smallerPos) {
-      return targetY.value
-    } else if (targetY.value > smallerPos) {
-      let delta = targetY.value - smallerPos
-      return smallerPos + expLimit(delta, 20)
-    } else if (targetY.value < biggerPos) {
-      let delta = biggerPos - targetY.value
-      return biggerPos - expLimit(delta, 20)
-    }
-  })
 
   const smallOffset = computed(() => containerHeight.value - 80)
   const mediumOffset = computed(() => containerHeight.value - 320)
@@ -103,16 +87,11 @@ export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>
     const delta = positionForState(state.value) - targetY.value
     let initialVelocity = Math.abs(1000 * y / delta)
 
-    if (targetY.value < positionForState(State.big)) {
-      targetY.value = offsetY.value
-      initialVelocity = 0
-    } else if (targetY.value > positionForState(State.small)) {
+    if (targetY.value < positionForState(State.big) || targetY.value > positionForState(State.small)) {
       targetY.value = offsetY.value
       initialVelocity = 0
     }
 
-
-    console.log(initialVelocity);
     currentTween = new Tween({ y: targetY.value }, tweenGroup)
       .to({ y: positionForState(state.value) }, 1000)
       .easing(SpringEasing(initialVelocity > 0.01 ? 0.8 : 1, 0.35, 1, -initialVelocity))
@@ -164,6 +143,22 @@ export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>
     movedByUser = true
     currentTween?.stop()
   }
+
+  watchEffect(() => {
+    if (!movedByUser) offsetY.value = targetY.value
+
+    const smallerPos = positionForState(State.small)
+    const biggerPos = positionForState(State.big)
+    if (biggerPos < targetY.value && targetY.value < smallerPos) {
+      offsetY.value = targetY.value
+    } else if (targetY.value > smallerPos) {
+      let delta = targetY.value - smallerPos
+      offsetY.value = smallerPos + expLimit(delta, 20)
+    } else if (targetY.value < biggerPos) {
+      let delta = biggerPos - targetY.value
+      offsetY.value = biggerPos - expLimit(delta, 20)
+    }
+  })
 
   useGesture({
     onDrag: ({ delta: [dx, dy] }) => moveTo(dy),
@@ -220,7 +215,6 @@ export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>
   }
 
   return {
-    offsetY,
     targetY,
     contentOpacity,
     progress,
