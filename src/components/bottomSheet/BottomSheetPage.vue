@@ -44,16 +44,19 @@ const { cloaseble, showHeader } = defineProps({
   }
 })
 
-const offsetY = inject('offsetY')
+const emit = defineEmits(['close', 'move', 'progress'])
+
 const state = inject('state')
-const { contentOpacity, reset } = useBottomSheetGesture(page, scrollElement, height, isPhone, offsetY, state)
+const { contentOpacity, offsetY, progress, reset } = useBottomSheetGesture(page, scrollElement, height, isPhone, state)
+
+watch(offsetY, (val) => emit('move', val))
+watch(progress, val => emit('progress', val))
 
 watch(isPhone, (isPhone) => {
   if (!isPhone) {
     reset()
   }
 })
-
 
 </script>
 
@@ -81,7 +84,6 @@ watch(isPhone, (isPhone) => {
 
 .page {
   margin: 0 10px;
-  // height: calc(100vh - 20px);
   height: 100%;
   padding: 0 12px;
   will-change: transform;

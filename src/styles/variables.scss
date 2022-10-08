@@ -1,6 +1,7 @@
-$phone-width: 500px;
+$phone-width: 700px;
 $font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu;
 
+//basic-colors
 $background: #ffffffff;
 $secondary-background: #f2f2f7ff;
 $tertiary-background: #ffffffff;
@@ -24,3 +25,7 @@ $gray3: #c7c7ccff;
 $gray4: #d1d1d6ff;
 $gray5: #e5e5eaff;
 $gray6: #f2f2f7ff;
+
+// bottom sheet
+$smallOffset: 80px;
+$middleOffset: 320px;

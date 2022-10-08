@@ -1,9 +1,9 @@
 <template>
-  <div class="container non-block" :class="fullHeight ? 'fullHeight':''">
-    <input type="checkbox" class="toggle" v-model="pop" />
-    <p>{{offsetY}}</p>
-    <Transition :name="animType">
-      <component :is="currentPage.component" :key="currentPage.key" @pop="onPop" @push="onPush" />
+  <div class="container non-block" :class="fullHeight ? 'fullHeight':''"
+    :style="{backgroundColor: `rgba(0,0,0,${backgroundOpacity})`, pointerEvents }">
+    <Transition :name="animType" @before-leave="onBeforeLeave">
+      <component :is="currentPage.component" :key="currentPage.key" @pop="onPop" @push="onPush" :class="State[state]"
+        @move="onMove" ref="pageContainer" />
     </Transition>
   </div>
 </template>
@@ -14,61 +14,122 @@ import { provide } from 'vue'
 import OccupantDetailVue from '../infoPanel/occupantDetail/index.vue';
 import { watch, } from 'vue';
 import { State } from './useBottomSheetGesture';
+import { clamp, lerp } from '@/core/shared/utils';
+import { useElementSize, useMediaQuery } from '@vueuse/core';
+import { middleOffset, phoneWidth } from '@/styles/variables';
+import { Easing, Group, Tween } from '@tweenjs/tween.js';
 
 const pages = ref([{
   component: markRaw(OccupantDetailVue),
   key: 1
 }])
 
-const offsetY = ref(0)
+const tweenGroup = new Group()
+
+const pageContainer = ref(null)
 const state = ref(State.middle)
 const pop = ref(false)
-const animType = computed(() => pop.value ? 'pop' : 'push')
+const pushPopProrgress = ref(0)
+const offsetY = ref(0)
+const isPhone = useMediaQuery(`(max-width: ${phoneWidth})`)
+const { height } = useElementSize(pageContainer)
 
-
-provide('offsetY', offsetY)
 provide('state', state)
 
+const animType = computed(() => pop.value ? 'pop' : 'push')
 const fullHeight = computed(() => pages.value.length != 0)
 const currentPage = computed(() => pages.value[pages.value.length - 1])
+const backgroundOpacity = computed(() => {
+  if (!isPhone.value) return 0
+  const progress = clamp(1 - offsetY.value / (height.value - middleOffset), 0, 1)
+  return lerp(0, 0.3, Math.max(pushPopProrgress.value, progress))
+})
+const pointerEvents = computed(() => (1 - offsetY.value / (height.value - middleOffset)) < 0.1 ? 'none' : 'auto')
 
+function onBeforeLeave(el: HTMLElement) {
+  el.classList.add(`to-${State[state.value]}`)
+}
+
+function onMove(value: number) {
+  offsetY.value = value
+}
 
 watch(() => pages.value.length, (current, last) => {
   pop.value = current < last
 })
 
+function animPushPopProrgress() {
+  new Tween({ progress: 1 }, tweenGroup)
+    .to({ progress: 0 }, 300)
+    .easing(Easing.Quartic.Out)
+    .onUpdate((obj) => pushPopProrgress.value = obj.progress)
+    .onComplete(() => pushPopProrgress.value = -1)
+    .start()
+}
+
 const onPop = () => {
-  if (pages.value.length > 1) pages.value.pop()
+  if (pages.value.length > 1) {
+    pages.value.pop()
+
+    if (state.value == State.big) {
+      animPushPopProrgress()
+      state.value = State.middle
+    }
+  }
 }
 
 const onPush = (e) => {
-  state.value = State.middle
   pages.value.push({
     component: OccupantDetailVue,
     key: currentPage.value.key == 0 ? 1 : 0
   })
+
+  if (state.value == State.big) {
+    animPushPopProrgress()
+  }
+
+  state.value = State.middle
 }
 
+const update = () => {
+  requestAnimationFrame(update)
+  tweenGroup.update()
+}
+update()
 </script>
 
 <style lang="scss">
 @import '@/styles/variables.scss';
 
 /*#region Animation*/
-$duration: 0.4s;
+$duration: 0.3s;
+$page-color: rgb(239, 239, 239);
 
 .pop-enter-active,
 .pop-leave-active {
-  transition: all $duration ease-in;
+  transition: all $duration ease-in-out;
+
+  @media (max-width: $phone-width) {
+    transition: all $duration ease-in;
+  }
 }
 
 .push-enter-active,
 .push-leave-active {
-  transition: all $duration ease-out;
+  transition: all $duration ease-in-out;
+
+  @media (max-width: $phone-width) {
+    transition: all $duration ease-out;
+  }
 }
 
 .pop-leave-active,
 .push-enter-active {
+  z-index: 5;
+}
+
+.push-leave-active,
+.pop-enter-active {
   z-index: 1;
 }
 
@@ -77,8 +138,23 @@ $duration: 0.4s;
   transform: translateX(0) scale(0.98);
 
   @media (max-width: $phone-width) {
-    transform: translateY(0) scale(0.98);
+    transform: translateY(0);
+
+    &.big {
+      &.to-middle {
+        transform: translateY(calc(100% - $middleOffset));
+      }
+
+      &.to-small {
+        transform: translateY(calc(100% - $smallOffset));
+      }
+    }
+
+    &.middle.to-small {
+      transform: translateY(calc(100% - $middleOffset - $smallOffset));
+    }
   }
+
 }
 
 .pop-leave-to,
@@ -87,9 +163,22 @@ $duration: 0.4s;
 
   @media (max-width: $phone-width) {
     transform: translateY(100%);
+
+    &.small {
+      transform: translateY($smallOffset);
+    }
+
+    &.middle {
+      transform: translateY($middleOffset);
+    }
   }
 }
 
+.pop-leave-active {
+  .page {
+    background-color: $page-color;
+  }
+}
 
 .push-enter-active {
   animation-duration: calc($duration + 1s);
@@ -99,11 +188,11 @@ $duration: 0.4s;
 
     @keyframes pop-opacity {
       0% {
-        background-color: rgba(248, 248, 248, 1);
+        background-color: $page-color;
       }
 
       30% {
-        background-color: rgba(248, 248, 248, 1);
+        background-color: $page-color;
       }
 
       100% {
@@ -122,7 +211,7 @@ $duration: 0.4s;
   overflow: hidden;
   position: relative;
 
-  @media (max-width: 1100px) {
+  @media (max-width: 1200px) {
     width: 300px;
   }
 

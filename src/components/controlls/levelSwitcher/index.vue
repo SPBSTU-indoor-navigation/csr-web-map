@@ -1,6 +1,5 @@
 
 <template>
-
   <div class="level-switcher highlight-disable">
     <div class="levels card-blur card-shadow">
       <div v-for="level in levels" class="level" @click="$emit('update:level', level.ordinal)">{{ level.name.ru }}

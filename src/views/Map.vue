@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <!-- <MapVue /> -->
+    <MapVue />
     <div class="abs-full non-block" @wheel="onScroll">
       <InfoPanelVue />
     </div>
@@ -24,7 +24,7 @@ useFullscreenScrollFix()
 
 <style scoped>
 .abs-full {
-
-  background-color: #343434;
+  /* 
+  background-color: #343434; */
 }
 </style>
