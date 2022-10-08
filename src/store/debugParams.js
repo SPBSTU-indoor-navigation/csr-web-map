@@ -6,6 +6,6 @@ export const showAnnotationBBox = ref(false)
 export const currentZoom = ref(0)
 export const renderAnnotationCount = ref(0)
 
-export const showDebugPanel = ref(true)
+export const showDebugPanel = ref(false)
 
 window.showDebugPanel = () => showDebugPanel.value = true
