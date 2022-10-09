@@ -179,11 +179,14 @@ export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>
   })
 
   useGesture({
-    onDrag: ({ delta: [dx, dy] }) => moveTo(dy),
+    onDrag: ({ delta: [dx, dy], event: { target } }) => {
+      if (target == document.activeElement) return
+      moveTo(dy)
+    },
     onDragStart: beginDrag,
-    onDragEnd: ({ velocities: [x, y], distance }) => {
+    onDragEnd: ({ velocities: [x, y], distance, event: { target } }) => {
       movedByUser = false
-      if (distance !== 0)
+      if (distance !== 0 && target != document.activeElement)
         endAnimation(y)
     },
   }, {

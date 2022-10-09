@@ -26,12 +26,14 @@
   }
 }
 
+button {
+  cursor: pointer;
+}
+
 button,
 input {
   border: none;
   border-radius: 2px;
-  cursor: pointer;
-
 
   &:hover {
     background-color: #f3f3f3

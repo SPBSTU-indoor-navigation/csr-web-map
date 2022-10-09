@@ -3,7 +3,7 @@
     :style="{backgroundColor: `rgba(0,0,0,${backgroundOpacity})`, pointerEvents }">
     <Transition :name="animType" @before-leave="onBeforeLeave">
       <component :is="currentPage.component" :key="currentPage.key" @pop="onPop" @push="onPush" :class="State[state]"
-        @move="onMove" ref="pageContainer" />
+        @move="onMove" :delegate="delegate" ref="pageContainer" @pointerdown="onPointerDown" />
     </Transition>
   </div>
 </template>
@@ -11,7 +11,6 @@
 <script setup lang="ts">
 import { computed, ref, markRaw } from '@vue/reactivity';
 import { provide } from 'vue'
-import OccupantDetailVue from '../infoPanel/occupantDetail/index.vue';
 import { watch, } from 'vue';
 import { State } from './useBottomSheetGesture';
 import { clamp, lerp } from '@/core/shared/utils';
@@ -19,20 +18,27 @@ import { useElementSize, useMediaQuery } from '@vueuse/core';
 import { middleOffset, phoneWidth } from '@/styles/variables';
 import { Easing, Group, Tween } from '@tweenjs/tween.js';
 
+const { delegate, initPage } = defineProps(['delegate', 'initPage'])
+
 const pages = ref([{
-  component: markRaw(OccupantDetailVue),
+  component: markRaw(initPage.component),
+  data: initPage.data,
   key: 1
 }])
 
 const tweenGroup = new Group()
 
 const pageContainer = ref(null)
-const state = ref(State.middle)
+const state = ref(State.small)
 const pop = ref(false)
 const pushPopProrgress = ref(0)
 const offsetY = ref(0)
 const isPhone = useMediaQuery(`(max-width: ${phoneWidth})`)
 const { height } = useElementSize(pageContainer)
+
+
+delegate.push = (params) => onPush(params)
+delegate.pop = () => onPop()
 
 provide('state', state)
 
@@ -48,6 +54,13 @@ const pointerEvents = computed(() => (1 - offsetY.value / (height.value - middle
 
 function onBeforeLeave(el: HTMLElement) {
   el.classList.add(`to-${State[state.value]}`)
+}
+
+function onPointerDown({ target: { className } }) {
+  if (!(className.includes && className.includes('prevent-pointer-event-blur'))) {
+    // @ts-ignore
+    document.activeElement.blur()
+  }
 }
 
 function onMove(value: number) {
@@ -78,17 +91,20 @@ const onPop = () => {
   }
 }
 
-const onPush = (e) => {
+const onPush = (params: { component, data: any, collapse: boolean }) => {
   pages.value.push({
-    component: OccupantDetailVue,
+    component: markRaw(params.component),
+    data: params.data,
     key: currentPage.value.key == 0 ? 1 : 0
   })
 
-  if (state.value == State.big) {
-    animPushPopProrgress()
-  }
+  if (params.collapse === true || params.collapse === undefined) {
+    if (state.value == State.big) {
+      animPushPopProrgress()
+    }
 
-  state.value = State.middle
+    state.value = State.middle
+  }
 }
 
 const update = () => {

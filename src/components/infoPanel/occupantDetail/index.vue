@@ -16,7 +16,7 @@
       </div>
       <button @click="emit('push', {component: 'occupantDetail'})">next</button>
       <h2>Описание2</h2>
-      <div class="block">
+      <div class="info-panel-group">
         <p>Буквы</p>
         <p>Буквы</p>
         <p>Буквы</p>
@@ -24,7 +24,7 @@
         <p>Буквы</p>
       </div>
       <h2>Описание2</h2>
-      <div class="block">
+      <div class="info-panel-group">
         <p>Буквы</p>
         <p>Буквы</p>
         <p>Буквы</p>
@@ -32,7 +32,7 @@
         <p>Буквы</p>
       </div>
       <h2>Описание2</h2>
-      <div class="block">
+      <div class="info-panel-group">
         <p>Буквы</p>
         <p>Буквы</p>
         <p>Буквы</p>
@@ -40,7 +40,7 @@
         <p>Буквы</p>
       </div>
       <h2>Описание2</h2>
-      <div class="block">
+      <div class="info-panel-group">
         <p>Буквы</p>
         <p>Буквы</p>
         <p>Буквы</p>
@@ -48,7 +48,7 @@
         <p>Буквы</p>
       </div>
       <h2>Описание2</h2>
-      <div class="block">
+      <div class="info-panel-group">
         <p>Буквы</p>
         <p>Буквы</p>
         <p>Буквы</p>
@@ -80,10 +80,5 @@ const onClose = () => {
 </script>
 
 <style lang="scss" scoped>
-.block {
-  border-radius: 10px;
-  margin-bottom: 20px;
-  padding: 10px;
-  background-color: #ffffff;
-}
+@import '../style.scss';
 </style>

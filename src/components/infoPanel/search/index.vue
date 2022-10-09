@@ -1,97 +1,74 @@
 <template>
-  <div class="search card flex">
-    <MagnifyingGlassIcon class="icon" />
-    <input type="text" class="label highlight-disable" placeholder="Поиск" ref="input" enterkeyhint="search"
-      @keydown.enter="search" v-model="searchText" />
-    <div v-if="showClose" class="clear-container highlight-disable" @click="clearContainer">
-      <XCircleIcon class="clear" @click="clear" />
-    </div>
-  </div>
+  <BottomSheetPageVue :showHeader="true" :cloaseble="false">
+    <template #header>
+      <SearchBarVue class="search-bar" :focusDelay="focusDelay" @focus="onFocus" v-model:searchText="searchText" />
+    </template>
+
+    <template #content>
+      <h2>{{searchText}}</h2>
+      <button @click="select">Selct</button>
+      <button @click="state=2">Selct</button>
+      <div class="info-panel-group">
+        <p>Буквы</p>
+        <p>Буквы</p>
+        <p>Буквы</p>
+        <p>Буквы</p>
+        <p>Буквы</p>
+      </div>
+    </template>
+  </BottomSheetPageVue>
 </template>
 
 <script setup lang="ts">
-import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
-import { XCircleIcon } from '@heroicons/vue/24/solid'
-import { ref, computed } from 'vue'
+import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
+import { State } from "@/components/bottomSheet/useBottomSheetGesture";
+import SearchBarVue from "@/components/shared/searchBar/index.vue";
+import { computed, ref } from "@vue/reactivity";
+import { inject, Ref } from "vue";
 
-const searchText = ref(null)
-const input = ref(null)
+const { title, delegate: { selectOccupant } } = defineProps(['title', 'delegate'])
+const emit = defineEmits(['push', 'pop'])
+const state: Ref = inject('state')
 
-const showClose = computed(() => {
-  return searchText.value != null && searchText.value.length > 0
-})
+const searchText = ref("")
 
-const clear = () => {
-  searchText.value = null
+const focusDelay = computed(() => state.value == State.big ? 0 : 500)
+
+function select() {
+  selectOccupant();
 }
 
-const clearContainer = (e: PointerEvent) => {
-  if (e.pointerType !== 'mouse') {
-    e.preventDefault()
-    e.stopPropagation()
-    clear()
-  }
+function onFocus() {
+  state.value = 2;
 }
-
-const search = () => {
-  input.value?.blur()
-}
-
 </script>
 
-<style lang="scss" scoped>
-@import '@/styles/variables.scss';
+<style lang="scss">
+@import '../style.scss';
 
-.search {
-  margin: 10px;
-  padding: 0 10px;
-  height: 2.5rem;
-
-  @media (max-width: $phone-width) {
-    height: 3rem;
-  }
-
-  align-items: center;
-  position: relative;
-
-  .icon {
-    stroke-width: 2px;
-    color: #2c2c3163;
-  }
-
-  .clear-container {
-    position: absolute;
-    right: 0px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .clear {
-      width: 18px;
-      height: 18px;
-
-      cursor: pointer;
-      color: $gray;
-    }
-  }
+.modal {
+  position: absolute;
+  z-index: 1000;
+  top: 47px;
+  height: 43px;
+  width: 100%;
+  background-color: rgba(208, 0, 255, 0.143);
 
   input {
-    width: 100%;
+    // width: 100%;
     height: 100%;
     border: none;
-    background-color: rgba(255, 255, 255, 0);
-    font-family: $font-family;
+    background-color: transparent;
+    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu;
     font-weight: 400;
     font-size: medium;
-
-    margin: 0 10px;
-
-    &::placeholder {
-      color: $placeholder;
-    }
+    margin: 0 0 0 53px;
   }
+}
 
+.search-bar {
+  margin: 6px 0px 15px 0px;
+  height: 40px;
+  border-radius: 10px;
 }
 </style>
