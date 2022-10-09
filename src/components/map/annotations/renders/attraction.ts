@@ -25,7 +25,8 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
       short_name: {}
       alt_name: {}
       name: {}
-      category: string
+      category: string,
+      image: string
     }
   }
 
@@ -85,6 +86,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
       .animateSpring(0.4, 0.4, { value: this.annotationParams.point, to: () => target.point(), duration: 1000 })
       .animateSpring(0.4, 0.4, { value: this.annotationParams.label, to: () => target.labelTransform(), duration: 1000 })
       .animateSpring(0.7, 0.3, { value: this.annotationParams.miniPoint, to: () => target.miniPoint(), duration: 1000, delay: 250 })
+      .animate({ value: this.annotationParams.point, to: () => target.contentOpacity(), duration: 200, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.shape, to: () => target.shapeProgress(), duration: 200, delay: 50, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.label, to: () => target.labelOpacity(), duration: 200, delay: 50, easing: Easing.Quadratic.InOut })
       .onStart(() => { this.updateTargetBBox() })
@@ -92,6 +94,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
     this.deSelectAnimation = new Animator(this.onAnim, [this.selectAnimation])
       .animateSpring(0.7, 0.3, { value: this.annotationParams.point, to: () => target.point(), duration: 1000 })
       .animateSpring(0.7, 0.3, { value: this.annotationParams.label, to: () => target.labelTransform(), duration: 1000 })
+      .animate({ value: this.annotationParams.point, to: () => target.contentOpacity(), duration: 200, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.miniPoint, to: () => target.miniPoint(), duration: 300, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.shape, to: () => target.shapeProgress(), duration: 100, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.label, to: () => target.labelOpacity(), duration: 150, easing: Easing.Quadratic.In })
@@ -101,9 +104,11 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
 
     modify(this.annotationParams.point, target.point())
 
+    if (this.data.properties.image) {
+      this.contentImg = new Image()
+      this.contentImg.src = `https://via.placeholder.com/256x256/${Math.floor(Math.random() * 16777215).toString(16)}`
+    }
 
-    this.contentImg = new Image()
-    this.contentImg.src = `https://via.placeholder.com/256x256/${Math.floor(Math.random() * 16777215).toString(16)}`
   }
 
   override get renderOrder(): number {
@@ -119,7 +124,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
     this.bounds.setSize({ width: size, height: size })
 
     this.animateChangeState(new Animator(this.onAnim)
-      .animate({ value: this.annotationParams.point, to: () => ({ ...target.point() }), duration: 200, easing: Easing.Quadratic.InOut })
+      .animate({ value: this.annotationParams.point, to: () => ({ ...target.point(), ...target.contentOpacity() }), duration: 200, easing: Easing.Quadratic.InOut })
       .animate({ value: this.annotationParams.label, to: () => ({ ...target.labelOpacity(), ...target.labelTransform() }), duration: 100, easing: Easing.Quadratic.InOut })
       .onEnd(() => this.updateTargetBBox())
       .onStart(() => this.updateTargetBBox()),
@@ -178,8 +183,10 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
       ctx.beginPath()
       ctx.fillStyle = this.currentStyle.pointFill.hex
       ctx.arc(0, 0, (DEFAULT_RADIUS - 2), 0, 2 * Math.PI)
-      if (point.contentOpacity != 0 || this.data.properties.short_name?.['ru'] || !this.contentImg.complete)
+
+      if (point.contentOpacity < 0.95 || !this.contentImg?.complete) {
         ctx.fill()
+      }
 
       if (point.contentOpacity > 0) {
         ctx.fillStyle = this.currentStyle.pointStroke.withAlphaComponent(point.contentOpacity).hex
@@ -280,10 +287,10 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
 
       return {
         size: scale(),
-        contentOpacity: this.isSelected || this.state == DetailLevelState.normal || this.state == DetailLevelState.big ? 1 : 0,
         offsetY: this.isSelected ? -38 : 0
       }
     },
+    contentOpacity: () => ({ contentOpacity: this.isSelected || this.state == DetailLevelState.normal || this.state == DetailLevelState.big ? 1 : 0 }),
     miniPoint: () => {
       const size = () => {
         if (this.isSelected) return 2

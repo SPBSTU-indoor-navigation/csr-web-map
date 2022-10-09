@@ -29,13 +29,12 @@ export class DetailLevelProcessor<DetailLevel extends number, State> {
         if (mapSize < result.size) return result.state
 
         for (const size of sizes) {
-            if (result.size < mapSize && mapSize < size.size) {
+            if (result.size <= mapSize && mapSize < size.size) {
                 return result.state
             }
             result = size
         }
 
-        // console.log(result.state);
         return result.state;
 
     }
