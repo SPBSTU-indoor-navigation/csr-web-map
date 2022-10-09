@@ -188,7 +188,7 @@ export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>
       movedByUser = false
       // @ts-ignore
       const prevent = target.className.includes && target.className.includes('prevent-pointer-event-blur')
-      if (distance !== 0 || !prevent) {
+      if (!(distance == 0 && prevent) && target != document.activeElement) {
         endAnimation(y)
       }
     },

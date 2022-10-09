@@ -53,10 +53,11 @@ const clear = () => {
 let skipNextFocus = false
 function focus(e) {
   emit('focus')
+
   if (skipNextFocus) {
     skipNextFocus = false
   } else {
-    skipNextFocus = true
+    skipNextFocus = props.focusDelay != 0 && true
     usePhoneInputFix({
       inputText: searchText,
       sourceElement: e.target,
@@ -75,6 +76,7 @@ const clearContainer = (e: PointerEvent) => {
 
 const search = () => {
   input.value?.blur()
+  document.body.focus()
 }
 
 </script>

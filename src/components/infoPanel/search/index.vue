@@ -9,7 +9,7 @@
       <button @click="select">Selct</button>
       <button @click="state=2">Selct</button>
       <div class="info-panel-group">
-        <p>Буквы</p>
+        <p>{{state}}</p>
         <p>Буквы</p>
         <p>Буквы</p>
         <p>Буквы</p>
