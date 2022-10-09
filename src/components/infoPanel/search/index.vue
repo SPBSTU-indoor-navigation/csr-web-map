@@ -44,6 +44,7 @@ function onFocus() {
 </script>
 
 <style lang="scss">
+@import "@/styles/variables.scss";
 @import '../style.scss';
 
 .modal {
@@ -68,7 +69,7 @@ function onFocus() {
 
 .search-bar {
   margin: 6px 0px 15px 0px;
-  height: 40px;
+
   border-radius: 10px;
 }
 </style>

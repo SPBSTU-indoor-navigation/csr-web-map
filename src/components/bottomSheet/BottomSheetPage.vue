@@ -6,8 +6,8 @@
         <CloseButtonVue v-if="cloaseble" class="close" @close="$emit('close')" />
         <slot name="header"></slot>
       </div>
-      <hr v-if="showHeader">
-      <div class="content-container" ref="scrollElement" :style="{opacity: contentOpacity}">
+      <hr v-if="showHeader" class="separator" :style="{opacity: hrOpacity}">
+      <div class="content-container" ref="scrollElement" :style="{opacity: contentOpacity}" @scroll="onScroll">
         <div class="content">
           <slot name="content"></slot>
         </div>
@@ -17,17 +17,19 @@
 </template>
 
 <script setup>
-import { ref } from '@vue/reactivity';
+import { computed, ref } from '@vue/reactivity';
 import { useElementSize, useMediaQuery } from '@vueuse/core';
 import { phoneWidth } from '@/styles/variables.ts';
 import CloseButtonVue from '../shared/closeButton.vue';
 
 import { useBottomSheetGesture } from './useBottomSheetGesture'
-import { watch, inject } from 'vue';
+import { watch, inject, watchEffect } from 'vue';
+import { clamp } from '@/core/shared/utils';
 
 const page = ref(null)
 const scrollElement = ref(null)
 const pageContainer = ref(null)
+const scrollTop = ref(0)
 const isPhone = useMediaQuery(`(max-width: ${phoneWidth})`)
 const { height } = useElementSize(pageContainer)
 
@@ -48,9 +50,19 @@ const emit = defineEmits(['close', 'move', 'progress'])
 
 const state = inject('state')
 const { contentOpacity, offsetY, progress, reset } = useBottomSheetGesture(page, scrollElement, height, isPhone, state)
+const hrOpacity = computed(() => clamp(scrollTop.value / 20, 0, 1) * contentOpacity.value)
 
 watch(offsetY, (val) => emit('move', val))
 watch(progress, val => emit('progress', val))
+
+watchEffect(() => {
+  console.log(scrollElement.value?.scrollTop);
+})
+
+watch(() => scrollElement.value?.scrollTop, (val) => {
+  console.log(val);
+  console.log(scrollElement.value);
+})
 
 watch(isPhone, (isPhone) => {
   if (!isPhone) {
@@ -58,10 +70,21 @@ watch(isPhone, (isPhone) => {
   }
 })
 
+function onScroll({ target: { scrollTop: y } }) {
+  scrollTop.value = y;
+}
+
 </script>
 
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
+
+.separator {
+  margin: 0 -12px;
+  border: none;
+  height: 2px;
+  background-color: $separator;
+}
 
 .page-container {
   position: absolute;

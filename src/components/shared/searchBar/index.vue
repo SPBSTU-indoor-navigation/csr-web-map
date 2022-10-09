@@ -89,7 +89,8 @@ const search = () => {
   background-color: $search-bar-background;
 
   @media (max-width: $phone-width) {
-    height: 3rem;
+    height: 2.2rem;
+    padding: 0 7px;
   }
 
   align-items: center;
