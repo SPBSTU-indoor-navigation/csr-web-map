@@ -186,8 +186,11 @@ export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>
     onDragStart: beginDrag,
     onDragEnd: ({ velocities: [x, y], distance, event: { target } }) => {
       movedByUser = false
-      if (distance !== 0 && target != document.activeElement)
+      // @ts-ignore
+      const prevent = target.className.includes && target.className.includes('prevent-pointer-event-blur')
+      if (distance !== 0 || !prevent) {
         endAnimation(y)
+      }
     },
   }, {
     domTarget: page,
@@ -203,7 +206,7 @@ export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>
       beginDrag()
     },
     onDragEnd: ({ velocities: [x, y] }) => {
-      if (isScrollPage) {
+      if (isScrollDragBegin || isScrollPage) {
         movedByUser = false
         isScrollPage = false
         endAnimation(y)
