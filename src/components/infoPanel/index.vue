@@ -5,28 +5,64 @@
 </template>
 
 <script setup lang="ts">
+import { onAnnotationSelect, onAnnotationDeSelect } from '@/store/mapInfoPanel';
+import { ref, ShallowRef, shallowRef } from 'vue';
 import BottomSheetVue from '../bottomSheet/BottomSheet.vue';
 import OccupantDetailVue from './occupantDetail/index.vue';
 import SearchVue from './search/index.vue';
 
 const initPage = {
   component: SearchVue,
-  data: {}
+  data: ref(null)
 };
 
-const delegate = {
-  push: (params) => { },
-  pop: () => { },
-  selectOccupant: selectOccupant
+const delegate: {
+  pages?: () => { component: any; data: ShallowRef; key: number }[],
+  push?: (params: { component: any; data: any }) => void,
+  pop?: () => void,
+  selectOccupant: (occupant: any) => void
+} = {
+  selectOccupant
 };
+
+
+let lastSelected = null;
+onAnnotationDeSelect.addEventListener((annotation) => {
+  lastSelected = null;
+  setTimeout(() => {
+    if (lastSelected) return;
+    const lastPage = delegate.pages()[delegate.pages().length - 1];
+    if (lastPage.component === OccupantDetailVue) {
+      delegate.pop();
+    }
+  }, 0);
+});
+
+onAnnotationSelect.addEventListener((annotation) => {
+  const pages = delegate.pages();
+  const lastPage = pages[pages.length - 1];
+  lastSelected = annotation;
+
+  if (lastPage.component === OccupantDetailVue) {
+    // delegate.pop();
+    // change data
+    lastPage.data.value = annotation;
+    delegate.pages()[delegate.pages().length - 1].data.value = annotation;
+    console.log('change data', delegate.pages()[1].data.value);
+
+  } else {
+    delegate.push({
+      component: OccupantDetailVue,
+      data: ref(annotation)
+    });
+  }
+});
+
+
 
 function selectOccupant() {
-  console.log('selectOccupant');
+  console.log('select occupant');
 
-  delegate.push({
-    component: OccupantDetailVue,
-    data: {}
-  });
 }
 
 </script>

@@ -55,15 +55,6 @@ const hrOpacity = computed(() => clamp(scrollTop.value / 20, 0, 1) * contentOpac
 watch(offsetY, (val) => emit('move', val))
 watch(progress, val => emit('progress', val))
 
-watchEffect(() => {
-  console.log(scrollElement.value?.scrollTop);
-})
-
-watch(() => scrollElement.value?.scrollTop, (val) => {
-  console.log(val);
-  console.log(scrollElement.value);
-})
-
 watch(isPhone, (isPhone) => {
   if (!isPhone) {
     reset()

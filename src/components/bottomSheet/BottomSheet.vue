@@ -3,13 +3,13 @@
     :style="{backgroundColor: `rgba(0,0,0,${backgroundOpacity})`, pointerEvents }">
     <Transition :name="animType" @before-leave="onBeforeLeave">
       <component :is="currentPage.component" :key="currentPage.key" @pop="onPop" @push="onPush" :class="State[state]"
-        @move="onMove" :delegate="delegate" ref="pageContainer" @pointerdown="onPointerDown" />
+        @move="onMove" :delegate="delegate" ref="pageContainer" @pointerdown="onPointerDown" :data="currentPage.data" />
     </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, markRaw } from '@vue/reactivity';
+import { computed, ref, markRaw, shallowRef } from '@vue/reactivity';
 import { provide } from 'vue'
 import { watch, } from 'vue';
 import { State } from './useBottomSheetGesture';
@@ -22,7 +22,7 @@ const { delegate, initPage } = defineProps(['delegate', 'initPage'])
 
 const pages = ref([{
   component: markRaw(initPage.component),
-  data: initPage.data,
+  data: ref(initPage.data),
   key: 1
 }])
 
@@ -39,6 +39,7 @@ const { height } = useElementSize(pageContainer)
 
 delegate.push = (params) => onPush(params)
 delegate.pop = () => onPop()
+delegate.pages = () => pages.value
 
 provide('state', state)
 

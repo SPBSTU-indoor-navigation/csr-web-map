@@ -6,6 +6,7 @@ import Tween from '@tweenjs/tween.js';
 import { currentZoom, renderAnnotationCount, showAnnotationBBox } from '@/store/debugParams';
 import { groupBy } from '../../shared/utils';
 import { useElementSize } from '@vueuse/core';
+import { onAnnotationDeSelect, onAnnotationSelect } from '@/store/mapInfoPanel';
 
 declare type Annotation = (IAnnotation & Shape2D);
 
@@ -161,13 +162,14 @@ export default function useMapAnnotations(options: {
     }
 
     selected.value?.setSelected(false, animated)
+    onAnnotationDeSelect.dispatch({ annotation: selected.value, annotationID: selected.value?.id })
 
     selected.value = annotation
 
-    selected.value?.setSelected(true, animated)
-
-    console.log('selected', selected.value)
-
+    if (selected.value) {
+      selected.value.setSelected(true, animated)
+      onAnnotationSelect.dispatch({ annotation: selected.value, annotationID: selected.value?.id })
+    }
   }
 
   const click = (pos: Vector2, e: PointerEvent) => {

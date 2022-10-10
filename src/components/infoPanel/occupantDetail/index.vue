@@ -61,6 +61,7 @@
 
 <script setup lang="ts">
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
+import { watchEffect } from "vue";
 
 type Emits = {
   (e: 'pop'): void
@@ -69,13 +70,17 @@ type Emits = {
   }): void
 }
 
-const { title } = defineProps(['title'])
+const { title, data } = defineProps(['title', 'data'])
 
 const emit = defineEmits<Emits>()
 
 const onClose = () => {
   emit('pop')
 }
+
+watchEffect(() => {
+  console.log(data)
+})
 
 </script>
 
