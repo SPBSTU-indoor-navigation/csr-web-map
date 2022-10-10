@@ -1,5 +1,5 @@
 import { Vector2, Vector3, Camera, Box2 } from 'three';
-import { Ref, ref, UnwrapRef, watchEffect } from 'vue';
+import { Ref, ref, shallowRef, UnwrapRef, watchEffect } from 'vue';
 import { MapController } from '../mapController';
 import { IAnnotation, Shape2D } from './annotation';
 import Tween from '@tweenjs/tween.js';
@@ -30,7 +30,7 @@ export default function useMapAnnotations(options: {
 
   let canvasSize: Vector2
   let lastZoom: number = 0
-  const selected = ref<IAnnotation | null>(null)
+  const selected = shallowRef<IAnnotation | null>(null)
 
   const screenSize = useElementSize(options.mapContainer)
 

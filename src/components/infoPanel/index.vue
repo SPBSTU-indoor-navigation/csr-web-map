@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { onAnnotationSelect, onAnnotationDeSelect } from '@/store/mapInfoPanel';
-import { ref, ShallowRef, shallowRef } from 'vue';
+import { markRaw, ref, ShallowRef, shallowRef } from 'vue';
 import BottomSheetVue from '../bottomSheet/BottomSheet.vue';
 import OccupantDetailVue from './occupantDetail/index.vue';
 import SearchVue from './search/index.vue';
@@ -17,7 +17,7 @@ const initPage = {
 };
 
 const delegate: {
-  pages?: () => { component: any; data: ShallowRef; key: number }[],
+  pages?: () => { component: any; data: any; key: number }[],
   push?: (params: { component: any; data: any }) => void,
   pop?: () => void,
   selectOccupant: (occupant: any) => void
@@ -44,16 +44,12 @@ onAnnotationSelect.addEventListener((annotation) => {
   lastSelected = annotation;
 
   if (lastPage.component === OccupantDetailVue) {
-    // delegate.pop();
-    // change data
-    lastPage.data.value = annotation;
-    delegate.pages()[delegate.pages().length - 1].data.value = annotation;
-    console.log('change data', delegate.pages()[1].data.value);
+    lastPage.data = markRaw(annotation);
 
   } else {
     delegate.push({
       component: OccupantDetailVue,
-      data: ref(annotation)
+      data: markRaw(annotation)
     });
   }
 });

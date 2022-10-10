@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { computed, ref, markRaw, shallowRef } from '@vue/reactivity';
-import { provide } from 'vue'
+import { provide, watchEffect } from 'vue'
 import { watch, } from 'vue';
 import { State } from './useBottomSheetGesture';
 import { clamp, lerp } from '@/core/shared/utils';
@@ -22,7 +22,7 @@ const { delegate, initPage } = defineProps(['delegate', 'initPage'])
 
 const pages = ref([{
   component: markRaw(initPage.component),
-  data: ref(initPage.data),
+  data: initPage.data,
   key: 1
 }])
 

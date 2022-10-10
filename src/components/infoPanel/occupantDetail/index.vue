@@ -1,12 +1,12 @@
 <template>
   <BottomSheetPageVue :showHeader="true" :cloaseble="true" @close="onClose">
     <template #header>
-      <h1>T{{title}}</h1>
+      <h1>{{props.data.annotation.data.properties.name.ru}}</h1>
       <button @click="emit('push', {component: 'occupantDetail'})">next</button>
     </template>
 
     <template #content>
-      <h2>Описание2</h2>
+      <h2></h2>
       <div class="block">
         <p>Буквы</p>
         <p>Буквы</p>
@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
-import { watchEffect } from "vue";
+import { toRaw, watchEffect } from "vue";
 
 type Emits = {
   (e: 'pop'): void
@@ -70,7 +70,7 @@ type Emits = {
   }): void
 }
 
-const { title, data } = defineProps(['title', 'data'])
+const props = defineProps(['title', 'data'])
 
 const emit = defineEmits<Emits>()
 
@@ -79,7 +79,7 @@ const onClose = () => {
 }
 
 watchEffect(() => {
-  console.log(data)
+  console.log(props.data)
 })
 
 </script>
