@@ -157,15 +157,20 @@ export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>
           event.preventDefault()
         }
 
+        if (!enabled.value && scroll.value.scrollTop < 5 && dy > 0) {
+          event.preventDefault()
+        }
       }
     }
 
-    if (isScrollPage) {
+    if (isScrollPage && enabled.value) {
       moveTo(dy)
       event.preventDefault()
     }
 
-    event.stopPropagation()
+    if (enabled.value) {
+      event.stopPropagation()
+    }
   }
 
   const beginDrag = () => {
