@@ -96,7 +96,7 @@ const onPush = (params: { component, data: any, collapse: boolean }) => {
   pages.value.push({
     component: markRaw(params.component),
     data: params.data,
-    key: currentPage.value.key == 0 ? 1 : 0
+    key: pages.value.length + 1
   })
 
   if (params.collapse === true || params.collapse === undefined) {

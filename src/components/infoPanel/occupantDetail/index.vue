@@ -2,7 +2,7 @@
   <BottomSheetPageVue :showHeader="true" :cloaseble="true" @close="onClose">
     <template #header>
       <h1>{{props.data.annotation.data.properties.name.ru}}</h1>
-      <button @click="emit('push', {component: 'occupantDetail'})">next</button>
+      <button @click="createRoute">next</button>
     </template>
 
     <template #content>
@@ -10,8 +10,8 @@
       <div class="block">
         <p>Буквы</p>
         <p>Буквы</p>
-        <p>Буквы</p>
-        <p>Буквы</p>
+        <input type="range" min="0" max="100" v-model="sliderValue">
+        <p>{{sliderValue}}</p>
         <p>Буквы</p>
       </div>
       <button @click="emit('push', {component: 'occupantDetail'})">next</button>
@@ -61,18 +61,17 @@
 
 <script setup lang="ts">
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
-import { toRaw, watchEffect } from "vue";
-
-type Emits = {
-  (e: 'pop'): void
-  (e: 'push', value: {
-    component: string,
-  }): void
-}
+import RouteDetailVue from "@/components/infoPanel/routeDetail/index.vue";
+import { ref, toRaw, watchEffect } from "vue";
 
 const props = defineProps(['title', 'data'])
+const emit = defineEmits(['pop', 'push'])
 
-const emit = defineEmits<Emits>()
+function createRoute() {
+  emit('push', { component: RouteDetailVue })
+}
+
+const sliderValue = ref(0)
 
 const onClose = () => {
   emit('pop')

@@ -24,13 +24,14 @@ import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
 import { State } from "@/components/bottomSheet/useBottomSheetGesture";
 import SearchBarVue from "@/components/shared/searchBar/index.vue";
 import { computed, ref } from "@vue/reactivity";
+import { useStorage } from "@vueuse/core";
 import { inject, Ref } from "vue";
 
 const { title, delegate: { selectOccupant } } = defineProps(['title', 'delegate'])
 const emit = defineEmits(['push', 'pop'])
 const state: Ref = inject('state')
 
-const searchText = ref("")
+const searchText = useStorage('searchText', '', sessionStorage)
 
 const focusDelay = computed(() => state.value == State.big ? 0 : 500)
 

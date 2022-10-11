@@ -13,7 +13,7 @@ import SearchVue from './search/index.vue';
 
 const initPage = {
   component: SearchVue,
-  data: ref(null)
+  data: null
 };
 
 const delegate: {
