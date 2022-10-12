@@ -1,5 +1,5 @@
 import { Vector2, Vector3, Camera, Box2 } from 'three';
-import { Ref, ref, shallowRef, UnwrapRef, watchEffect } from 'vue';
+import { Ref, ref, ShallowRef, shallowRef, UnwrapRef, watchEffect } from 'vue';
 import { MapController } from '../mapController';
 import { IAnnotation, Shape2D } from './annotation';
 import Tween from '@tweenjs/tween.js';
@@ -11,7 +11,7 @@ import { onAnnotationDeSelect, onAnnotationSelect } from '@/store/mapInfoPanel';
 declare type Annotation = (IAnnotation & Shape2D);
 
 export interface IMapAnnotations {
-  selected: Ref<UnwrapRef<IAnnotation | null>>
+  selected: ShallowRef<IAnnotation | null>
   add(annotation: IAnnotation | IAnnotation[]): void
   remove(annotation: IAnnotation | IAnnotation[]): void
   select(annotation: IAnnotation | null): void
@@ -156,13 +156,11 @@ export default function useMapAnnotations(options: {
   }
 
   const select = (annotation: Annotation | null, animated: boolean = true) => {
-    if (selected.value) {
-      annotations = annotations.filter(t => t.id !== selected.value.id)
-      annotations.push(selected.value as Annotation)
-    }
 
-    selected.value?.setSelected(false, animated)
-    onAnnotationDeSelect.dispatch({ annotation: selected.value, annotationID: selected.value?.id })
+    if (selected.value) {
+      selected.value?.setSelected(false, animated)
+      onAnnotationDeSelect.dispatch({ annotation: selected.value, annotationID: selected.value?.id })
+    }
 
     selected.value = annotation
 

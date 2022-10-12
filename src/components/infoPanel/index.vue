@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { onAnnotationSelect, onAnnotationDeSelect } from '@/store/mapInfoPanel';
-import { markRaw, ref, ShallowRef, shallowRef } from 'vue';
+import { markRaw, provide, ref, ShallowRef, shallowRef } from 'vue';
 import BottomSheetVue from '../bottomSheet/BottomSheet.vue';
 import OccupantDetailVue from './occupantDetail/index.vue';
 import SearchVue from './search/index.vue';
@@ -53,7 +53,6 @@ onAnnotationSelect.addEventListener((annotation) => {
     });
   }
 });
-
 
 
 function selectOccupant() {

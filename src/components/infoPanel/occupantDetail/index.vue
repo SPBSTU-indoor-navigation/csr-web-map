@@ -62,10 +62,13 @@
 <script setup lang="ts">
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
 import RouteDetailVue from "@/components/infoPanel/routeDetail/index.vue";
-import { ref, toRaw, watchEffect } from "vue";
+import { IMapDelegate } from "@/components/map/mapControlls";
+import { inject, onMounted, ref, ShallowRef, toRaw, watchEffect } from "vue";
 
 const props = defineProps(['title', 'data'])
 const emit = defineEmits(['pop', 'push'])
+
+const mapDelegate = inject('mapDelegate') as ShallowRef<IMapDelegate>
 
 function createRoute() {
   emit('push', { component: RouteDetailVue })
@@ -74,8 +77,18 @@ function createRoute() {
 const sliderValue = ref(0)
 
 const onClose = () => {
-  emit('pop')
+  if (mapDelegate.value.selectedAnnotation.value === props.data.annotation) {
+    mapDelegate.value.deselectAnnotation(props.data.annotation)
+  } else {
+    emit('pop')
+  }
 }
+
+onMounted(() => {
+  if (mapDelegate.value.selectedAnnotation.value !== props.data.annotation) {
+    mapDelegate.value.selectAnnotation(props.data.annotation)
+  }
+})
 
 watchEffect(() => {
   console.log(props.data)

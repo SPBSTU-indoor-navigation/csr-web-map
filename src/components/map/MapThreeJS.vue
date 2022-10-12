@@ -31,7 +31,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import Venue from '@/core/imdf/venue';
 import lightTheme from '@/styles/map/light.js';
 import LevelSwitcherVue from '../controlls/levelSwitcher/index.vue';
@@ -48,6 +48,8 @@ import { nearestBuiling } from '@/core/map/utils';
 import { MapController } from '@/core/map/mapController';
 
 import { showBackedCanvas, showBackedOutline, renderAnnotationCount, currentZoom, showAnnotationBBox, showDebugPanel } from '@/store/debugParams'
+
+import { IMapDelegate } from './mapControlls';
 
 const mapContainer = ref(null)
 
@@ -71,6 +73,8 @@ let lastAnimateTime = 0
 let fps = ref("0")
 const fps2 = useFps()
 
+const emit = defineEmits(['mapDelegate'])
+
 function mapClick(e) {
   mapController.mapAnnotations.click(new Vector2(e.clientX, e.clientY), e);
 }
@@ -83,7 +87,7 @@ function onAnimate() {
   const time = performance.now()
   const delta = time - lastAnimateTime
   const t = Math.round(1000 / delta)
-  fps.value = t < 10 ? '-' : t
+  fps.value = t < 10 ? '-' : t.toFixed(0)
   lastAnimateTime = time
 
   mapController.render();
@@ -107,7 +111,9 @@ async function load() {
   venue.value = new Venue(archive.imdf);
   mapController = new MapController(venue.value.mkGeometry);
 
-  mapController.mapAnnotations = useMapAnnotations({ mapController, styleSheet, mapContainer });
+  const mapAnnotations = useMapAnnotations({ mapController, styleSheet, mapContainer });
+  mapController.mapAnnotations = mapAnnotations
+
   const mapOverlay = useMapOverlay({
     venue,
     mkMap: mkMap.value,
@@ -120,8 +126,23 @@ async function load() {
 
   watchEffect(() => {
     zoom.value = mapOverlay.zoom.value;
-    mapController.mapAnnotations.zoom(zoom.value);
+    mapAnnotations.zoom(zoom.value);
   });
+
+  // @ts-ignore
+  const delegate: IMapDelegate = {
+    selectedAnnotation: mapAnnotations.selected,
+    selectAnnotation: (a) => {
+      mapAnnotations.select(a)
+    },
+    deselectAnnotation: (a) => {
+      if (mapAnnotations.selected.value == a) {
+        mapAnnotations.select(null)
+      }
+    },
+  }
+
+  emit('mapDelegate', delegate)
 }
 
 load();
