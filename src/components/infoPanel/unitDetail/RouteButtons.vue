@@ -1,0 +1,81 @@
+<template>
+  <div class="multy-line flex" v-if="props.fromToPlan.to && props.fromToPlan.from && props.fromToPlan.plan">
+    <div class="line1 flex">
+      <button v-if="props.fromToPlan.to" class="from">{{props.fromToPlan.from ? "Отсюда" : "Маршрут"}}</button>
+      <button v-if="props.fromToPlan.from" class="to">Сюда</button>
+    </div>
+    <div class="line2 flex">
+      <button v-if="props.fromToPlan.plan" class="plan">Планировка</button>
+    </div>
+  </div>
+  <div class="single-line flex" v-else>
+    <button v-if="props.fromToPlan.to" class="from">{{props.fromToPlan.from ? "Отсюда" : "Маршрут"}}</button>
+    <button v-if="props.fromToPlan.from" class="to">Сюда</button>
+    <button v-if="props.fromToPlan.plan" class="plan">Планировка</button>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { FromToPlan } from './data'
+
+const props = defineProps<{ fromToPlan: FromToPlan }>()
+
+</script>
+
+
+<style lang="scss" scoped>
+@import '@/styles/variables.scss';
+
+.multy-line {
+  flex-direction: column;
+
+  .plan {
+    flex-grow: 5;
+  }
+}
+
+.multy-line,
+.single-line {
+  // margin-top: 10px;
+  gap: 5px;
+
+  .from,
+  .to {
+    flex-grow: 5;
+  }
+}
+
+.line1,
+.line2 {
+  gap: 5px;
+}
+
+.from,
+.to,
+.plan {
+  // width: 1000px;
+  font-size: 0.9em;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.from,
+.to {
+  background-color: var(--accent-color);
+  font-weight: 600;
+  color: white;
+
+  &:hover {
+    background-color: #2e993e
+  }
+}
+
+.plan {
+  color: var(--accent-color);
+  background-color: #E2E2E2;
+
+  &:hover {
+    background-color: #d5d5d5;
+  }
+}
+</style>

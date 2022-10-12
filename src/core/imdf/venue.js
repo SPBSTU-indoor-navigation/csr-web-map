@@ -39,7 +39,10 @@ export default class Venue {
         const anchor_id = feature.properties.anchor_id
 
         if (address_id) feature.properties.address = addressById[address_id]
-        if (anchor_id) feature.properties.anchor = anchorById[anchor_id]
+        if (anchor_id) {
+          feature.properties.anchor = anchorById[anchor_id]
+          if (anchorById[anchor_id]?.properties?.address) feature.properties.address = anchorById[anchor_id].properties.address
+        }
       })
     })
 

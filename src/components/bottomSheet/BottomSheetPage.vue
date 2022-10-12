@@ -72,9 +72,6 @@ function onScroll({ target: { scrollTop: y } }) {
 
 .separator {
   margin: 0 -12px;
-  border: none;
-  height: 2px;
-  background-color: $separator;
 }
 
 .page-container {
@@ -111,7 +108,7 @@ function onScroll({ target: { scrollTop: y } }) {
   }
 
   .header {
-    padding-top: 8px;
+    padding-top: 13px;
     position: relative;
 
     &.cloaseble {
@@ -138,13 +135,18 @@ function onScroll({ target: { scrollTop: y } }) {
 
     .close {
       position: absolute;
-      top: 10px;
+      top: 15px;
       right: 0;
+
+      @media (min-width: $phone-width) {
+        top: 10px;
+      }
     }
   }
 
   .content-container {
     overflow-y: scroll;
+    padding-bottom: 300px;
 
     &::-webkit-scrollbar {
       display: none;

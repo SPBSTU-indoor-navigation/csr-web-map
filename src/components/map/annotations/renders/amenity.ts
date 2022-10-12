@@ -7,6 +7,7 @@ import { Box2, Vector2 } from "three";
 import { AnimatedAnnotation } from "../animatedAnnotation";
 import { AnnotationImages } from "../annotationImages";
 import { AnnotationBakery } from '@/core/map/annotations/bakery'
+import { LocalizedString } from "@/core/shared/localizedString";
 
 enum DetailLevel {
   alwaysShowBig = 0,
@@ -49,8 +50,8 @@ const DEFAULT_RADIUS = 10
 
 declare type Data = {
   properties?: {
-    alt_name: {}
-    name: {}
+    alt_name: LocalizedString
+    name: LocalizedString
     detailLevel: number
     category: string
   }
@@ -105,6 +106,9 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
   }
 
   constructor(localPosition: Vector2, data: any) {
+    data.properties.name = new LocalizedString(data.properties.name)
+    data.properties.alt_name = new LocalizedString(data.properties.alt_name)
+
     super(localPosition, data, (data as Data).properties.detailLevel, levelProcessor)
 
     const target = this.target
@@ -163,7 +167,7 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
     applyTextParams(params, ctx)
     ctx.lineJoin = 'round'
     ctx.textBaseline = 'top'
-    const text = multiLineText(this.data.properties.alt_name['ru'], 100, ctx)
+    const text = multiLineText(this.data.properties.alt_name.bestLocalizedValue, 100, ctx)
 
     const hasSpacing = ctx['letterSpacing'] != undefined && params.letterSpacing != 0
 
@@ -259,7 +263,7 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
       applyTextParams(this.textParams(), ctx)
       ctx.lineJoin = 'round'
       ctx.textBaseline = 'top'
-      const text = multiLineText(this.data.properties.alt_name['ru'], 100, ctx)
+      const text = multiLineText(this.data.properties.alt_name.bestLocalizedValue, 100, ctx)
 
       ctx.save()
       ctx.scale(label.scale, label.scale)

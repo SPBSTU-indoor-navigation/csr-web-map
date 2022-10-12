@@ -2,6 +2,7 @@ import { Animator } from "@/core/animator/animator";
 import { AnnotationBakery, TextBakery } from "@/core/map/annotations/bakery";
 import { DetailLevelProcessor, DetailLevelState } from "@/core/map/annotations/detailLevelProcessor";
 import { Color } from "@/core/shared/color";
+import { LocalizedString } from "@/core/shared/localizedString";
 import { applyTextParams, clamp, drawTextWithCurrentParams, modify, multiLineText, TextParams } from "@/core/shared/utils";
 import { Easing } from "@tweenjs/tween.js";
 import { Box2, Vector2 } from "three";
@@ -22,9 +23,9 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
 
   declare data: {
     properties?: {
-      short_name: {}
-      alt_name: {}
-      name: {}
+      short_name: LocalizedString
+      alt_name: LocalizedString
+      name: LocalizedString
       category: string,
       image: string
     }
@@ -78,6 +79,11 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
   contentImg: HTMLImageElement | null = null
 
   constructor(localPosition: Vector2, data: any) {
+    data.properties.short_name = new LocalizedString(data.properties.short_name)
+    data.properties.alt_name = new LocalizedString(data.properties.alt_name)
+    data.properties.name = new LocalizedString(data.properties.name)
+
+
     super(localPosition, data, 0, levelProcessor)
 
     const target = this.target
@@ -139,7 +145,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
     applyTextParams(params, ctx)
     ctx.lineJoin = 'round'
     ctx.textBaseline = 'top'
-    const text = multiLineText(this.data.properties.name['ru'], 100, ctx)
+    const text = multiLineText(this.data.properties.name.bestLocalizedValue, 100, ctx)
 
     const hasSpacing = ctx['letterSpacing'] != undefined && params.letterSpacing != 0
 
@@ -194,8 +200,8 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
 
-        if (this.data.properties.short_name?.['ru']) {
-          ctx.fillText(this.data.properties.short_name['ru'], 0, 0)
+        if (this.data.properties.short_name?.bestLocalizedValue) {
+          ctx.fillText(this.data.properties.short_name.bestLocalizedValue, 0, 0)
         } else {
           ctx.clip()
           ctx.globalAlpha = clamp(point.contentOpacity, 0, 1)
@@ -220,7 +226,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
       applyTextParams(this.textParams(), ctx)
       ctx.lineJoin = 'round'
       ctx.textBaseline = 'top'
-      const text = multiLineText(this.data.properties.name['ru'], 100, ctx)
+      const text = multiLineText(this.data.properties.name.bestLocalizedValue, 100, ctx)
 
       ctx.save()
       ctx.translate(0, label.offsetY + 20)
@@ -234,7 +240,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
     if (isAnim) {
       drawPoint(ctx)
     } else {
-      const text = this.data.properties.short_name?.['ru'] || (this.contentImg?.complete ? this.contentImg.src : '-')
+      const text = this.data.properties.short_name?.bestLocalizedValue || (this.contentImg?.complete ? this.contentImg.src : '-')
       AnnotationBakery.instance.bakeAndRender({
         name: `point_${point.contentOpacity <= Number.MIN_VALUE ? '' : text}_${this.currentStyle.pointFill.hex}_${Math.round(point.size * 1000) / 1000}`,
         size: { width: DEFAULT_RADIUS * point.size * 2, height: DEFAULT_RADIUS * point.size * 2 },
@@ -246,7 +252,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
     if (isAnim || label.opacity != 1) {
       drawLabel(ctx)
     } else {
-      const text = this.data.properties.name['ru']
+      const text = this.data.properties.name.bestLocalizedValue
       TextBakery.instance.bakeAndRender({
         name: `label_${text}_${this.currentStyle.labelColor.hex}`,
         text, ctx, maxWidth: 100,

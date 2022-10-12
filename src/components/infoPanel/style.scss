@@ -1,6 +1,11 @@
-.info-panel-group {
+.info-panel-section {
   border-radius: 10px;
-  margin-bottom: 20px;
   padding: 10px;
   background-color: #ffffff;
+}
+
+.info-panel-section-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 5px;
 }

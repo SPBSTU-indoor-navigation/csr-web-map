@@ -49,7 +49,7 @@ import { MapController } from '@/core/map/mapController';
 
 import { showBackedCanvas, showBackedOutline, renderAnnotationCount, currentZoom, showAnnotationBBox, showDebugPanel } from '@/store/debugParams'
 
-import { IMapDelegate } from './mapControlls';
+import { FocusVariant, IMapDelegate } from './mapControlls';
 
 const mapContainer = ref(null)
 
@@ -129,10 +129,9 @@ async function load() {
     mapAnnotations.zoom(zoom.value);
   });
 
-  // @ts-ignore
   const delegate: IMapDelegate = {
     selectedAnnotation: mapAnnotations.selected,
-    selectAnnotation: (a) => {
+    selectAnnotation: (a, focusVariant) => {
       mapAnnotations.select(a)
     },
     deselectAnnotation: (a) => {

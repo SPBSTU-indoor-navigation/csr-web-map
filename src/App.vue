@@ -7,19 +7,21 @@
 @import '@/styles/variables.scss';
 
 #app {
-  font-family: $font-family;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #000000;
+  accent-color: $accent-color;
 }
 
-// :root {
-//   --phone-width: #{$phone-width};
-// }
+:root {
+  --phone-width: #{$phone-width};
+  --accent-color: #{$accent-color};
+}
 
 * {
   margin: 0;
   padding: 0;
+  font-family: $font-family;
 
   &:focus {
     outline: none;

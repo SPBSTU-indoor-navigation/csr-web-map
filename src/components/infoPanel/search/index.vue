@@ -9,7 +9,7 @@
       <button @click="select">Selct</button>
       <button @click="state=2">Selct</button>
       <div class="info-panel-group">
-        <p>{{state}}</p>
+        <p>{{page}}v</p>
         <p>Буквы</p>
         <p>Буквы</p>
         <p>Буквы</p>
@@ -21,17 +21,17 @@
 
 <script setup lang="ts">
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
+import { usePageStore } from "@/components/bottomSheet/usePageStore";
 import { State } from "@/components/bottomSheet/useBottomSheetGesture";
 import SearchBarVue from "@/components/shared/searchBar/index.vue";
 import { computed, ref } from "@vue/reactivity";
-import { useStorage } from "@vueuse/core";
 import { inject, Ref } from "vue";
 
-const { title, delegate: { selectOccupant } } = defineProps(['title', 'delegate'])
+const { delegate: { selectOccupant }, page } = defineProps(['delegate', 'page'])
 const emit = defineEmits(['push', 'pop'])
 const state: Ref = inject('state')
 
-const searchText = useStorage('searchText', '', sessionStorage)
+const searchText = usePageStore(`search_${page.value}`, 'searchText', '')
 
 const focusDelay = computed(() => state.value == State.big ? 0 : 500)
 

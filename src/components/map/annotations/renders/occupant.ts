@@ -2,6 +2,7 @@ import { Animator } from '@/core/animator/animator'
 import { AnnotationBakery, TextBakery } from '@/core/map/annotations/bakery'
 import { DetailLevelProcessor, DetailLevelState } from '@/core/map/annotations/detailLevelProcessor'
 import { Color } from '@/core/shared/color'
+import { LocalizedString } from '@/core/shared/localizedString'
 import { applyTextParams, drawTextWithCurrentParams, modify, multiLineText, TextParams } from '@/core/shared/utils'
 import { Easing } from '@tweenjs/tween.js'
 import { Box2, Vector2 } from 'three'
@@ -63,9 +64,13 @@ const DEFAULT_RADIUS = 5
 export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLevelState> {
   declare data: {
     properties?: {
-      shortName: {
-      }
-      category: string
+      name: LocalizedString
+      shortName: LocalizedString
+      category: string,
+      email: string,
+      phone: string,
+      website: string,
+      address: any
     }
   }
 
@@ -117,6 +122,9 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
   }
 
   constructor(localPosition: Vector2, data: any) {
+    data.properties.name = new LocalizedString(data.properties.name)
+    data.properties.shortName = new LocalizedString(data.properties.shortName)
+
     super(localPosition, data, detailLevelByCategory(data.properties.category), levelProcessor)
 
     const target = this.target
@@ -183,7 +191,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     applyTextParams(params, ctx)
     ctx.lineJoin = 'round'
     ctx.textBaseline = 'top'
-    const text = multiLineText(this.data.properties.shortName['ru'], 80, ctx)
+    const text = multiLineText(this.data.properties.shortName.bestLocalizedValue, 80, ctx)
 
     const hasSpacing = ctx['letterSpacing'] != undefined && params.letterSpacing != 0
 
@@ -265,7 +273,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       applyTextParams(this.textParams(), ctx)
       ctx.lineJoin = 'round'
       ctx.textBaseline = 'top'
-      const text = multiLineText(this.data.properties.shortName['ru'], 80, ctx)
+      const text = multiLineText(this.data.properties.shortName.bestLocalizedValue, 80, ctx)
 
       ctx.save()
       ctx.scale(label.scale, label.scale)
@@ -291,7 +299,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     if (isAnim || label.opacity != 1) {
       drawLabel(ctx)
     } else {
-      const text = this.data.properties.shortName['ru']
+      const text = this.data.properties.shortName.bestLocalizedValue
       TextBakery.instance.bakeAndRender({
         name: `label_${text}_${this.currentStyle.labelColor.hex}`,
         text, ctx, maxWidth: 80,

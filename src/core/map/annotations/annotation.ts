@@ -68,7 +68,7 @@ export class Annotation extends Shape2D implements IAnnotation {
 
   constructor(localPosition: Vector2, data: any) {
     super()
-    this.id = uuidv4()
+    this.id = data?.id || uuidv4()
     this.scenePosition = localPosition
     this.data = data
   }

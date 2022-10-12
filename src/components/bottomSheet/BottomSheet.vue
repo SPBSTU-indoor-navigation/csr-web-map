@@ -2,8 +2,9 @@
   <div class="container non-block" :class="fullHeight ? 'fullHeight':''"
     :style="{backgroundColor: `rgba(0,0,0,${backgroundOpacity})`, pointerEvents }">
     <Transition :name="animType" @before-leave="onBeforeLeave">
-      <component :is="currentPage.component" :key="currentPage.key" @pop="onPop" @push="onPush" :class="State[state]"
-        @move="onMove" :delegate="delegate" ref="pageContainer" @pointerdown="onPointerDown" :data="currentPage.data" />
+      <component :is="currentPage.component" :key="currentPage.key" :data="currentPage.data" :page="currentPage.key"
+        :delegate="delegate" @pop="onPop" @push="onPush" @move="onMove" @pointerdown="onPointerDown"
+        :class="State[state]" ref="pageContainer" />
     </Transition>
   </div>
 </template>
