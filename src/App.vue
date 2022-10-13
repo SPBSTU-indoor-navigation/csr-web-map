@@ -2,6 +2,15 @@
   <router-view />
 </template>
 
+<script setup>
+import { useZoomDisable } from '@/core/shared/composition/useZoomDisable'
+import { onMounted } from 'vue';
+
+onMounted(() => {
+  useZoomDisable()
+})
+</script>
+
 <style lang="scss">
 @import '@/styles/shared.scss';
 @import '@/styles/variables.scss';
@@ -22,6 +31,7 @@
   margin: 0;
   padding: 0;
   font-family: $font-family;
+  touch-action: pan-x pan-y;
 
   &:focus {
     outline: none;
