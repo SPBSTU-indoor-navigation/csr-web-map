@@ -109,9 +109,9 @@ watchEffect(() => {
 .controll-image {
   fill: var(--accent-color);
 
-  min-width: 24px;
-  min-height: 24px;
-  max-width: 24px;
-  max-height: 24px;
+  min-width: 22px;
+  min-height: 22px;
+  max-width: 22px;
+  max-height: 22px;
 }
 </style>
