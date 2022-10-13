@@ -1,16 +1,18 @@
 <template>
   <div class="cell flex" :class="props.clickable ? 'clickable' : ''">
-    <div class="left flex" v-if="!!this.$slots.left">
+    <div class="left flex" v-if="slots.left">
       <slot name="left"></slot>
     </div>
     <p>{{props.title}}</p>
-    <div class="right flex" v-if="!!this.$slots.right">
+    <div class="right flex" v-if="slots.right">
       <slot name="right"></slot>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useSlots } from 'vue';
+
 
 const props = defineProps({
   clickable: {
@@ -19,6 +21,8 @@ const props = defineProps({
   },
   title: String
 })
+
+const slots = useSlots()
 
 </script>
 
