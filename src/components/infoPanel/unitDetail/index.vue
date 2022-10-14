@@ -22,7 +22,7 @@
           </template>
         </SectionCellVue>
         <hr class="separator" />
-        <SectionCellVue title="Сообщить об ошибке" :clickable="true">
+        <SectionCellVue title="Сообщить об ошибке" :clickable="true" @click="createRoute">
           <template #left>
             <IconVue img="report" class="controll-image" />
           </template>
@@ -74,9 +74,7 @@ onMounted(() => {
 
 watchEffect(() => {
   console.log('unitInfo', toRaw(unitInfo.value));
-
 })
-
 
 </script>
 

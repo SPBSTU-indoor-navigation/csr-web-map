@@ -11,7 +11,7 @@ export enum FocusVariant {
 export interface IMapDelegate {
   selectedAnnotation: ShallowRef<IAnnotation | null>;
 
-  selectAnnotation(annotation: IAnnotation, focusVariant: FocusVariant): void;
-  deselectAnnotation(annotation: IAnnotation): void;
+  selectAnnotation?(annotation: IAnnotation, focusVariant: FocusVariant): void;
+  deselectAnnotation?(annotation: IAnnotation): void;
   // selectedAnnotation(): IAnnotation;
 }

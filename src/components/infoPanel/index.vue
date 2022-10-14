@@ -5,11 +5,11 @@
 </template>
 
 <script setup lang="ts">
-import { onAnnotationSelect, onAnnotationDeSelect } from '@/store/mapInfoPanel';
-import { markRaw, provide, ref, ShallowRef, shallowRef } from 'vue';
+import { inject, markRaw, provide, ref, ShallowRef, shallowRef, watch, watchEffect } from 'vue';
 import BottomSheetVue from '../bottomSheet/BottomSheet.vue';
 import UnitDetailVue from './unitDetail/index.vue';
 import SearchVue from './search/index.vue';
+import { IMapDelegate } from '../map/mapControlls';
 
 const initPage = {
   component: SearchVue,
@@ -19,46 +19,27 @@ const initPage = {
 const delegate: {
   pages?: () => { component: any; data: any; key: number }[],
   push?: (params: { component: any; data: any }) => void,
-  pop?: () => void,
-  selectOccupant: (occupant: any) => void
-} = {
-  selectOccupant
-};
+  pop?: () => void
+} = {};
 
+const mapDelegate = inject('mapDelegate') as ShallowRef<IMapDelegate>
 
-let lastSelected = null;
-onAnnotationDeSelect.addEventListener((annotation) => {
-  lastSelected = null;
-  setTimeout(() => {
-    if (lastSelected) return;
-    const lastPage = delegate.pages()[delegate.pages().length - 1];
-    if (lastPage.component === UnitDetailVue) {
-      delegate.pop();
-    }
-  }, 0);
-});
+watch(() => mapDelegate.value.selectedAnnotation.value, (annotation) => {
+  if (!delegate.pages) return
 
-onAnnotationSelect.addEventListener((annotation) => {
   const pages = delegate.pages();
   const lastPage = pages[pages.length - 1];
-  lastSelected = annotation;
-
-  if (lastPage.component === UnitDetailVue) {
-    lastPage.data = markRaw(annotation);
-
-  } else {
+  if (annotation && lastPage.component != UnitDetailVue) {
     delegate.push({
       component: UnitDetailVue,
-      data: markRaw(annotation)
+      data: { annotation: markRaw(annotation) }
     });
+  } else if (annotation && lastPage.component == UnitDetailVue) {
+    lastPage.data = { annotation: markRaw(annotation) };
+  } else if (!annotation && lastPage.component == UnitDetailVue) {
+    delegate.pop();
   }
 });
-
-
-function selectOccupant() {
-  console.log('select occupant');
-
-}
 
 </script>
 

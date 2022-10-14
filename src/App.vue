@@ -3,12 +3,7 @@
 </template>
 
 <script setup>
-import { useZoomDisable } from '@/core/shared/composition/useZoomDisable'
-import { onMounted } from 'vue';
 
-onMounted(() => {
-  useZoomDisable()
-})
 </script>
 
 <style lang="scss">
