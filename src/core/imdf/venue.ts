@@ -1,8 +1,11 @@
+import { convert, IAnnotationInfo } from "@/components/map/annotations/annotationInfo";
 import { AmenityAnnotation } from "@/components/map/annotations/renders/amenity";
-import { Vector2 } from "three";
+import { BufferGeometry, Mesh, MeshBasicMaterial, Vector2 } from "three";
+import { MapController } from "../map/mapController";
 import Building from "./building";
 import Environments from "./environment";
 import Level from "./level";
+import { MeshLineMaterial } from "./MeshLineESM";
 import {
   createPolygon, geoToVector,
   LineMeshMaterialStorage,
@@ -12,19 +15,34 @@ import {
 
 
 export default class Venue {
+  archive: {
+    building: any[];
+    venue: any[];
+  }
+  data = {}
 
-  /** @type {Building[]} */
-  buildings = []
-  /** @type {AmenityAnnotation[]} */
-  enviromentAmenity = []
-  archive = {}
+  buildings: Building[] = []
+  environments: Environments
+  enviromentAmenity: AmenityAnnotation[] = []
 
+  annotations: IAnnotationInfo[] = []
+
+
+  private lineMeshMaterialStorage: LineMeshMaterialStorage
+  private mkGeometry: any
+  private pivot: { latitude: number, longitude: number }
+
+  private mesh: Mesh<BufferGeometry, MeshBasicMaterial>
+  private buildingFootprintMesh: Mesh<BufferGeometry, MeshBasicMaterial>
+  private buildingFootprintOutlineMesh: Mesh<BufferGeometry, MeshLineMaterial>
 
   constructor(archive) {
     this.lineMeshMaterialStorage = new LineMeshMaterialStorage()
     this.data = archive.venue
     this.archive = archive
     this.mkGeometry = createPolygon(this.data)
+
+    // @ts-ignore
     this.mkGeometry.style = new mapkit.Style({ fillOpacity: 0, strokeOpacity: 0 })
 
     this.pivot = this.mkGeometry.region().center
@@ -48,6 +66,7 @@ export default class Venue {
 
     console.log('archive', archive);
 
+    const annotations = []
     this.buildings = archive.building.map(building => {
 
       const levels = archive.level
@@ -66,11 +85,21 @@ export default class Venue {
           return new Level(level, units, openings, details, amenitys, occupants, this.lineMeshMaterialStorage, (p) => geoToVector(this.pivot, p))
         })
 
+      annotations.push(...levels.flatMap(t => t.annotations))
+
 
       return new Building(building,
         levels,
         archive.attraction.filter(t => t.properties.building_id == building.id),
         (p) => geoToVector(this.pivot, p))
+    })
+
+    this.buildings.forEach(building => {
+      building.levels.forEach(level => {
+        level.annotations.forEach(annotation => {
+          annotation.building = building
+        })
+      })
     })
 
 
@@ -81,14 +110,22 @@ export default class Venue {
     })
 
     this.environments = new Environments(archive.enviroment, archive.detail, this.lineMeshMaterialStorage)
-    this.mesh = meshForFeatureCollection(archive.venue, -2)
-    this.buildingFootprintMesh = meshForFeatureCollection(archive.building)
+    this.mesh = meshForFeatureCollection(archive.venue, -2) as Mesh<BufferGeometry, MeshBasicMaterial>
+    this.buildingFootprintMesh = meshForFeatureCollection(archive.building) as Mesh<BufferGeometry, MeshBasicMaterial>
 
     this.buildingFootprintOutlineMesh = outlineMeshForFeatureCollection(archive.building, 1, this.lineMeshMaterialStorage)
+
+
+    annotations.push(...this.buildings.flatMap(t => t.attractions))
+    annotations.push(...this.enviromentAmenity)
+
+    this.annotations = annotations.map(convert)
+
+    console.log('annotations', this.annotations);
+
   }
 
-  /** @param { import('../map/mapController').MapController } map */
-  Add(map) {
+  Add(map: MapController) {
     [this.mesh, this.buildingFootprintMesh, this.buildingFootprintOutlineMesh]
       .forEach(mesh => map.addOverlay(mesh))
 
@@ -97,8 +134,7 @@ export default class Venue {
     setTimeout(() => map.addAnnotation(this.enviromentAmenity), 0)
   }
 
-  /** @param { import('../map/mapController').MapController } map */
-  Remove(map) {
+  Remove(map: MapController) {
     [this.mesh, this.buildingFootprintMesh, this.buildingFootprintOutlineMesh]
       .forEach(mesh => map.removeOverlay(mesh))
 
@@ -109,6 +145,8 @@ export default class Venue {
   Style(styleSheet) {
     this.mesh.material.color.set(styleSheet.venue.fillColor)
     this.buildingFootprintMesh.material.color.set(styleSheet['building.footprint'].fillColor)
+
+    // @ts-ignore material.color
     this.buildingFootprintOutlineMesh.material.color.set(styleSheet['building.footprint'].strokeColor)
 
     this.buildingFootprintOutlineMesh.material.lineWidth = styleSheet['building.footprint'].lineWidth
@@ -133,6 +171,8 @@ export default class Venue {
     svg.appendChild(this.environments.CrateSVG())
 
     const footprint = createSvgPathFromFeatureCollection(archive.building, this.buildingFootprintMesh.material.color.getHexString())
+
+    // @ts-ignore material.color
     footprint.setAttribute('stroke', '#' + this.buildingFootprintOutlineMesh.material.color.getHexString())
     footprint.setAttribute('stroke-width', this.buildingFootprintOutlineMesh.material.lineWidth)
     svg.appendChild(footprint)

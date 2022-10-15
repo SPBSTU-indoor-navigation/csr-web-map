@@ -49,8 +49,14 @@
 
 hr.separator {
   border: none;
-  height: 2px;
+  min-height: 1px;
+  max-height: 1px;
   background-color: $separator;
+
+  &.small {
+    min-height: 0.5px;
+    max-height: 0.5px;
+  }
 }
 
 .link {

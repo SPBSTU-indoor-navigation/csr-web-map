@@ -131,6 +131,7 @@ async function load() {
 
   const delegate: IMapDelegate = {
     selectedAnnotation: mapAnnotations.selected,
+    venue,
     selectAnnotation: (a, focusVariant) => {
       mapAnnotations.select(a)
     },

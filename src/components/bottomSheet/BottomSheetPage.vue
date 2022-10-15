@@ -110,6 +110,7 @@ function onScroll({ target: { scrollTop: y } }) {
   .header {
     padding-top: 13px;
     position: relative;
+    // min-height: 42.5px;
 
     &.cloaseble {
       padding-right: 30px;

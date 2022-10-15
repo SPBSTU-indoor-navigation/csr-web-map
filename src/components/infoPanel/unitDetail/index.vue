@@ -21,7 +21,7 @@
             <IconVue img="star.fill" class="controll-image" />
           </template>
         </SectionCellVue>
-        <hr class="separator" />
+        <hr class="separator small" />
         <SectionCellVue title="Сообщить об ошибке" :clickable="true" @click="createRoute">
           <template #left>
             <IconVue img="report" class="controll-image" />
@@ -100,8 +100,7 @@ watchEffect(() => {
 }
 
 .separator {
-  margin: 10px 0;
-  height: 1px;
+  margin: 10px -10px 10px 32px;
 }
 
 .controll-image {

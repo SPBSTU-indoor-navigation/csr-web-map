@@ -124,7 +124,7 @@ export function mergeGeometrys(geometrys) {
   return mergeBufferGeometries(geometrys, false)
 }
 
-/** @param { LineMeshMaterialStorage } materialStorage  @return { Mesh } */
+/** @param { LineMeshMaterialStorage } materialStorage  @return { Mesh<BufferGeometry, MeshLineMaterial> } */
 export function outlineMeshForFeatureCollection(collection, order = 0, materialStorage) {
 
   const material = new MeshLineMaterial({ sizeAttenuation: false });
@@ -138,8 +138,8 @@ export function outlineMeshForFeatureCollection(collection, order = 0, materialS
   return mesh
 }
 
-/** @param { LineMeshMaterialStorage } materialStorage @return { Mesh } */
-export function meshForFeatureCollection(collection, order = 0, materialStorage) {
+/** @param { LineMeshMaterialStorage } materialStorage @return { Mesh<BufferGeometry, MeshLineMaterial | MeshBasicMaterial> } */
+export function meshForFeatureCollection(collection, order = 0, materialStorage = null) {
   let matertial
   if (materialStorage) {
     matertial = new MeshLineMaterial()

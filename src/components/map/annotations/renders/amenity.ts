@@ -8,6 +8,8 @@ import { AnimatedAnnotation } from "../animatedAnnotation";
 import { AnnotationImages } from "../annotationImages";
 import { AnnotationBakery } from '@/core/map/annotations/bakery'
 import { LocalizedString } from "@/core/shared/localizedString";
+import Building from "@/core/imdf/building";
+import Level from "@/core/imdf/level";
 
 enum DetailLevel {
   alwaysShowBig = 0,
@@ -59,6 +61,8 @@ declare type Data = {
 
 export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLevelState> {
   declare data: Data
+  building: Building
+  level: Level
 
   annotationParams = {
     point: {
@@ -105,11 +109,12 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
     this.updateBBox(size.width, size.height, center)
   }
 
-  constructor(localPosition: Vector2, data: any) {
+  constructor(localPosition: Vector2, data: any, level: Level = null) {
     data.properties.name = new LocalizedString(data.properties.name)
     data.properties.alt_name = new LocalizedString(data.properties.alt_name)
 
     super(localPosition, data, (data as Data).properties.detailLevel, levelProcessor)
+    this.level = level
 
     const target = this.target
     this.selectAnimation = new Animator(this.onAnim)

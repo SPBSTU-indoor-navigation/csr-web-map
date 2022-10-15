@@ -1,21 +1,37 @@
 import { AttractionAnnotation } from '@/components/map/annotations/renders/attraction'
 import { Box2, Vector2 } from 'three'
+import { MapController } from '../map/mapController'
+import { LocalizedString } from '../shared/localizedString'
+import Level from './level'
 import { polygonIntersection } from './utils'
 
 
 export default class Building {
 
+  data: {
+    geometry: any,
+    properties: {
+      name: LocalizedString,
+      alt_name: LocalizedString,
+    }
+  }
+
+  levels: Level[]
+
+  attractions: AttractionAnnotation[] = []
   currentOrdinal = 0
-  showLevel = false
-  attractions = []
 
-  /** @type { import('../map/mapController').MapController } */
-  map = null
+  private map: MapController = null
 
-  bbox = null
-  points = []
+  private bbox = null
+  private points = []
+  private showLevel = false
+  private levelByOrdinal: { [key: number]: Level } = {}
 
-  constructor(data, levels, attractions, translate) {
+  constructor(data, levels: Level[], attractions, translate) {
+    data.properties.name = new LocalizedString(data.properties.name)
+    data.properties.alt_name = new LocalizedString(data.properties.alt_name)
+
     this.data = data
     this.levels = levels
     this.attractions = attractions.map(t => {
@@ -47,6 +63,7 @@ export default class Building {
 
     let isInside = false
     let i = 0, j = points.length - 1;
+    // @ts-ignore
     for (i, j; i < points.length; j = i++) {
       if ((points[i].y > point.y) != (points[j].y > point.y) &&
         point.x < (points[j].x - points[i].x) * (point.y - points[i].y) / (points[j].y - points[i].y) + points[i].x) {
@@ -70,14 +87,12 @@ export default class Building {
     return false
   }
 
-  /** @param { import('../map/mapController').MapController } map */
-  Add(map) {
+  Add(map: MapController) {
     this.map = map
     setTimeout(() => map.addAnnotation(this.attractions), 0)
   }
 
-  /** @param { import('../map/mapController').MapController } map */
-  Remove(map) {
+  Remove(map: MapController) {
     this.HideIndoor()
   }
 

@@ -2,7 +2,7 @@
 <template>
   <div class="level-switcher highlight-disable">
     <div class="levels card-blur card-shadow">
-      <div v-for="level in levels" class="level" @click="$emit('update:level', level.ordinal)">{{ level.name.ru }}
+      <div v-for="level in levels" class="level" @click="$emit('update:level', level.ordinal)">{{ level.name }}
       </div>
     </div>
 
@@ -22,7 +22,7 @@ const emit = defineEmits(['update:level'])
 const changed = ref(false)
 
 const levels = computed(() => {
-  return props.levels.map(t => ({ ordinal: t.ordinal, name: t.data.properties.short_name })).sort((a, b) => b.ordinal - a.ordinal)
+  return props.levels.map(t => ({ ordinal: t.ordinal, name: t.data.properties.short_name.bestLocalizedValue })).sort((a, b) => b.ordinal - a.ordinal)
 })
 
 const isPhone = useMediaQuery(`(max-width: ${phoneWidth})`)

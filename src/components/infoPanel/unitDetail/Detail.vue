@@ -10,7 +10,7 @@
         <a v-else-if="line.type == 'url'" class="link" :href="line.content" target="_blank"
           rel="noopener noreferrer">{{line.content}}</a>
         <p v-else style="white-space: pre-line">{{line.content}}</p>
-        <hr v-if="i < lines.length - 1" class="separator">
+        <hr v-if="i < lines.length - 1" class="separator small">
       </div>
     </div>
 
@@ -48,8 +48,7 @@ const lines = computed(() => {
 }
 
 .separator {
-  margin: 10px 0;
-  height: 1px;
+  margin: 10px -10px 10px 0;
 }
 
 .line {

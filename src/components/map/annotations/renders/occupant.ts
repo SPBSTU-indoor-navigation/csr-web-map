@@ -1,4 +1,6 @@
 import { Animator } from '@/core/animator/animator'
+import Building from '@/core/imdf/building'
+import Level from '@/core/imdf/level'
 import { AnnotationBakery, TextBakery } from '@/core/map/annotations/bakery'
 import { DetailLevelProcessor, DetailLevelState } from '@/core/map/annotations/detailLevelProcessor'
 import { Color } from '@/core/shared/color'
@@ -74,6 +76,9 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     }
   }
 
+  building: Building
+  level: Level
+
   annotationParams = {
     point: {
       size: 1,
@@ -121,11 +126,12 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     this.updateBBox(size.width, size.height, center)
   }
 
-  constructor(localPosition: Vector2, data: any) {
+  constructor(localPosition: Vector2, data: any, level: Level) {
     data.properties.name = new LocalizedString(data.properties.name)
     data.properties.shortName = new LocalizedString(data.properties.shortName)
 
     super(localPosition, data, detailLevelByCategory(data.properties.category), levelProcessor)
+    this.level = level
 
     const target = this.target
 

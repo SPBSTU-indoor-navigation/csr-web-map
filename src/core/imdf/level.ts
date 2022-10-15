@@ -1,13 +1,32 @@
 import { AmenityAnnotation } from '@/components/map/annotations/renders/amenity'
 import { OccupantAnnotation } from '@/components/map/annotations/renders/occupant'
-import { Group, Vector2 } from 'three'
+import { Group, Mesh, MeshBasicMaterial, Vector2 } from 'three'
+import { LocalizedString } from '../shared/localizedString'
 import { meshForFeatureCollection, outlineMeshForFeatureCollection } from './utils'
 
 
 export default class Level {
   annotations = []
+  data: {
+    properties: {
+      name: LocalizedString
+      short_name: LocalizedString
+    }
+  }
+
+  ordinal: number
+  private units
+  private openings
+  private details
+  private amenitys
+  private occupants
+
+  private geometrys: { [key: string]: Mesh }
+  private groupMesh: Group
 
   constructor(data, units, openings, details, amenitys, occupants, lineMeshMaterialStorage, translate) {
+    data.properties.name = new LocalizedString(data.properties.name)
+    data.properties.short_name = new LocalizedString(data.properties.short_name)
 
     this.ordinal = data.properties.ordinal
 
@@ -18,18 +37,16 @@ export default class Level {
     this.amenitys = amenitys
     this.occupants = occupants
 
-    console.log('occupants', occupants);
-
     this.annotations = occupants.map(t => {
       const coordArray = t.properties.anchor.geometry.coordinates
       const pos = translate({ latitude: coordArray[1], longitude: coordArray[0] })
-      return new OccupantAnnotation(new Vector2(pos.x, pos.y), t)
+      return new OccupantAnnotation(new Vector2(pos.x, pos.y), t, this)
     })
 
     this.annotations.push(...amenitys.map(t => {
       const coordArray = t.geometry.coordinates
       const pos = translate({ latitude: coordArray[1], longitude: coordArray[0] })
-      return new AmenityAnnotation(new Vector2(pos.x, pos.y), t)
+      return new AmenityAnnotation(new Vector2(pos.x, pos.y), t, this)
     }))
 
     const groupedUnits = units.groupBy(t => {
@@ -77,17 +94,21 @@ export default class Level {
       }
 
       const style = styleSheet.indoor[styleCategory] || styleSheet.indoor.default
-      const material = this.geometrys[category].material
+      const material = this.geometrys[category].material as MeshBasicMaterial
 
       material.color.set(style.fillColor)
     })
 
+    // @ts-ignore material.color
     this.geometrys.outline.material.color.set(styleSheet.indoor.outline.strokeColor)
+    // @ts-ignore material.color
     this.geometrys.levelOutline.material.color.set(styleSheet.indoor.outline.strokeColor)
   }
 
   OnZoom(zoom) {
+    // @ts-ignore lineWidth
     this.geometrys.outline.material.lineWidth = Math.max(zoom / 15, 2)
+    // @ts-ignore lineWidth
     this.geometrys.levelOutline.material.lineWidth = Math.max(zoom / 10, 5)
   }
 }

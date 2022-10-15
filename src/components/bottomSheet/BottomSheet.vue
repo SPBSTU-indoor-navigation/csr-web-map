@@ -230,7 +230,7 @@ $page-color: rgb(239, 239, 239);
   position: relative;
 
   @media (max-width: 1200px) {
-    width: 300px;
+    width: 330px;
   }
 
   @media (max-width: $phone-width) {

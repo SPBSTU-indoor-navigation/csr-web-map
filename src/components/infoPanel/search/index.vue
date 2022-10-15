@@ -5,16 +5,7 @@
     </template>
 
     <template #content>
-      <h2>{{searchText}}</h2>
-      <button @click="select">Selct</button>
-      <button @click="state=2">Selct</button>
-      <div class="info-panel-group">
-        <p>{{page}}v</p>
-        <p>Буквы</p>
-        <p>Буквы</p>
-        <p>Буквы</p>
-        <p>Буквы</p>
-      </div>
+      <AnnotationInfoListVue :annotations="annotations" />
     </template>
   </BottomSheetPageVue>
 </template>
@@ -24,20 +15,29 @@ import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
 import { usePageStore } from "@/components/bottomSheet/usePageStore";
 import { State } from "@/components/bottomSheet/useBottomSheetGesture";
 import SearchBarVue from "@/components/shared/searchBar/index.vue";
-import { computed, ref } from "@vue/reactivity";
-import { inject, Ref } from "vue";
+import { computed, ref, ShallowRef, shallowRef } from "@vue/reactivity";
+import { inject, Ref, watchEffect } from "vue";
+import { IMapDelegate } from "@/components/map/mapControlls";
+import { IAnnotationInfo } from "@/components/map/annotations/annotationInfo";
+import AnnotationInfoListVue from "@/components/shared/annotations/AnnotationInfoList.vue";
 
-const { delegate: { selectOccupant }, page } = defineProps(['delegate', 'page'])
-const emit = defineEmits(['push', 'pop'])
+
+const { page } = defineProps(['page'])
 const state: Ref = inject('state')
+const mapDelegate = inject('mapDelegate') as ShallowRef<IMapDelegate>
+const annotations: ShallowRef<IAnnotationInfo[]> = shallowRef([]);
 
 const searchText = usePageStore(`search_${page.value}`, 'searchText', '')
 
 const focusDelay = computed(() => state.value == State.big ? 0 : 500)
 
-function select() {
-  selectOccupant();
-}
+watchEffect(() => {
+  if (!mapDelegate.value.venue) return
+  annotations.value = mapDelegate.value.venue.value.annotations.sort((a, b) => a.title.bestLocalizedValue.localeCompare(b.title.bestLocalizedValue))
+
+  console.log(annotations.value);
+
+})
 
 function onFocus() {
   state.value = 2;
