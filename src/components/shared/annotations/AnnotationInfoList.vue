@@ -48,11 +48,11 @@ const categories = computed(() => {
 
   let res: { title: string, annotations: IAnnotationInfo[] }[] = []
 
-  if (attractions.length > 0) res.push({ title: 'Здания', annotations: attractions })
+  if (attractions.length > 0) res.push({ title: 'Здания', annotations: attractions.slice(0, 5) })
 
   Array.from(groupped.keys()).sort(localCompare).forEach((key) => {
     const annotations = groupped.get(key)
-    res.push({ title: key?.bestLocalizedValue, annotations: annotations })
+    res.push({ title: key?.bestLocalizedValue, annotations: annotations.slice(0, 5) })
   })
 
   return res
