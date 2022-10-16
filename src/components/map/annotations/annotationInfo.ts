@@ -12,6 +12,9 @@ import { OccupantAnnotation } from "./renders/occupant"
 export class IAnnotationInfo {
   readonly annotation: IAnnotation
 
+  readonly sprite?: HTMLImageElement
+  readonly backgroundColor?: string
+
   readonly title: LocalizedString
   readonly additionalTitle?: LocalizedString
   readonly place?: LocalizedString | null
@@ -31,6 +34,7 @@ export function convert(annotation: AttractionAnnotation | OccupantAnnotation | 
       title: annotation.data.properties.name,
       place: annotation.building?.data.properties.name,
       floor: annotation.level?.data.properties.name,
+      sprite: annotation.img
     }
   } else if (annotation instanceof AmenityAnnotation) {
     return {

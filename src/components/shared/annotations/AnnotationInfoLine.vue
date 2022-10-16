@@ -1,14 +1,12 @@
 <template>
   <div class="flex line">
     <div class="annotation-icon">
-
+      <AnnotationIcon :annotation="props.info" />
     </div>
 
     <div class="content">
       <p class="label">{{props.info.title.bestLocalizedValue}}</p>
       <p class="secondary-label" v-if="subtitle">{{subtitle}}</p>
-
-
     </div>
   </div>
 </template>
@@ -16,6 +14,7 @@
 <script setup lang="ts">
 import { IAnnotationInfo } from '@/components/map/annotations/annotationInfo';
 import { computed } from 'vue';
+import AnnotationIcon from './AnnotationIcon.vue';
 
 const props = defineProps<{ info: IAnnotationInfo }>()
 

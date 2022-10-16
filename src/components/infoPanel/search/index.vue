@@ -5,7 +5,7 @@
     </template>
 
     <template #content>
-      <AnnotationInfoListVue :annotations="annotations" />
+      <AnnotationInfoListVue :annotations="annotations" :search-text="searchText" />
     </template>
   </BottomSheetPageVue>
 </template>
@@ -33,7 +33,7 @@ const focusDelay = computed(() => state.value == State.big ? 0 : 500)
 
 watchEffect(() => {
   if (!mapDelegate.value.venue) return
-  annotations.value = mapDelegate.value.venue.value.annotations.sort((a, b) => a.title.bestLocalizedValue.localeCompare(b.title.bestLocalizedValue))
+  annotations.value = mapDelegate.value.venue.value.annotations.sort((a, b) => a.title.localCompare(b.title))
 
   console.log(annotations.value);
 
