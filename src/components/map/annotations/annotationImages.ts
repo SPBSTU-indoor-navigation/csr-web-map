@@ -18,7 +18,6 @@ export class AnnotationImages {
     const load = Object.keys(annotationImages).map(async t => {
       const name = t.split('/').pop()?.split('.').slice(0, -1).join('.')
       this.images[name] = new Image()
-      this.images[name].src = 'https://via.placeholder.com/256x256/'
 
       return {
         name,
