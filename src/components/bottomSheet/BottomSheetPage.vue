@@ -147,7 +147,7 @@ function onScroll({ target: { scrollTop: y } }) {
 
   .content-container {
     overflow-y: scroll;
-    padding-bottom: 300px;
+    padding-bottom: 12px;
 
     &::-webkit-scrollbar {
       display: none;
