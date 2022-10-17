@@ -1,12 +1,14 @@
 import { AmenityAnnotation } from '@/components/map/annotations/renders/amenity'
 import { OccupantAnnotation } from '@/components/map/annotations/renders/occupant'
 import { Group, Mesh, MeshBasicMaterial, Vector2 } from 'three'
+import { Annotation } from '../map/annotations/annotation'
+import { MapController } from '../map/mapController'
 import { LocalizedString } from '../shared/localizedString'
 import { meshForFeatureCollection, outlineMeshForFeatureCollection } from './utils'
 
 
 export default class Level {
-  annotations = []
+  annotations: Annotation[] = []
   data: {
     properties: {
       name: LocalizedString
@@ -69,14 +71,12 @@ export default class Level {
     Object.values(this.geometrys).forEach(mesh => this.groupMesh.add(mesh))
   }
 
-  /** @param { import('../map/mapController').MapController } map */
-  Add(map) {
+  Add(map: MapController) {
     map.addOverlay(this.groupMesh)
     map.addAnnotation(this.annotations)
   }
 
-  /** @param { import('../map/mapController').MapController } map */
-  Remove(map) {
+  Remove(map: MapController) {
     map.removeOverlay(this.groupMesh)
     map.removeAnnotation(this.annotations)
   }

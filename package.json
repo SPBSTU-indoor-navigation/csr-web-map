@@ -1,10 +1,12 @@
 {
   "name": "web-map-nossr",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev": "vite --port 8080 --host",
-    "build": "vite build",
-    "preview": "vite preview --port 4173  --host"
+    "build": "node prebuild.mjs; vite build",
+    "preview": "vite preview --port 4173  --host",
+    "pre-build": "node prebuild.mjs"
   },
   "dependencies": {
     "@heroicons/vue": "^2.0.11",

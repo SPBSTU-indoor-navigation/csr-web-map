@@ -1,5 +1,6 @@
 import { convert, IAnnotationInfo } from "@/components/map/annotations/annotationInfo";
 import { AmenityAnnotation } from "@/components/map/annotations/renders/amenity";
+import { OccupantAnnotation } from "@/components/map/annotations/renders/occupant";
 import { BufferGeometry, Mesh, MeshBasicMaterial, Vector2 } from "three";
 import { MapController } from "../map/mapController";
 import Building from "./building";
@@ -97,7 +98,9 @@ export default class Venue {
     this.buildings.forEach(building => {
       building.levels.forEach(level => {
         level.annotations.forEach(annotation => {
-          annotation.building = building
+          if (annotation instanceof AmenityAnnotation || annotation instanceof OccupantAnnotation) {
+            annotation.building = building
+          }
         })
       })
     })

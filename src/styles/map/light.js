@@ -171,6 +171,10 @@ export default {
       wardrobe: {
         pointFill: '#8596BD'
       }
+    },
+    attraction: {
+      fill: '#4593CF',
+      stroke: '#ffffff',
     }
   }
 }

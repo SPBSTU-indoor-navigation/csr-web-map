@@ -43,9 +43,7 @@ const subtitle = computed(() => {
   .annotation-icon {
     min-width: 40px;
     max-width: 40px;
-    border-radius: 20px;
     height: 40px;
-    background-color: #007aff;
   }
 
   p {
