@@ -2,7 +2,8 @@
   <div class="search flex">
     <MagnifyingGlassIcon class="icon" />
     <input type="text" class="label highlight-disable prevent-pointer-event-blur" placeholder="Поиск" ref="input"
-      enterkeyhint="search" @keydown.enter="search" v-model="searchText" @focus="focus" @dragStart.prevent
+      enterkeyhint="search" @keydown.enter="search" :value="searchText"
+      @input="e => searchText = (e.target as HTMLInputElement).value" @focus="focus" @dragStart.prevent
       :style="{marginRight: showClose ? '20px' : undefined}" />
     <div v-if="showClose" class="clear-container highlight-disable" @click="clearContainer">
       <XCircleIcon class="clear" @click="clear" />

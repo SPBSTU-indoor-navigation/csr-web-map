@@ -19,6 +19,8 @@ export function usePhoneInputFix(params: {
   t.style.height = '20px';
   t.style.opacity = '0';
   t.enterKeyHint = "search"
+  t.type = "text"
+  t.autocomplete = 'off'
   t.addEventListener('input', (e: any) => {
     inputText.value = e.target.value
   });

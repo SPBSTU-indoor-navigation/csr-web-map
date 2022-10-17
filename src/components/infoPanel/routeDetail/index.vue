@@ -12,4 +12,6 @@
 
 <script setup lang="ts">
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
+
+defineProps(['delegate', 'data'])
 </script>

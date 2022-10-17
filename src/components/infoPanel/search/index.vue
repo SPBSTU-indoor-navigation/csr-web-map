@@ -22,7 +22,7 @@ import { IAnnotationInfo } from "@/components/map/annotations/annotationInfo";
 import AnnotationInfoListVue from "@/components/shared/annotations/AnnotationInfoList.vue";
 
 
-const { page } = defineProps(['page'])
+const { page } = defineProps(['delegate', 'page'])
 const state: Ref = inject('state')
 const mapDelegate = inject('mapDelegate') as ShallowRef<IMapDelegate>
 const annotations: ShallowRef<IAnnotationInfo[]> = shallowRef([]);
@@ -32,7 +32,7 @@ const searchText = usePageStore(`search_${page.value}`, 'searchText', '')
 const focusDelay = computed(() => state.value == State.big ? 0 : 500)
 
 watchEffect(() => {
-  if (!mapDelegate.value.venue) return
+  if (!mapDelegate.value.venue.value) return
   annotations.value = mapDelegate.value.venue.value.annotations.sort((a, b) => a.title.localCompare(b.title))
 
   console.log(annotations.value);

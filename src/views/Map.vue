@@ -11,11 +11,12 @@
 import MapVue from "../components/map/MapThreeJS.vue";
 import InfoPanelVue from "@/components/infoPanel/index.vue";
 import { useFullscreenScrollFix } from "@/core/shared/composition/useFullscreenScrollFix";
-import { provide, ShallowRef, shallowRef, watch, watchEffect } from "vue";
+import { onMounted, provide, ShallowRef, shallowRef, watch, watchEffect } from "vue";
 import { IMapDelegate } from "@/components/map/mapControlls";
 
 const mapDelegate: ShallowRef<IMapDelegate> = shallowRef({
   selectedAnnotation: shallowRef(null),
+  venue: shallowRef(null),
 })
 
 provide('mapDelegate', mapDelegate)

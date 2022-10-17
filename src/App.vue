@@ -3,6 +3,13 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue';
+import { useFullscreenViewport } from './core/shared/composition/useFullscreenViewport';
+
+
+onMounted(() => {
+  useFullscreenViewport()
+});
 
 </script>
 

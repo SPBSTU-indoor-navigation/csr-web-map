@@ -119,13 +119,14 @@ export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>
     const targetState = nextState(y)
 
     const delta = positionForState(targetState) - targetY.value
+    if (Math.abs(delta) < 1) return
+
     initialVelocity = Math.abs(1000 * y / delta)
 
     if (targetY.value < positionForState(State.big) || targetY.value > positionForState(State.small)) {
       targetY.value = offsetY.value
       initialVelocity = 0
     }
-
 
     if (state.value != targetState) {
       state.value = targetState

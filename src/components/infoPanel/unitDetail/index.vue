@@ -47,7 +47,7 @@ import SectionCellVue from "../shared/SectionCell.vue";
 
 import IconVue from "@/components/icon/index.vue";
 
-const props = defineProps(['data'])
+const props = defineProps(['delegate', 'data'])
 const emit = defineEmits(['pop', 'push'])
 
 const mapDelegate = inject('mapDelegate') as ShallowRef<IMapDelegate>
