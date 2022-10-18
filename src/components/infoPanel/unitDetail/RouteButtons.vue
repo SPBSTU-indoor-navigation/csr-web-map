@@ -36,7 +36,6 @@ const props = defineProps<{ fromToPlan: FromToPlan }>()
 
 .multy-line,
 .single-line {
-  // margin-top: 10px;
   gap: 5px;
 
   .from,
@@ -53,10 +52,14 @@ const props = defineProps<{ fromToPlan: FromToPlan }>()
 .from,
 .to,
 .plan {
-  // width: 1000px;
+  height: 45px;
   font-size: 0.9em;
   border-radius: 10px;
   padding: 10px;
+
+  @media (min-width: $phone-width) {
+    height: 40px;
+  }
 }
 
 .from,

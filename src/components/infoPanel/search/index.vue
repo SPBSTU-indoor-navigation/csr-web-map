@@ -1,11 +1,11 @@
 <template>
-  <BottomSheetPageVue :showHeader="true" :cloaseble="false">
+  <BottomSheetPageVue :showHeader="true" :cloaseble="false" class="search-page">
     <template #header>
       <SearchBarVue class="search-bar" :focusDelay="focusDelay" @focus="onFocus" v-model:searchText="searchText" />
     </template>
 
     <template #content>
-      <AnnotationInfoListVue :annotations="annotations" :search-text="searchText" />
+      <AnnotationInfoListVue :annotations="annotations" :search-text="searchText" @select="onSelectAnnotation" />
     </template>
   </BottomSheetPageVue>
 </template>
@@ -17,7 +17,7 @@ import { State } from "@/components/bottomSheet/useBottomSheetGesture";
 import SearchBarVue from "@/components/shared/searchBar/index.vue";
 import { computed, ref, ShallowRef, shallowRef } from "@vue/reactivity";
 import { inject, Ref, watchEffect } from "vue";
-import { IMapDelegate } from "@/components/map/mapControlls";
+import { FocusVariant, IMapDelegate } from "@/components/map/mapControlls";
 import { IAnnotationInfo } from "@/components/map/annotations/annotationInfo";
 import AnnotationInfoListVue from "@/components/shared/annotations/AnnotationInfoList.vue";
 
@@ -41,6 +41,15 @@ watchEffect(() => {
 
 function onFocus() {
   state.value = 2;
+}
+
+function onSelectAnnotation(info: IAnnotationInfo) {
+  console.log(info);
+
+  mapDelegate.value.selectAnnotation(info.annotation, FocusVariant.center)
+
+  // mapDelegate.value.selectAnnotation(info)
+  state.value = 0;
 }
 </script>
 
@@ -72,5 +81,11 @@ function onFocus() {
   margin: 6px 0px 15px 0px;
 
   border-radius: 10px;
+}
+
+.search-page {
+  .header {
+    min-height: auto !important;
+  }
 }
 </style>

@@ -7,7 +7,7 @@
       </div>
 
       <div v-for="info in group.annotations">
-        <AnnotationInfoLineVue :info="info" />
+        <AnnotationInfoLineVue :info="info" @click="$emit('select', info)" class="clickable-line-button" />
         <hr class="separator small info-line" />
       </div>
     </div>
@@ -28,6 +28,10 @@ const props = defineProps<{
   annotations: IAnnotationInfo[],
   filter?: (info: IAnnotationInfo) => boolean,
   searchText?: string
+}>()
+
+defineEmits<{
+  select: (info: IAnnotationInfo) => void
 }>()
 
 const filtered = computed(() => {
@@ -58,42 +62,32 @@ const categories = computed(() => {
   return res
 })
 
-
-// const list = computed(() => {
-//   const annotations = props.annotations.filter(t => !(t.annotation instanceof AmenityAnnotation))
-
-//   const attractions = annotations.filter(t => t.annotation instanceof AttractionAnnotation)
-//   const other = annotations.filter(t => !(t.annotation instanceof AttractionAnnotation))
-
-//   const groupped = groupBy(other, (a) => a.place)
-
-//   let res: {
-//     id?: number,
-//     size: number,
-//     title?: string
-//     info?: IAnnotationInfo
-//   }[] = []
-
-//   res.push({ size: 40, title: 'Здания' })
-
-//   res.push(...attractions.map(info => ({ size: 50, info })))
-
-//   Array.from(groupped.keys()).forEach((key) => {
-//     res.push({ size: 40, title: key.bestLocalizedValue })
-//     res.push(...groupped.get(key).map(info => ({ size: 50, info })))
-//   })
-
-//   res.forEach((t, i) => t.id = i)
-
-//   return res
-// })
-
 </script>
 
 
 <style lang="scss" scoped>
 .section-title.space {
   margin-top: 30px;
+}
+
+.clickable-line-button {
+  cursor: pointer;
+
+  &:active {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -5px;
+      right: -5px;
+      bottom: 0;
+      background-color: #86868624;
+      border-radius: 10px;
+      z-index: -1;
+    }
+  }
 }
 
 .separator {

@@ -70,10 +70,6 @@ function onScroll({ target: { scrollTop: y } }) {
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 
-.separator {
-  margin: 0 -12px;
-}
-
 .page-container {
   position: absolute;
   top: 0;
@@ -96,8 +92,13 @@ function onScroll({ target: { scrollTop: y } }) {
 .page {
   margin: 0 10px;
   height: 100%;
-  padding: 0 12px;
   will-change: transform;
+
+  .content-container,
+  .header {
+    padding: 0 12px;
+  }
+
 
   display: flex;
   flex-direction: column;
@@ -110,7 +111,7 @@ function onScroll({ target: { scrollTop: y } }) {
   .header {
     padding-top: 13px;
     position: relative;
-    // min-height: 42.5px;
+    min-height: 42.5px;
 
     &.cloaseble {
       padding-right: 30px;
@@ -137,7 +138,7 @@ function onScroll({ target: { scrollTop: y } }) {
     .close {
       position: absolute;
       top: 15px;
-      right: 0;
+      right: 12px;
 
       @media (min-width: $phone-width) {
         top: 10px;

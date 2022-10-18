@@ -93,6 +93,11 @@ const onPop = () => {
   }
 }
 
+watchEffect(() => {
+  console.log(offsetY.value);
+
+})
+
 const onPush = (params: { component, data: any, collapse: boolean }) => {
   pages.value.push({
     component: markRaw(params.component),
