@@ -127,3 +127,10 @@ export function project(params: { velocity: number, position: number, decelerati
   const factor = -1 / (1000 * Math.log(params.decelerationRate))
   return params.position + factor * params.velocity
 }
+
+
+export function nextFrame(resolve: () => void) {
+  requestAnimationFrame(() => {
+    resolve()
+  })
+}

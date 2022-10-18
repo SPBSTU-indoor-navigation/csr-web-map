@@ -1,5 +1,5 @@
 import { Easing, Tween } from '@tweenjs/tween.js'
-import { modify } from '../shared/utils';
+import { modify, nextFrame } from '../shared/utils';
 import { SpringEasing } from './springAnimation';
 
 declare type Animation = {
@@ -66,7 +66,7 @@ export class Animator {
     return this
   }
 
-  start() {
+  start(skipFrame = false) {
     this.dependents.forEach(d => d?.stop())
 
     for (const animation of this.animations) {
@@ -96,8 +96,11 @@ export class Animator {
       tween.easing(easing ?? Easing.Quadratic.InOut)
       this.playedAnimations.push(tween);
 
-      tween.start()
-
+      if (!skipFrame) {
+        tween.start()
+      } else {
+        nextFrame(() => tween.start())
+      }
     }
 
     executeCallback(this.onStartCallback)

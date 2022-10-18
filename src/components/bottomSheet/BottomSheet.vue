@@ -14,7 +14,7 @@ import { computed, ref, markRaw, shallowRef } from '@vue/reactivity';
 import { provide, watchEffect } from 'vue'
 import { watch, } from 'vue';
 import { State } from './useBottomSheetGesture';
-import { clamp, lerp } from '@/core/shared/utils';
+import { clamp, lerp, nextFrame } from '@/core/shared/utils';
 import { useElementSize, useMediaQuery } from '@vueuse/core';
 import { middleOffset, phoneWidth } from '@/styles/variables';
 import { Easing, Group, Tween } from '@tweenjs/tween.js';
@@ -74,12 +74,16 @@ watch(() => pages.value.length, (current, last) => {
 })
 
 function animPushPopProrgress() {
-  new Tween({ progress: 1 }, tweenGroup)
-    .to({ progress: 0 }, 300)
-    .easing(Easing.Quartic.Out)
-    .onUpdate((obj) => pushPopProrgress.value = obj.progress)
-    .onComplete(() => pushPopProrgress.value = -1)
-    .start()
+  pushPopProrgress.value = 1
+
+  nextFrame(() => {
+    new Tween({ progress: 1 }, tweenGroup)
+      .to({ progress: 0 }, 300)
+      .easing(Easing.Quartic.Out)
+      .onUpdate((obj) => pushPopProrgress.value = obj.progress)
+      .onComplete(() => pushPopProrgress.value = -1)
+      .start()
+  })
 }
 
 const onPop = () => {
@@ -92,11 +96,6 @@ const onPop = () => {
     }
   }
 }
-
-watchEffect(() => {
-  console.log(offsetY.value);
-
-})
 
 const onPush = (params: { component, data: any, collapse: boolean }) => {
   pages.value.push({

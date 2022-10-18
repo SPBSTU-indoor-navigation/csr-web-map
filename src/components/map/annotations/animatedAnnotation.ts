@@ -24,10 +24,10 @@ export class AnimatedAnnotation<DetailLevel extends number, DetailLevelState> ex
     super.setSelected(selected, animated)
 
     if (selected) {
-      this.selectAnimation?.start()
+      this.selectAnimation?.start(true)
     }
     else {
-      this.deSelectAnimation?.start()
+      this.deSelectAnimation?.start(true)
     }
   }
 
@@ -40,7 +40,7 @@ export class AnimatedAnnotation<DetailLevel extends number, DetailLevelState> ex
       .addDependent(this.selectAnimation)
       .addDependent(this.deSelectAnimation)
 
-    if (animated) animator.start(); else animator.skip()
+    if (animated) animator.start(true); else animator.skip()
 
 
     this.isDirty = true
