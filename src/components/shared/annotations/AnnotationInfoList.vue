@@ -79,12 +79,12 @@ const categories = computed(() => {
     &::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: -5px;
-      right: -5px;
-      bottom: 0;
+      top: -0.25px;
+      left: -12px;
+      right: -12px;
+      bottom: -0.25px;
       background-color: #86868624;
-      border-radius: 10px;
+      border-radius: 0px;
       z-index: -1;
     }
   }
