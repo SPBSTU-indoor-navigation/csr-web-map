@@ -7,9 +7,12 @@
 <script setup lang="ts">
 import { inject, markRaw, provide, ref, ShallowRef, shallowRef, watch, watchEffect } from 'vue';
 import BottomSheetVue from '../bottomSheet/BottomSheet.vue';
+import RouteDetailVue from "@/components/infoPanel/routeDetail/index.vue";
 import UnitDetailVue from './unitDetail/index.vue';
 import SearchVue from './search/index.vue';
 import { IMapDelegate } from '../map/mapControlls';
+import { IAnnotation } from '@/core/map/annotations/annotation';
+import { useDefineControlls } from './infoPanelControlls';
 
 const initPage = {
   component: SearchVue,
@@ -19,7 +22,8 @@ const initPage = {
 const delegate: {
   pages?: () => { component: any; data: any; key: number }[],
   push?: (params: { component: any; data: any }) => void,
-  pop?: () => void
+  pop?: () => void,
+  popTo?: (index: number) => void,
 } = {};
 
 const mapDelegate = inject('mapDelegate') as ShallowRef<IMapDelegate>
@@ -40,6 +44,40 @@ watch(() => mapDelegate.value.selectedAnnotation.value, (annotation) => {
     delegate.pop();
   }
 });
+
+function setRoute(annotation: IAnnotation, isFrom = false) {
+  console.log('setRoute', annotation, isFrom);
+
+  const pages = delegate.pages();
+  const pathFinder = mapDelegate.value.venue.value.pathFinder
+  const defaultStart = mapDelegate.value.venue.value.navpathBegin
+
+  const routeDetailIndex = pages.findIndex((page) => page.component == RouteDetailVue);
+  if (routeDetailIndex != -1) {
+    delegate.popTo(routeDetailIndex);
+    const lastPage = pages[routeDetailIndex];
+    if (isFrom) {
+      lastPage.data.from = annotation
+    } else {
+      lastPage.data.to = annotation
+    }
+
+  } else {
+    delegate.push({
+      component: RouteDetailVue,
+      data: {
+        from: isFrom ? annotation : defaultStart,
+        to: isFrom ? null : annotation,
+        pathFinder
+      }
+    });
+  }
+}
+
+useDefineControlls({
+  setFrom: a => setRoute(a, true),
+  setTo: a => setRoute(a, false),
+})
 
 </script>
 

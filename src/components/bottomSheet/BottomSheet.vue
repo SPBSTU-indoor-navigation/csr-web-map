@@ -41,6 +41,7 @@ const { height } = useElementSize(pageContainer)
 delegate.push = (params) => onPush(params)
 delegate.pop = () => onPop()
 delegate.pages = () => pages.value
+delegate.popTo = (index) => onPopTo(index)
 
 provide('state', state)
 
@@ -89,6 +90,17 @@ function animPushPopProrgress() {
 const onPop = () => {
   if (pages.value.length > 1) {
     pages.value.pop()
+
+    if (state.value == State.big) {
+      animPushPopProrgress()
+      state.value = State.middle
+    }
+  }
+}
+
+const onPopTo = (index: number) => {
+  if (pages.value.length > index) {
+    pages.value = pages.value.slice(0, index + 1)
 
     if (state.value == State.big) {
       animPushPopProrgress()

@@ -10,6 +10,7 @@ import { meshForFeatureCollection, outlineMeshForFeatureCollection } from './uti
 export default class Level {
   annotations: Annotation[] = []
   data: {
+    id: string,
     properties: {
       name: LocalizedString
       short_name: LocalizedString
@@ -26,7 +27,7 @@ export default class Level {
   private geometrys: { [key: string]: Mesh }
   private groupMesh: Group
 
-  constructor(data, units, openings, details, amenitys, occupants, lineMeshMaterialStorage, translate) {
+  constructor(data, units, openings, details, amenitys, occupants, lineMeshMaterialStorage) {
     data.properties.name = new LocalizedString(data.properties.name)
     data.properties.short_name = new LocalizedString(data.properties.short_name)
 
@@ -40,14 +41,12 @@ export default class Level {
     this.occupants = occupants
 
     this.annotations = occupants.map(t => {
-      const coordArray = t.properties.anchor.geometry.coordinates
-      const pos = translate({ latitude: coordArray[1], longitude: coordArray[0] })
+      const pos = t.properties.anchor.geometry.coordinates
       return new OccupantAnnotation(new Vector2(pos.x, pos.y), t, this)
     })
 
     this.annotations.push(...amenitys.map(t => {
-      const coordArray = t.geometry.coordinates
-      const pos = translate({ latitude: coordArray[1], longitude: coordArray[0] })
+      const pos = t.geometry.coordinates
       return new AmenityAnnotation(new Vector2(pos.x, pos.y), t, this)
     }))
 

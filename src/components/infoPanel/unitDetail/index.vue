@@ -5,7 +5,8 @@
     </template>
 
     <template #content>
-      <RouteButtonsVue :fromToPlan="unitInfo.fromToPlan" v-if="unitInfo.fromToPlan" />
+      <RouteButtonsVue :fromToPlan="unitInfo.fromToPlan" v-if="unitInfo.fromToPlan" @set-to="onSetTo"
+        @set-from="onSetFrom" />
       <DetailVue :detail="unitInfo.detail" v-if="unitInfo.detail" />
       <div class="info-panel-section share-section">
         <SectionCellVue title="Поделиться" :clickable="true">
@@ -39,16 +40,16 @@ import DetailVue from './Detail.vue'
 import RouteButtonsVue from './RouteButtons.vue'
 import { FocusVariant, IMapDelegate } from "@/components/map/mapControlls";
 import { computed } from "@vue/reactivity";
-import { inject, onMounted, ref, ShallowRef, toRaw, watchEffect } from "vue";
+import { inject, onMounted, ref, ShallowRef, Ref, toRaw, watchEffect } from "vue";
 import { unitInfoFromAnnotation } from "./data";
 import SectionCellVue from "../shared/SectionCell.vue";
-
-
-
 import IconVue from "@/components/icon/index.vue";
+import { useInfoPanel } from "../infoPanelControlls";
+import { IAnnotation } from "@/core/map/annotations/annotation";
 
-const props = defineProps(['delegate', 'data'])
+const props = defineProps<{ data: { annotation: IAnnotation }, delegate: any }>()
 const emit = defineEmits(['pop', 'push'])
+const { setFrom, setTo } = useInfoPanel()
 
 const mapDelegate = inject('mapDelegate') as ShallowRef<IMapDelegate>
 
@@ -75,6 +76,14 @@ onMounted(() => {
 watchEffect(() => {
   console.log('unitInfo', toRaw(unitInfo.value));
 })
+
+function onSetTo() {
+  setTo(props.data.annotation)
+}
+
+function onSetFrom() {
+  setFrom(props.data.annotation)
+}
 
 </script>
 

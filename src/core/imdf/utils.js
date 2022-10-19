@@ -13,7 +13,7 @@ export function geoToVector(pivot, position) {
 
 export function processGeometryCoordinates(geometry, pivot) {
 
-  function processPointAttay(points) {
+  function processPointArray(points) {
     return points.map(point => geoToVector(pivot, { latitude: point[1], longitude: point[0] }))
   }
 
@@ -23,14 +23,17 @@ export function processGeometryCoordinates(geometry, pivot) {
   let coordinates = geometry.coordinates
 
   switch (geometry.type) {
+    case 'Point':
+      coordinates = geoToVector(pivot, { latitude: coordinates[1], longitude: coordinates[0] })
+      break;
     case 'Polygon':
-      coordinates = coordinates.map(cicle => processPointAttay(cicle))
+      coordinates = coordinates.map(cicle => processPointArray(cicle))
       break;
     case 'MultiPolygon':
-      coordinates = coordinates.map(polygon => polygon.map(cicle => processPointAttay(cicle)))
+      coordinates = coordinates.map(polygon => polygon.map(cicle => processPointArray(cicle)))
       break;
     case 'MultiLineString':
-      coordinates = coordinates.map(lines => processPointAttay(lines))
+      coordinates = coordinates.map(lines => processPointArray(lines))
       break;
 
     default: break;

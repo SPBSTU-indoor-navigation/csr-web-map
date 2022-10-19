@@ -14,6 +14,8 @@ import {
   unwrapBy, createSvgPathFromFeature, createSvgPathFromFeatureCollection
 } from './utils';
 
+import { PathFinder } from '@/core/pathFinder'
+import { IAnnotation } from "../map/annotations/annotation";
 
 export default class Venue {
   archive: {
@@ -27,6 +29,8 @@ export default class Venue {
   enviromentAmenity: AmenityAnnotation[] = []
 
   annotations: IAnnotationInfo[] = []
+  pathFinder: PathFinder
+  navpathBegin: IAnnotation
 
 
   private lineMeshMaterialStorage: LineMeshMaterialStorage
@@ -83,16 +87,12 @@ export default class Venue {
           const amenitys = archive.amenity.filter(t => t.properties.unit_ids.filter(Set.prototype.has, unitsIds).length != 0)
           const occupants = archive.occupant.filter(t => unitsIds.has(t.properties.anchor.properties.unit_id))
 
-          return new Level(level, units, openings, details, amenitys, occupants, this.lineMeshMaterialStorage, (p) => geoToVector(this.pivot, p))
+          return new Level(level, units, openings, details, amenitys, occupants, this.lineMeshMaterialStorage)
         })
 
       annotations.push(...levels.flatMap(t => t.annotations))
 
-
-      return new Building(building,
-        levels,
-        archive.attraction.filter(t => t.properties.building_id == building.id),
-        (p) => geoToVector(this.pivot, p))
+      return new Building(building, levels, archive.attraction.filter(t => t.properties.building_id == building.id))
     })
 
     this.buildings.forEach(building => {
@@ -107,8 +107,7 @@ export default class Venue {
 
 
     this.enviromentAmenity = archive.enviromentAmenity.map(t => {
-      const coordArray = t.geometry.coordinates
-      const pos = geoToVector(this.pivot, { latitude: coordArray[1], longitude: coordArray[0] })
+      const pos = t.geometry.coordinates
       return new AmenityAnnotation(new Vector2(pos.x, pos.y), t)
     })
 
@@ -123,9 +122,15 @@ export default class Venue {
     annotations.push(...this.enviromentAmenity)
 
     this.annotations = annotations.map(convert)
-
     console.log('annotations', this.annotations);
 
+    this.navpathBegin = annotations.find(t => t.id == this.data[0].properties.navpath_begin_id)
+
+    this.pathFinder = new PathFinder(archive.navPath,
+      archive.navPathAssocieted,
+      new Map(this.buildings.map(t => [t.data.id, t])),
+      new Map(this.buildings.flatMap(t => t.levels).map(t => [t.data.id, t])),
+      this.annotations.map(t => t.annotation))
   }
 
   Add(map: MapController) {

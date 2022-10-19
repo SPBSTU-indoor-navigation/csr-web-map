@@ -10,6 +10,7 @@ export default class Building {
 
   data: {
     geometry: any,
+    id: string,
     properties: {
       name: LocalizedString,
       alt_name: LocalizedString,
@@ -28,15 +29,14 @@ export default class Building {
   private showLevel = false
   private levelByOrdinal: { [key: number]: Level } = {}
 
-  constructor(data, levels: Level[], attractions, translate) {
+  constructor(data, levels: Level[], attractions) {
     data.properties.name = new LocalizedString(data.properties.name)
     data.properties.alt_name = new LocalizedString(data.properties.alt_name)
 
     this.data = data
     this.levels = levels
     this.attractions = attractions.map(t => {
-      const coordArray = t.geometry.coordinates
-      const pos = translate({ latitude: coordArray[1], longitude: coordArray[0] })
+      const pos = t.geometry.coordinates
       return new AttractionAnnotation(new Vector2(pos.x, pos.y), t)
     })
 
