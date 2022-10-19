@@ -87,7 +87,7 @@ export class PathFinder {
     return nearest
   }
 
-  findPath(from: IAnnotation, to: IAnnotation, denyTags: Tag[]): PathResult | null {
+  findPath(from: IAnnotation, to: IAnnotation, denyTags: Tag[] = []): PathResult | null {
     let fromAssociated = this.associeted.get(from)
     let toAssociated = this.associeted.get(to)
 
