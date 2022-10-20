@@ -1,5 +1,5 @@
 import { Vector2, Vector3, Camera, Box2 } from 'three';
-import { Ref, ref, ShallowRef, shallowRef, UnwrapRef, watchEffect } from 'vue';
+import { Ref, ref, ShallowRef, shallowRef, UnwrapRef, watch, watchEffect } from 'vue';
 import { MapController } from '../mapController';
 import { IAnnotation, Shape2D } from './annotation';
 import Tween from '@tweenjs/tween.js';
@@ -13,7 +13,6 @@ export interface IMapAnnotations {
   selected: ShallowRef<IAnnotation | null>
   add(annotation: IAnnotation | IAnnotation[]): void
   remove(annotation: IAnnotation | IAnnotation[]): void
-  select(annotation: IAnnotation | null): void
 
   render(options: { cam: Camera }): void
   click(pos: Vector2, e: PointerEvent): void
@@ -71,7 +70,8 @@ export default function useMapAnnotations(options: {
     const toRemove = new Set((Array.isArray(annotation) ? annotation : [annotation]).map(t => t.id))
 
     if (toRemove.has(selected.value?.id)) {
-      select(null, false)
+      selected.value.setSelected(false, false)
+      selected.value = null
     }
 
     annotations = annotations.filter(t => !toRemove.has(t.id))
@@ -154,21 +154,13 @@ export default function useMapAnnotations(options: {
 
   }
 
-  const select = (annotation: Annotation | null, animated: boolean = true) => {
-
-    if (selected.value) {
-      selected.value?.setSelected(false, animated)
-    }
-
-    selected.value = annotation
-
-    if (selected.value) {
-      selected.value.setSelected(true, animated)
-    }
-  }
+  watch(selected, (value, old) => {
+    if (old != null) old.setSelected(false, true)
+    if (value != null) value.setSelected(true, true)
+  })
 
   const click = (pos: Vector2, e: PointerEvent) => {
-    let selected = false
+    let isSelect = false
 
     const isTouch = e.pointerType === 'touch'
     let touchDistance = Number.MAX_VALUE;
@@ -181,8 +173,8 @@ export default function useMapAnnotations(options: {
       if (!annotation.shouldSelectOnTap) continue
 
       if (annotation.pointInside(pos)) {
-        selected = true
-        select(annotation)
+        isSelect = true
+        selected.value = annotation
         break;
       }
 
@@ -196,13 +188,13 @@ export default function useMapAnnotations(options: {
 
     }
 
-    if (!selected && touchAnnotation && touchDistance < 15) {
-      selected = true;
-      select(touchAnnotation)
+    if (!isSelect && touchAnnotation && touchDistance < 15) {
+      isSelect = true;
+      selected.value = touchAnnotation
     }
 
-    if (!selected) {
-      select(null)
+    if (!isSelect) {
+      selected.value = null
     }
 
   }
@@ -235,7 +227,6 @@ export default function useMapAnnotations(options: {
     render,
     click,
     zoom,
-    select,
     selected
   }
 

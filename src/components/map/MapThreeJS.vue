@@ -37,7 +37,7 @@ import lightTheme from '@/styles/map/light.js';
 import LevelSwitcherVue from '../controlls/levelSwitcher/index.vue';
 import useMapAnnotations from '@/core/map/annotations/useMapAnnotations';
 import MapKitVue from '@/core/map/mapKit/MapKit.vue';
-import useMapOverlay from '@/core/map/overlays/useMapOverlay';
+import useMapOverlay from '@/core/map/overlayGeometry/useMapOverlay';
 
 import { Box2, Vector2 } from 'three';
 import { defineComponent, ref, shallowRef, watch, watchEffect } from 'vue';
@@ -133,11 +133,11 @@ async function load() {
     selectedAnnotation: mapAnnotations.selected,
     venue,
     selectAnnotation: (a, focusVariant) => {
-      mapAnnotations.select(a)
+      mapAnnotations.selected.value = a
     },
     deselectAnnotation: (a) => {
       if (mapAnnotations.selected.value == a) {
-        mapAnnotations.select(null)
+        mapAnnotations.selected.value = null
       }
     },
   }

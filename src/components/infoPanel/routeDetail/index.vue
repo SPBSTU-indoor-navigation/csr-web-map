@@ -7,7 +7,9 @@
     <template #content>
       <p>{{fromUnitInfo.title}}</p>
       <p>{{toUnitInfo.title}}</p>
-      <p>{{pathResult}}</p>
+      <p>{{pathResult.indoorDistance}}</p>
+      <p>{{pathResult.outdoorDistance}}</p>
+      <p>{{fullPath}}</p>
     </template>
   </BottomSheetPageVue>
 </template>
@@ -35,9 +37,10 @@ const toUnitInfo = computed(() => unitInfoFromAnnotation(props.data.to))
 
 const pathResult = computed(() => {
   if (!props.data.from || !props.data.to) return null
-  const t = props.data.pathFinder.findPath(props.data.from, props.data.to)
-
-  return t.map(t => `(${(t as Node2D).position.x.toFixed(1)}; ${(t as Node2D).position.y.toFixed(1)})`).join(' -> ')
+  return props.data.pathFinder.findPath(props.data.from, props.data.to)
 })
 
+const fullPath = computed(() => {
+  return pathResult.value.path.map(t => `(${(t as Node2D).position.x.toFixed(1)}; ${(t as Node2D).position.y.toFixed(1)})`).join(' -> ')
+})
 </script>
