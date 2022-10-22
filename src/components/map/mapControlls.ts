@@ -1,5 +1,6 @@
 import Venue from "@/core/imdf/venue";
 import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
+import { PathNode } from "@/core/pathFinder";
 import { Object3D } from "three";
 import { ShallowRef } from "vue";
 
@@ -16,6 +17,9 @@ export interface IMap {
 
   addAnnotation(annotation: IAnnotation | IAnnotation[]): void
   removeAnnotation(annotation: IAnnotation | IAnnotation[]): void
+
+  addPath(path: PathNode[]): string
+  removePath(id: string): void
 }
 
 export interface IMapDelegate {
@@ -24,5 +28,7 @@ export interface IMapDelegate {
 
   selectAnnotation?(annotation: IAnnotation, focusVariant: FocusVariant): void;
   deselectAnnotation?(annotation: IAnnotation): void;
-  // selectedAnnotation(): IAnnotation;
+
+  addPath?: (path: PathNode[]) => string;
+  removePath?: (id: string) => void;
 }

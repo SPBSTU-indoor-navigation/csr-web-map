@@ -101,8 +101,6 @@ export default function useMapAnnotations(options: {
 
     renderAnnotationCount.value = annotationsToRender.length
 
-    ctx.clearRect(0, 0, screen.getSize(new Vector2()).width, screen.getSize(new Vector2()).height)
-
     let renderQueue = []
     renderQueue.push(...annotationsToRender.filter(t => t.annotation.isSelected))
 

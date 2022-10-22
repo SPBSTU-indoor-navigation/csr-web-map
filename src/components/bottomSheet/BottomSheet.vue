@@ -18,8 +18,12 @@ import { clamp, lerp, nextFrame } from '@/core/shared/utils';
 import { useElementSize, useMediaQuery } from '@vueuse/core';
 import { middleOffset, phoneWidth } from '@/styles/variables';
 import { Easing, Group, Tween } from '@tweenjs/tween.js';
+import { IInfoPanelDelegate } from '../infoPanel/infoPanelControlls';
 
-const { delegate, initPage } = defineProps(['delegate', 'initPage'])
+const { delegate, initPage } = defineProps<{
+  delegate: IInfoPanelDelegate,
+  initPage: any
+}>()
 
 const pages = ref([{
   component: markRaw(initPage.component),
@@ -109,7 +113,7 @@ const onPopTo = (index: number) => {
   }
 }
 
-const onPush = (params: { component, data: any, collapse: boolean }) => {
+const onPush = (params: { component: any, data: any, collapse?: boolean }) => {
   pages.value.push({
     component: markRaw(params.component),
     data: params.data,

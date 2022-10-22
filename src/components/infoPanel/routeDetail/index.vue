@@ -1,5 +1,5 @@
 <template>
-  <BottomSheetPageVue @close="$emit('pop')">
+  <BottomSheetPageVue @close="onClose">
     <template #header>
       <h1>Route</h1>
     </template>
@@ -9,21 +9,24 @@
       <p>{{toUnitInfo.title}}</p>
       <p>{{pathResult.indoorDistance}}</p>
       <p>{{pathResult.outdoorDistance}}</p>
-      <p>{{fullPath}}</p>
     </template>
   </BottomSheetPageVue>
 </template>
 
 <script setup lang="ts">
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
+import { usePageStore } from "@/components/bottomSheet/usePageStore";
+import { IMapDelegate } from "@/components/map/mapControlls";
 import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
 import { PathFinder } from "@/core/pathFinder";
 import { Node2D } from "@/core/pathFinder/aStar";
-import { computed } from "vue";
+import { computed, inject, Ref, ShallowRef, watch, watchEffect } from "vue";
+import { IInfoPanelDelegate } from "../infoPanelControlls";
 import { unitInfoFromAnnotation } from "../unitDetail/data";
 
 const props = defineProps<{
-  delegate: any,
+  delegate: IInfoPanelDelegate,
+  page: number
   data: {
     from: IAnnotation,
     to: IAnnotation
@@ -31,16 +34,35 @@ const props = defineProps<{
   }
 }>()
 
+const emit = defineEmits<{
+  (event: 'pop'): void
+}>()
+
+const currentRouteId = usePageStore<string>(`route_${props.page}`, 'currentRouteId', null)
 const fromUnitInfo = computed(() => unitInfoFromAnnotation(props.data.from))
 const toUnitInfo = computed(() => unitInfoFromAnnotation(props.data.to))
-
+const mapDelegate = inject<ShallowRef<IMapDelegate>>('mapDelegate')
 
 const pathResult = computed(() => {
   if (!props.data.from || !props.data.to) return null
   return props.data.pathFinder.findPath(props.data.from, props.data.to)
 })
 
-const fullPath = computed(() => {
-  return pathResult.value.path.map(t => `(${(t as Node2D).position.x.toFixed(1)}; ${(t as Node2D).position.y.toFixed(1)})`).join(' -> ')
+function onClose() {
+  if (pathResult.value != null) {
+    mapDelegate.value.removePath(currentRouteId.value)
+  }
+  emit('pop')
+}
+
+
+watchEffect(() => {
+  if (pathResult.value != null) {
+    mapDelegate.value.removePath(currentRouteId.value)
+  }
+
+  currentRouteId.value = mapDelegate.value.addPath(pathResult.value.path)
 })
+
+
 </script>

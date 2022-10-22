@@ -14,6 +14,7 @@ import { useFullscreenScrollFix } from "@/core/shared/composition/useFullscreenS
 import { onMounted, provide, ShallowRef, shallowRef, watch, watchEffect } from "vue";
 import { IMapDelegate } from "@/components/map/mapControlls";
 
+// @ts-ignore
 const mapDelegate: ShallowRef<IMapDelegate> = shallowRef({
   selectedAnnotation: shallowRef(null),
   venue: shallowRef(null),
@@ -29,7 +30,7 @@ const onScroll = (e) => {
   }
 };
 
-function onMapDelegate(delegate) {
+function onMapDelegate(delegate: IMapDelegate) {
   mapDelegate.value = delegate
 }
 

@@ -22,13 +22,13 @@ import { IAnnotationInfo } from "@/components/map/annotations/annotationInfo";
 import AnnotationInfoListVue from "@/components/shared/annotations/AnnotationInfoList.vue";
 
 
-const { page } = defineProps(['delegate', 'page'])
+const props = defineProps(['delegate', 'page'])
 const state = inject<Ref<State>>('state')
 
 const mapDelegate = inject<ShallowRef<IMapDelegate>>('mapDelegate')
 const annotations: ShallowRef<IAnnotationInfo[]> = shallowRef([]);
 
-const searchText = usePageStore(`search_${page.value}`, 'searchText', '')
+const searchText = usePageStore(`search_${props.page}`, 'searchText', '')
 
 const focusDelay = computed(() => state.value == State.big ? 0 : 500)
 

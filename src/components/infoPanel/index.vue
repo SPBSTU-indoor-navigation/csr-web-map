@@ -12,19 +12,14 @@ import UnitDetailVue from './unitDetail/index.vue';
 import SearchVue from './search/index.vue';
 import { IMapDelegate } from '../map/mapControlls';
 import { IAnnotation } from '@/core/map/overlayDrawing/annotations/annotation';
-import { useDefineControlls } from './infoPanelControlls';
+import { useDefineControlls, IInfoPanelDelegate } from './infoPanelControlls';
 
 const initPage = {
   component: SearchVue,
   data: null
 };
 
-const delegate: {
-  pages?: () => { component: any; data: any; key: number }[],
-  push?: (params: { component: any; data: any }) => void,
-  pop?: () => void,
-  popTo?: (index: number) => void,
-} = {};
+const delegate: IInfoPanelDelegate = {};
 
 const mapDelegate = inject('mapDelegate') as ShallowRef<IMapDelegate>
 
@@ -66,10 +61,10 @@ function setRoute(annotation: IAnnotation, isFrom = false) {
     delegate.push({
       component: RouteDetailVue,
       data: {
-        from: isFrom ? annotation : defaultStart,
+        from: isFrom ? annotation : markRaw(defaultStart),
         to: isFrom ? null : annotation,
         pathFinder
-      }
+      },
     });
   }
 }

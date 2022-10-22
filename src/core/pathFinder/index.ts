@@ -67,7 +67,7 @@ export class PathNode extends Node2D {
   weight: number
   tags: Tag[]
 
-  extraWeight = 0
+  extraWeight = 1
 
   constructor(pos: { x: number, y: number }, building?: Building, level?: Level, weight: number = 1, tags: Tag[] = []) {
     super(pos)
@@ -79,6 +79,14 @@ export class PathNode extends Node2D {
 
   applyDenyTags(tags: Tag[]) {
     this.extraWeight = this.tags.some(tag => tags.includes(tag)) ? 1000 : 0
+  }
+
+  override cost(node: PathNode): number {
+    return super.cost(node) * this.weight + this.extraWeight
+  }
+
+  override estimatedCost(goal: Node2D): number {
+    return 0
   }
 }
 

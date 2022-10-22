@@ -37,6 +37,8 @@ export class Node {
           path.unshift(current)
           current = cameFrom.get(current)
         }
+
+        path.unshift(this)
         return path
       }
 

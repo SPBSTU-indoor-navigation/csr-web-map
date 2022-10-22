@@ -19,8 +19,12 @@
           <input type="checkbox" v-model="showAnnotationBBox" id="checkbox3">
           <label for="checkbox3">bbox</label>
         </div>
+        <div>
+          <input type="checkbox" v-model="showDebugPath" id="checkbox4">
+          <label for="checkbox4">navpath</label>
+        </div>
         <p>annotation c: {{renderAnnotationCount}}</p>
-        <p>zoom: {{currentZoom.toFixed(4)}}</p>
+        <p>zoom: {{zoom.toFixed(4)}}</p>
         <p>fps: {{fps}}</p>
         <p>fps2: {{fps2}}</p>
         <hr>
@@ -45,12 +49,13 @@ import { useFps } from '@vueuse/core'
 
 import { nearestBuiling } from '@/core/map/utils';
 
-import { showBackedCanvas, showBackedOutline, renderAnnotationCount, currentZoom, showAnnotationBBox, showDebugPanel } from '@/store/debugParams'
+import { showBackedCanvas, showBackedOutline, renderAnnotationCount, showAnnotationBBox, showDebugPanel, showDebugPath } from '@/store/debugParams'
 
 import { FocusVariant, IMap, IMapDelegate } from './mapControlls';
 import useOverlayDrawing from '@/core/map/overlayDrawing/useOverlayDrawing';
 import useMapAnnotations from '@/core/map/overlayDrawing/annotations/useMapAnnotations';
 import useOverlayGeometry from '@/core/map/overlayGeometry/useOverlayGeometry';
+import useMapPath from '@/core/map/overlayDrawing/path/useMapPath';
 
 const mapContainer = ref(null)
 
@@ -66,6 +71,7 @@ const currentOrdinal = ref(0);
 let overlayDrawing: ReturnType<typeof useOverlayDrawing>;
 let overlayGeometry: ReturnType<typeof useOverlayGeometry>;
 let mapAnnotations: ReturnType<typeof useMapAnnotations>;
+let mapPath: ReturnType<typeof useMapPath>;
 
 let map: IMap = null;
 
@@ -144,8 +150,10 @@ async function load() {
     scheduleUpdate,
   })
 
+  mapPath = useMapPath({ pathFinder: venue.value.pathFinder })
   mapAnnotations = useMapAnnotations({ styleSheet, mapZoom: readonly(zoom) })
 
+  overlayDrawing.addOverlay(mapPath.overlayDrawing)
   overlayDrawing.addOverlay(mapAnnotations.overlayDrawing)
 
   map = {
@@ -154,6 +162,9 @@ async function load() {
 
     addOverlay: t => overlayGeometry.scene.add(t),
     removeOverlay: t => overlayGeometry.scene.remove(t),
+
+    addPath: mapPath.add,
+    removePath: mapPath.remove,
   }
 
 
@@ -168,6 +179,8 @@ async function load() {
         mapAnnotations.selected.value = null
       }
     },
+    addPath: mapPath.add,
+    removePath: mapPath.remove,
   }
 
   emit('mapDelegate', delegate)

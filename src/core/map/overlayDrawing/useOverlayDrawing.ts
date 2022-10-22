@@ -55,8 +55,9 @@ export default function useOverlayDrawing(options: {
 }) {
 
   let overlays: IOverlayDrawing[] = []
+  let initFinished = false
 
-  const { ctx, canvasSize } = useCanvas(options.container, t => draw())
+  const { ctx, canvasSize } = useCanvas(options.container, t => { if (initFinished) draw() })
 
   function project(pos: { x: number, y: number }) {
     const v = new Vector3(pos.x, pos.y, 0)
@@ -74,6 +75,7 @@ export default function useOverlayDrawing(options: {
   }
 
   function draw() {
+    ctx.clearRect(0, 0, canvasSize.value.x, canvasSize.value.y)
     overlays.forEach(o => o.draw(ctx, canvasSize.value))
   }
 
@@ -94,7 +96,7 @@ export default function useOverlayDrawing(options: {
   }
   updateEveryFrame()
 
-
+  initFinished = true
   return {
     draw,
     addOverlay,
