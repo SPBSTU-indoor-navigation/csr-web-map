@@ -1,8 +1,7 @@
 import { convert, IAnnotationInfo } from "@/components/map/annotations/annotationInfo";
 import { AmenityAnnotation } from "@/components/map/annotations/renders/amenity";
 import { OccupantAnnotation } from "@/components/map/annotations/renders/occupant";
-import { BufferGeometry, Mesh, MeshBasicMaterial, Vector2 } from "three";
-import { MapController } from "../map/mapController";
+import { BufferGeometry, Mesh, MeshBasicMaterial, Vector2, Object3D } from "three";
 import Building from "./building";
 import Environments from "./environment";
 import Level from "./level";
@@ -15,7 +14,15 @@ import {
 } from './utils';
 
 import { PathFinder } from '@/core/pathFinder'
-import { IAnnotation } from "../map/annotations/annotation";
+import { IAnnotation } from "../map/overlayDrawing/annotations/annotation";
+
+export interface IMap {
+  addOverlay(...object: Object3D[]): void
+  removeOverlay(...object: Object3D[]): void
+
+  addAnnotation(annotation: IAnnotation | IAnnotation[]): void
+  removeAnnotation(annotation: IAnnotation | IAnnotation[]): void
+}
 
 export default class Venue {
   archive: {
@@ -32,9 +39,9 @@ export default class Venue {
   pathFinder: PathFinder
   navpathBegin: IAnnotation
 
+  mkGeometry: any
 
   private lineMeshMaterialStorage: LineMeshMaterialStorage
-  private mkGeometry: any
   private pivot: { latitude: number, longitude: number }
 
   private mesh: Mesh<BufferGeometry, MeshBasicMaterial>
@@ -133,7 +140,7 @@ export default class Venue {
       this.annotations.map(t => t.annotation))
   }
 
-  Add(map: MapController) {
+  Add(map: IMap) {
     [this.mesh, this.buildingFootprintMesh, this.buildingFootprintOutlineMesh]
       .forEach(mesh => map.addOverlay(mesh))
 
@@ -142,12 +149,17 @@ export default class Venue {
     setTimeout(() => map.addAnnotation(this.enviromentAmenity), 0)
   }
 
-  Remove(map: MapController) {
+  Remove(map: IMap) {
     [this.mesh, this.buildingFootprintMesh, this.buildingFootprintOutlineMesh]
       .forEach(mesh => map.removeOverlay(mesh))
 
     this.environments.Remove(map)
     this.buildings.forEach(building => building.Remove(map))
+  }
+
+  ScheduleUpdate() {
+    this.mkGeometry.style.fillOpacity = 1;
+    this.mkGeometry.style.fillOpacity = 0;
   }
 
   Style(styleSheet) {

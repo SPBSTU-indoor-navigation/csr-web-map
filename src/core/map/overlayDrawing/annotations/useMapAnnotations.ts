@@ -1,72 +1,42 @@
-import { Vector2, Vector3, Camera, Box2 } from 'three';
-import { Ref, ref, ShallowRef, shallowRef, UnwrapRef, watch, watchEffect } from 'vue';
-import { MapController } from '../mapController';
+import { Vector2, Box2 } from 'three';
+import { Ref, shallowRef, watch, watchEffect } from 'vue';
 import { IAnnotation, Shape2D } from './annotation';
-import Tween from '@tweenjs/tween.js';
-import { currentZoom, renderAnnotationCount, showAnnotationBBox } from '@/store/debugParams';
-import { groupBy } from '../../shared/utils';
-import { useElementSize } from '@vueuse/core';
+import { renderAnnotationCount, showAnnotationBBox } from '@/store/debugParams';
+import { groupBy } from '../../../shared/utils';
+
+import { IOverlayDrawing } from '../useOverlayDrawing';
 
 declare type Annotation = (IAnnotation & Shape2D);
 
-export interface IMapAnnotations {
-  selected: ShallowRef<IAnnotation | null>
-  add(annotation: IAnnotation | IAnnotation[]): void
-  remove(annotation: IAnnotation | IAnnotation[]): void
-
-  render(options: { cam: Camera }): void
-  click(pos: Vector2, e: PointerEvent): void
-  zoom(zoom: number)
-}
-
-
 export default function useMapAnnotations(options: {
-  mapController: MapController,
-  styleSheet: Ref<UnwrapRef<any>>,
-  mapContainer: Ref<UnwrapRef<HTMLElement>>
-}): IMapAnnotations {
-
-  let canvasSize: Vector2
-  let lastZoom: number = 0
+  styleSheet: Readonly<Ref<any>>,
+  mapZoom: Readonly<Ref<number>>,
+}) {
+  const mapZoom = options.mapZoom;
   const selected = shallowRef<IAnnotation | null>(null)
-
-  const screenSize = useElementSize(options.mapContainer)
-
-  const canvas = document.createElement('canvas')
-  canvas.classList.add('map-annotations')
-  const ctx = canvas.getContext('2d')!
-  ctx.imageSmoothingEnabled = true
-  ctx.imageSmoothingQuality = 'high'
-  document.querySelector('.mk-map-view')!.insertBefore(canvas, document.querySelector(".mk-map-view>.mk-map-node-element"))
-
-  watchEffect(() => {
-    const width = screenSize.width.value
-    const height = screenSize.height.value
-
-    canvas.width = width * window.devicePixelRatio
-    canvas.height = height * window.devicePixelRatio
-    canvas.style.width = `${width}px`
-    canvas.style.height = `${height}px`
-    canvasSize = new Vector2(width, height)
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
-  })
-
   let annotations: Annotation[] = []
+  let project: (pos: { x: number, y: number }) => Vector2
 
-  watchEffect(() => {
-    annotations.forEach(a => a.style(options.styleSheet.value.annotations))
-  })
+  function setup(options: {
+    project: (pos: { x: number, y: number }) => Vector2
+  }) {
+    project = options.project
+  }
 
-  const addAnotation = (annotation: Annotation | Annotation[]) => {
+  function isDirty() {
+    return annotations.some(a => a.isDirty)
+  }
+
+  function addAnotation(annotation: Annotation | Annotation[]) {
     const toAdd = Array.isArray(annotation) ? annotation : [annotation]
     annotations.push(...toAdd)
     toAdd.forEach(a => {
       a.style(options.styleSheet.value.annotation)
-      a.zoom(lastZoom, false)
+      a.zoom(mapZoom.value, false)
     })
   }
 
-  const removeAnotation = (annotation: IAnnotation | IAnnotation[]) => {
+  function removeAnotation(annotation: IAnnotation | IAnnotation[]) {
     const toRemove = new Set((Array.isArray(annotation) ? annotation : [annotation]).map(t => t.id))
 
     if (toRemove.has(selected.value?.id)) {
@@ -77,11 +47,7 @@ export default function useMapAnnotations(options: {
     annotations = annotations.filter(t => !toRemove.has(t.id))
   }
 
-  const render = (options: {
-    cam: Camera
-  }) => {
-    const { cam } = options
-
+  function draw(ctx: CanvasRenderingContext2D, canvasSize: Vector2) {
     const debugDraw = (annotation: { screenPosition: Vector2, annotation: Annotation }) => {
       if (!showAnnotationBBox.value) return
       ctx.save()
@@ -103,14 +69,6 @@ export default function useMapAnnotations(options: {
         annotation.annotation.boundingBox.max.x - annotation.annotation.boundingBox.min.x,
         annotation.annotation.boundingBox.max.y - annotation.annotation.boundingBox.min.y)
       ctx.restore()
-    }
-
-    const project = (pos: Vector2) => {
-      const v = new Vector3(pos.x, pos.y, 0)
-      v.project(cam)
-      v.x = ((v.x + 1) / 2)
-      v.y = ((-v.y + 1) / 2)
-      return new Vector2(v.x * canvasSize.x, v.y * canvasSize.y)
     }
 
     const draw = (annotation: { screenPosition: Vector2, annotation: Annotation }) => {
@@ -142,7 +100,8 @@ export default function useMapAnnotations(options: {
       .filter(t => t.annotation.shouldDraw(screen))
 
     renderAnnotationCount.value = annotationsToRender.length
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    ctx.clearRect(0, 0, screen.getSize(new Vector2()).width, screen.getSize(new Vector2()).height)
 
     let renderQueue = []
     renderQueue.push(...annotationsToRender.filter(t => t.annotation.isSelected))
@@ -154,12 +113,7 @@ export default function useMapAnnotations(options: {
 
   }
 
-  watch(selected, (value, old) => {
-    if (old != null) old.setSelected(false, true)
-    if (value != null) value.setSelected(true, true)
-  })
-
-  const click = (pos: Vector2, e: PointerEvent) => {
+  function click(pos: Vector2, e: PointerEvent) {
     let isSelect = false
 
     const isTouch = e.pointerType === 'touch'
@@ -199,34 +153,28 @@ export default function useMapAnnotations(options: {
 
   }
 
-  const zoom = (zoom: number) => {
-    currentZoom.value = zoom
-    lastZoom = zoom
-    annotations.forEach(t => t.zoom(zoom))
-  }
+  watchEffect(() => {
+    annotations.forEach(a => a.style(options.styleSheet.value.annotations))
+  })
 
-  const updateEveryFrame = () => {
-    Tween.update()
+  watch(selected, (value, old) => {
+    if (old != null) old.setSelected(false, true)
+    if (value != null) value.setSelected(true, true)
+  })
 
-    // setTimeout(() => requestAnimationFrame(updateEveryFrame), 1000 / 60)
-    setTimeout(updateEveryFrame, 1000 / 60)
-
-    // requestAnimationFrame(updateEveryFrame)
-    const isDirty = annotations.some(t => t.isDirty)
-    if (isDirty) {
-      options.mapController.scheduleUpdate()
-    }
-  }
-
-  updateEveryFrame()
-
+  watch(mapZoom, zoom => {
+    annotations.forEach(a => a.zoom(zoom))
+  })
 
   return {
+    overlayDrawing: {
+      isDirty,
+      setup,
+      draw,
+      click,
+    } as IOverlayDrawing,
     add: addAnotation,
     remove: removeAnotation,
-    render,
-    click,
-    zoom,
     selected
   }
 

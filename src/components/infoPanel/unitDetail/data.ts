@@ -1,7 +1,7 @@
 import { AttractionAnnotation } from '@/components/map/annotations/renders/attraction';
 import { OccupantAnnotation } from '@/components/map/annotations/renders/occupant'
 import { AmenityAnnotation } from '@/components/map/annotations/renders/amenity'
-import { IAnnotation } from '@/core/map/annotations/annotation';
+import { IAnnotation } from '@/core/map/overlayDrawing/annotations/annotation';
 
 
 

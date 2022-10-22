@@ -11,7 +11,7 @@ import RouteDetailVue from "@/components/infoPanel/routeDetail/index.vue";
 import UnitDetailVue from './unitDetail/index.vue';
 import SearchVue from './search/index.vue';
 import { IMapDelegate } from '../map/mapControlls';
-import { IAnnotation } from '@/core/map/annotations/annotation';
+import { IAnnotation } from '@/core/map/overlayDrawing/annotations/annotation';
 import { useDefineControlls } from './infoPanelControlls';
 
 const initPage = {

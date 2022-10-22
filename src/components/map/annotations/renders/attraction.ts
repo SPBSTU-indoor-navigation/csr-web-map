@@ -1,6 +1,6 @@
 import { Animator } from "@/core/animator/animator";
-import { AnnotationBakery, TextBakery } from "@/core/map/annotations/bakery";
-import { DetailLevelProcessor, DetailLevelState } from "@/core/map/annotations/detailLevelProcessor";
+import { AnnotationBakery, TextBakery } from "@/core/map/overlayDrawing/annotations/bakery";
+import { DetailLevelProcessor, DetailLevelState } from "@/core/map/overlayDrawing/annotations/detailLevelProcessor";
 import { Color } from "@/core/shared/color";
 import { LocalizedString } from "@/core/shared/localizedString";
 import { applyTextParams, clamp, drawTextWithCurrentParams, modify, multiLineText, TextParams } from "@/core/shared/utils";

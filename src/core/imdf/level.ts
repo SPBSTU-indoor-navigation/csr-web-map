@@ -1,10 +1,10 @@
 import { AmenityAnnotation } from '@/components/map/annotations/renders/amenity'
 import { OccupantAnnotation } from '@/components/map/annotations/renders/occupant'
 import { Group, Mesh, MeshBasicMaterial, Vector2 } from 'three'
-import { Annotation } from '../map/annotations/annotation'
-import { MapController } from '../map/mapController'
+import { Annotation } from '../map/overlayDrawing/annotations/annotation'
 import { LocalizedString } from '../shared/localizedString'
 import { meshForFeatureCollection, outlineMeshForFeatureCollection } from './utils'
+import { IMap } from './venue'
 
 
 export default class Level {
@@ -70,12 +70,12 @@ export default class Level {
     Object.values(this.geometrys).forEach(mesh => this.groupMesh.add(mesh))
   }
 
-  Add(map: MapController) {
+  Add(map: IMap) {
     map.addOverlay(this.groupMesh)
     map.addAnnotation(this.annotations)
   }
 
-  Remove(map: MapController) {
+  Remove(map: IMap) {
     map.removeOverlay(this.groupMesh)
     map.removeAnnotation(this.annotations)
   }

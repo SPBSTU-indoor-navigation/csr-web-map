@@ -3,7 +3,7 @@ import { markRaw, toRaw } from "vue"
 import Building from "../imdf/building"
 import Level from "../imdf/level"
 import { INavPath, INavPathAssocieted, Tag } from "../imdf/navPath"
-import { IAnnotation } from "../map/annotations/annotation"
+import { IAnnotation } from "../map/overlayDrawing/annotations/annotation"
 import { Node, Node2D, totalCost } from "./aStar"
 
 export interface IPathResultNode {

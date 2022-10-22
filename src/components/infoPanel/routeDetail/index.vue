@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
-import { IAnnotation } from "@/core/map/annotations/annotation";
+import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
 import { PathFinder } from "@/core/pathFinder";
 import { Node2D } from "@/core/pathFinder/aStar";
 import { computed } from "vue";

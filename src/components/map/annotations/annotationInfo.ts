@@ -2,7 +2,7 @@
 // var annotation: MKAnnotation { get }
 // var annotationSprite: UIImage? { get }
 // var backgroundSpriteColor: UIColor { get }
-import { IAnnotation } from "@/core/map/annotations/annotation"
+import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation"
 import { LocalizedString } from "@/core/shared/localizedString"
 import { AmenityAnnotation } from "./renders/amenity"
 import { AttractionAnnotation } from "./renders/attraction"

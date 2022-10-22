@@ -32,38 +32,42 @@
 </template>
 
 <script setup lang="ts">
-import Venue from '@/core/imdf/venue';
+import Venue, { IMap } from '@/core/imdf/venue';
+import Building from '@/core/imdf/building';
 import lightTheme from '@/styles/map/light.js';
 import LevelSwitcherVue from '../controlls/levelSwitcher/index.vue';
-import useMapAnnotations from '@/core/map/annotations/useMapAnnotations';
 import MapKitVue from '@/core/map/mapKit/MapKit.vue';
-import useMapOverlay from '@/core/map/overlayGeometry/useMapOverlay';
 
 import { Box2, Vector2 } from 'three';
-import { defineComponent, ref, shallowRef, watch, watchEffect } from 'vue';
+import { defineComponent, markRaw, readonly, ref, shallowRef, watch, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import { useFps } from '@vueuse/core'
 
 import { nearestBuiling } from '@/core/map/utils';
-import { MapController } from '@/core/map/mapController';
 
 import { showBackedCanvas, showBackedOutline, renderAnnotationCount, currentZoom, showAnnotationBBox, showDebugPanel } from '@/store/debugParams'
 
 import { FocusVariant, IMapDelegate } from './mapControlls';
+import useOverlayDrawing from '@/core/map/overlayDrawing/useOverlayDrawing';
+import useMapAnnotations from '@/core/map/overlayDrawing/annotations/useMapAnnotations';
+import useOverlayGeometry from '@/core/map/overlayGeometry/useOverlayGeometry';
 
 const mapContainer = ref(null)
 
 const mkMap = shallowRef();
-/** @type {import('vue').ShallowRef<Venue>} */
-const venue = shallowRef();
+
+const venue = shallowRef<Venue>(null);
 const styleSheet = shallowRef(lightTheme);
 const zoom = ref(0);
-const currentBuilding = ref();
+const currentBuilding = shallowRef<Building>();
 const showIndoor = ref(false);
 const currentOrdinal = ref(0);
 
-/** @type {MapController} */
-let mapController;
+let overlayDrawing: ReturnType<typeof useOverlayDrawing>;
+let overlayGeometry: ReturnType<typeof useOverlayGeometry>;
+let mapAnnotations: ReturnType<typeof useMapAnnotations>;
+
+let map: IMap = null;
 
 
 const SHOW_ZOOM = 4;
@@ -75,29 +79,44 @@ const fps2 = useFps()
 
 const emit = defineEmits(['mapDelegate'])
 
-function mapClick(e) {
-  mapController.mapAnnotations.click(new Vector2(e.clientX, e.clientY), e);
+function mapClick(e: PointerEvent) {
+  overlayDrawing.click(new Vector2(e.clientX, e.clientY), e)
 }
 
 function onMapReady(map) {
   mkMap.value = map;
 }
 
-function onAnimate() {
+function debugFPS() {
   const time = performance.now()
   const delta = time - lastAnimateTime
   const t = Math.round(1000 / delta)
   fps.value = t < 10 ? '-' : t.toFixed(0)
   lastAnimateTime = time
+}
 
-  mapController.render();
+function onAnimate() {
+  debugFPS()
+
+  if (!map) return
+
+  overlayGeometry.render()
+  overlayDrawing.draw()
   const nearest = nearestBuiling(
     new Box2(new Vector2(-1, -1), new Vector2(1, 1)).expandByScalar(-0.1),
-    mapController.camera,
+    overlayGeometry.camera,
     venue.value
   );
   currentBuilding.value = nearest;
 }
+
+function scheduleUpdate() {
+  venue.value.ScheduleUpdate()
+}
+
+//@ts-ignore
+window.onMapkitUpdate = () => onAnimate()
+
 
 async function load() {
   const router = useRoute();
@@ -108,26 +127,35 @@ async function load() {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
-  venue.value = new Venue(archive.imdf);
-  mapController = new MapController(venue.value.mkGeometry);
+  venue.value = new Venue(archive.imdf)
 
-  const mapAnnotations = useMapAnnotations({ mapController, styleSheet, mapContainer });
-  mapController.mapAnnotations = mapAnnotations
-
-  const mapOverlay = useMapOverlay({
+  overlayGeometry = useOverlayGeometry({
     venue,
+    mapZoom: zoom,
     mkMap: mkMap.value,
-    styleSheet,
-    onAnimate,
-    mapController,
-    mapContainer
-  });
+    mapContainer,
+    scheduleUpdate
+  })
 
+  overlayDrawing = useOverlayDrawing({
+    mapZoom: readonly(zoom),
+    container: mapContainer,
+    threeJsCamera: overlayGeometry.camera,
+    scheduleUpdate,
+  })
 
-  watchEffect(() => {
-    zoom.value = mapOverlay.zoom.value;
-    mapAnnotations.zoom(zoom.value);
-  });
+  mapAnnotations = useMapAnnotations({ styleSheet, mapZoom: readonly(zoom) })
+
+  overlayDrawing.addOverlay(mapAnnotations.overlayDrawing)
+
+  map = {
+    addAnnotation: mapAnnotations.add,
+    removeAnnotation: mapAnnotations.remove,
+
+    addOverlay: t => overlayGeometry.scene.add(t),
+    removeOverlay: t => overlayGeometry.scene.remove(t),
+  }
+
 
   const delegate: IMapDelegate = {
     selectedAnnotation: mapAnnotations.selected,
@@ -147,10 +175,20 @@ async function load() {
 
 load();
 
+
+watchEffect(() => {
+  venue.value?.Style(styleSheet.value.imdf)
+})
+
+watch(venue, (newValue, oldValue) => {
+  newValue.Add(map)
+  oldValue?.Remove(map)
+})
+
 watch(zoom, (zoom) => {
   if (currentBuilding.value) {
     if (zoom > SHOW_ZOOM) {
-      currentBuilding.value.ShowIndoor();
+      currentBuilding.value.ShowIndoor(undefined);
       showIndoor.value = true;
     } else if (zoom < HIDE_ZOOM) {
       currentBuilding.value.HideIndoor();
@@ -164,7 +202,7 @@ watch(currentBuilding, (building, old) => {
   if (building) {
     currentOrdinal.value = building.currentOrdinal;
     if (zoom.value > HIDE_ZOOM) {
-      building.ShowIndoor();
+      building.ShowIndoor(undefined);
       showIndoor.value = true;
     }
   }
@@ -172,7 +210,7 @@ watch(currentBuilding, (building, old) => {
 
 watch(currentOrdinal, (ordinal) => {
   currentBuilding.value.ChangeOrdinal(ordinal);
-  mapController.scheduleUpdate();
+  scheduleUpdate();
 });
 
 defineComponent([MapKitVue, LevelSwitcherVue]);

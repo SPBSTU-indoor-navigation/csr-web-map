@@ -1,9 +1,9 @@
 import { AttractionAnnotation } from '@/components/map/annotations/renders/attraction'
 import { Box2, Vector2 } from 'three'
-import { MapController } from '../map/mapController'
 import { LocalizedString } from '../shared/localizedString'
 import Level from './level'
 import { polygonIntersection } from './utils'
+import { IMap } from './venue'
 
 
 export default class Building {
@@ -22,7 +22,7 @@ export default class Building {
   attractions: AttractionAnnotation[] = []
   currentOrdinal = 0
 
-  private map: MapController = null
+  private map: IMap = null
 
   private bbox = null
   private points = []
@@ -87,16 +87,16 @@ export default class Building {
     return false
   }
 
-  Add(map: MapController) {
+  Add(map: IMap) {
     this.map = map
     setTimeout(() => map.addAnnotation(this.attractions), 0)
   }
 
-  Remove(map: MapController) {
+  Remove(map: IMap) {
     this.HideIndoor()
   }
 
-  ShowIndoor(ordinal) {
+  ShowIndoor(ordinal: number | undefined) {
     if (this.showLevel) return
 
     this.currentOrdinal = ordinal == undefined ? this.currentOrdinal : ordinal;

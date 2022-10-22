@@ -1,5 +1,5 @@
 import Venue from "@/core/imdf/venue";
-import { IAnnotation } from "@/core/map/annotations/annotation";
+import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
 import { ShallowRef } from "vue";
 
 

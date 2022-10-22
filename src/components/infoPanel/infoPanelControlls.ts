@@ -1,4 +1,4 @@
-import { IAnnotation } from "@/core/map/annotations/annotation";
+import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
 
 let setFrom: (info: IAnnotation) => void;
 let setTo: (info: IAnnotation) => void;

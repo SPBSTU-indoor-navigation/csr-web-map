@@ -45,7 +45,7 @@ import { unitInfoFromAnnotation } from "./data";
 import SectionCellVue from "../shared/SectionCell.vue";
 import IconVue from "@/components/icon/index.vue";
 import { useInfoPanel } from "../infoPanelControlls";
-import { IAnnotation } from "@/core/map/annotations/annotation";
+import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
 
 const props = defineProps<{ data: { annotation: IAnnotation }, delegate: any }>()
 const emit = defineEmits(['pop', 'push'])

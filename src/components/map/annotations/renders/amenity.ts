@@ -1,12 +1,12 @@
 import { Animator } from "@/core/animator/animator";
-import { DetailLevelProcessor, DetailLevelState } from "@/core/map/annotations/detailLevelProcessor";
+import { DetailLevelProcessor, DetailLevelState } from "@/core/map/overlayDrawing/annotations/detailLevelProcessor";
 import { Color } from "@/core/shared/color";
 import { applyTextParams, clamp, drawTextWithCurrentParams, multiLineText, TextParams } from "@/core/shared/utils";
 import { Easing } from "@tweenjs/tween.js";
 import { Box2, Vector2 } from "three";
 import { AnimatedAnnotation } from "../animatedAnnotation";
 import { AnnotationImages } from "../annotationImages";
-import { AnnotationBakery } from '@/core/map/annotations/bakery'
+import { AnnotationBakery } from '@/core/map/overlayDrawing/annotations/bakery'
 import { LocalizedString } from "@/core/shared/localizedString";
 import Building from "@/core/imdf/building";
 import Level from "@/core/imdf/level";
