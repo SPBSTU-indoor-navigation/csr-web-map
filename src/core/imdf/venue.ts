@@ -15,14 +15,7 @@ import {
 
 import { PathFinder } from '@/core/pathFinder'
 import { IAnnotation } from "../map/overlayDrawing/annotations/annotation";
-
-export interface IMap {
-  addOverlay(...object: Object3D[]): void
-  removeOverlay(...object: Object3D[]): void
-
-  addAnnotation(annotation: IAnnotation | IAnnotation[]): void
-  removeAnnotation(annotation: IAnnotation | IAnnotation[]): void
-}
+import { IMap } from "@/components/map/mapControlls";
 
 export default class Venue {
   archive: {

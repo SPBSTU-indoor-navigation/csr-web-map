@@ -1,10 +1,10 @@
 import { AmenityAnnotation } from '@/components/map/annotations/renders/amenity'
 import { OccupantAnnotation } from '@/components/map/annotations/renders/occupant'
+import { IMap } from '@/components/map/mapControlls'
 import { Group, Mesh, MeshBasicMaterial, Vector2 } from 'three'
 import { Annotation } from '../map/overlayDrawing/annotations/annotation'
 import { LocalizedString } from '../shared/localizedString'
 import { meshForFeatureCollection, outlineMeshForFeatureCollection } from './utils'
-import { IMap } from './venue'
 
 
 export default class Level {

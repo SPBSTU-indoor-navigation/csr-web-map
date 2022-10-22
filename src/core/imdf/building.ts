@@ -1,9 +1,9 @@
 import { AttractionAnnotation } from '@/components/map/annotations/renders/attraction'
+import { IMap } from '@/components/map/mapControlls'
 import { Box2, Vector2 } from 'three'
 import { LocalizedString } from '../shared/localizedString'
 import Level from './level'
 import { polygonIntersection } from './utils'
-import { IMap } from './venue'
 
 
 export default class Building {

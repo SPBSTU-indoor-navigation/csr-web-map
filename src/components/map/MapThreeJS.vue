@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import Venue, { IMap } from '@/core/imdf/venue';
+import Venue from '@/core/imdf/venue';
 import Building from '@/core/imdf/building';
 import lightTheme from '@/styles/map/light.js';
 import LevelSwitcherVue from '../controlls/levelSwitcher/index.vue';
@@ -47,7 +47,7 @@ import { nearestBuiling } from '@/core/map/utils';
 
 import { showBackedCanvas, showBackedOutline, renderAnnotationCount, currentZoom, showAnnotationBBox, showDebugPanel } from '@/store/debugParams'
 
-import { FocusVariant, IMapDelegate } from './mapControlls';
+import { FocusVariant, IMap, IMapDelegate } from './mapControlls';
 import useOverlayDrawing from '@/core/map/overlayDrawing/useOverlayDrawing';
 import useMapAnnotations from '@/core/map/overlayDrawing/annotations/useMapAnnotations';
 import useOverlayGeometry from '@/core/map/overlayGeometry/useOverlayGeometry';
