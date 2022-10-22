@@ -18,6 +18,8 @@ export default class Level {
   }
 
   ordinal: number
+  isShow = false
+
   private units
   private openings
   private details
@@ -73,11 +75,13 @@ export default class Level {
   Add(map: IMap) {
     map.addOverlay(this.groupMesh)
     map.addAnnotation(this.annotations)
+    this.isShow = true
   }
 
   Remove(map: IMap) {
     map.removeOverlay(this.groupMesh)
     map.removeAnnotation(this.annotations)
+    this.isShow = false
   }
 
   Style(styleSheet) {

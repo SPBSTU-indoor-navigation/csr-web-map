@@ -1,4 +1,11 @@
 
+interface INode {
+  connectedNodes: Node[]
+  estimatedCost(goal: Node): number
+  cost(node: Node): number
+  findPath(goal: Node): Node[]
+}
+
 export class Node {
   connectedNodes: Node[] = []
 

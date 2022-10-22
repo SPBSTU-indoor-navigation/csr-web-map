@@ -69,6 +69,10 @@ export class PathNode extends Node2D {
 
   extraWeight = 1
 
+  get isIndoor() {
+    return this.building != null
+  }
+
   constructor(pos: { x: number, y: number }, building?: Building, level?: Level, weight: number = 1, tags: Tag[] = []) {
     super(pos)
     this.building = building
