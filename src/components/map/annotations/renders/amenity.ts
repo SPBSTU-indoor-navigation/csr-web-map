@@ -141,12 +141,12 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
   }
 
   override get shouldSelectOnTap(): boolean {
-    const isAnim = this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.chaneStateAnimator.isPlaying
+    const isAnim = this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.changeStateAnimator.isPlaying
     return (this.state != DetailLevelState.hide || isAnim || this.isSelected) && super.shouldSelectOnTap
   }
 
   override shouldDraw(screen: Box2): boolean {
-    const isAnim = this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.chaneStateAnimator.isPlaying
+    const isAnim = this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.changeStateAnimator.isPlaying
     return (this.state != DetailLevelState.hide || isAnim || this.isSelected) && super.shouldDraw(screen)
   }
 
@@ -280,7 +280,7 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
     drawMiniPoint(ctx)
     drawLabel(ctx)
 
-    const isAnim = this.isSelected || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.chaneStateAnimator?.isPlaying
+    const isAnim = this.isSelected || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.changeStateAnimator?.isPlaying
     if (isAnim) {
       drawPoint(ctx)
     } else {

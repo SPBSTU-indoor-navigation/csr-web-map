@@ -170,6 +170,7 @@ async function load() {
 
   const delegate: IMapDelegate = {
     selectedAnnotation: mapAnnotations.selected,
+    pinnedAnnotations: mapAnnotations.pinned,
     venue,
     selectAnnotation: (a, focusVariant) => {
       mapAnnotations.selected.value = a
@@ -181,6 +182,13 @@ async function load() {
     },
     addPath: mapPath.add,
     removePath: mapPath.remove,
+    pinAnnotation: (...a) => {
+      mapAnnotations.pinned.value.push(...a)
+    },
+    unpinAnnotation: (...a) => {
+      const target = Array.from(a)
+      mapAnnotations.pinned.value = mapAnnotations.pinned.value.filter(x => !target.includes(x))
+    },
   }
 
   emit('mapDelegate', delegate)

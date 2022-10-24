@@ -2,13 +2,14 @@ import { Animator } from "@/core/animator/animator";
 import { DetailLevelAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
 import { Size } from "@/core/map/overlayDrawing/annotations/bounds";
 import { DetailLevelProcessor } from "@/core/map/overlayDrawing/annotations/detailLevelProcessor";
+import { nextFrame } from "@/core/shared/utils";
 import { Vector2 } from "three";
 
 
 export class AnimatedAnnotation<DetailLevel extends number, DetailLevelState> extends DetailLevelAnnotation<DetailLevel, DetailLevelState> {
   selectAnimation: Animator
   deSelectAnimation: Animator
-  chaneStateAnimator: Animator | null = null
+  changeStateAnimator: Animator | null = null
 
   protected onAnim = () => {
     this.isDirty = true
@@ -31,10 +32,15 @@ export class AnimatedAnnotation<DetailLevel extends number, DetailLevelState> ex
     }
   }
 
-  protected animateChangeState(animator: Animator, animated: boolean = true) {
-    if (this.isSelected) return;
+  override setPinned(pinned: boolean, animated: boolean): void {
+    super.setPinned(pinned, animated)
+    this.setSelected(this.isSelected, animated)
+  }
 
-    this.chaneStateAnimator = animator
+  protected animateChangeState(animator: Animator, animated: boolean = true) {
+    if (this.isSelected || this.isPinned) return;
+
+    this.changeStateAnimator = animator
 
     animator
       .addDependent(this.selectAnimation)

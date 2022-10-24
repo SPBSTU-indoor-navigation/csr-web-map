@@ -14,6 +14,8 @@ export default function useMapAnnotations(options: {
 }) {
   const mapZoom = options.mapZoom;
   const selected = shallowRef<IAnnotation | null>(null)
+  const pinned = shallowRef<IAnnotation[]>([])
+
   let annotations: Annotation[] = []
   let project: (pos: { x: number, y: number }) => Vector2
 
@@ -160,6 +162,11 @@ export default function useMapAnnotations(options: {
     if (value != null) value.setSelected(true, true)
   })
 
+  watch(pinned, (value, old) => {
+    old.forEach(a => a.setPinned(false, true))
+    value.forEach(a => a.setPinned(true, true))
+  })
+
   watch(mapZoom, zoom => {
     annotations.forEach(a => a.zoom(zoom))
   })
@@ -173,7 +180,8 @@ export default function useMapAnnotations(options: {
     } as IOverlayDrawing,
     add: addAnotation,
     remove: removeAnotation,
-    selected
+    selected,
+    pinned
   }
 
 }

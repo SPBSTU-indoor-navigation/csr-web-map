@@ -20,6 +20,7 @@ export interface IAnnotation {
 
   zoom(zoom: number, animated?: boolean): void
   setSelected(selected: boolean, animated: boolean): void
+  setPinned(selected: boolean, animated: boolean): void
   updateScreenPosition(pos: Vector2): void
 
   pointInside(pos: Vector2): boolean
@@ -62,6 +63,7 @@ export class Annotation extends Shape2D implements IAnnotation {
 
   isDirty = true
   isSelected = false
+  isPinned = false
 
   protected currentZoom: number = 0
   protected data: any = {}
@@ -83,6 +85,10 @@ export class Annotation extends Shape2D implements IAnnotation {
 
   setSelected(selected: boolean, animated: boolean): void {
     this.isSelected = selected
+  }
+
+  setPinned(pinned: boolean, animated: boolean): void {
+    this.isPinned = pinned
   }
 
   zoom(zoom: number, animated: boolean = true) {

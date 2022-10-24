@@ -24,6 +24,7 @@ export interface IMap {
 
 export interface IMapDelegate {
   selectedAnnotation: ShallowRef<IAnnotation | null>;
+  pinnedAnnotations: ShallowRef<IAnnotation[]>;
   venue: ShallowRef<Venue | null>;
 
   selectAnnotation?(annotation: IAnnotation, focusVariant: FocusVariant): void;
@@ -31,4 +32,7 @@ export interface IMapDelegate {
 
   addPath?: (path: PathNode[]) => string;
   removePath?: (id: string) => void;
+
+  pinAnnotation?: (...annotation: IAnnotation[]) => void;
+  unpinAnnotation?: (...annotation: IAnnotation[]) => void;
 }

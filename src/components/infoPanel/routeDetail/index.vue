@@ -39,6 +39,8 @@ const emit = defineEmits<{
 }>()
 
 const currentRouteId = usePageStore<string>(`route_${props.page}`, 'currentRouteId', null)
+const lastAnnotations = usePageStore<IAnnotation[]>(`route_${props.page}`, 'lastAnnotations', [])
+
 const fromUnitInfo = computed(() => unitInfoFromAnnotation(props.data.from))
 const toUnitInfo = computed(() => unitInfoFromAnnotation(props.data.to))
 const mapDelegate = inject<ShallowRef<IMapDelegate>>('mapDelegate')
@@ -55,13 +57,18 @@ function onClose() {
   emit('pop')
 }
 
-
 watchEffect(() => {
   if (pathResult.value != null) {
     mapDelegate.value.removePath(currentRouteId.value)
   }
 
   currentRouteId.value = mapDelegate.value.addPath(pathResult.value.path)
+
+  const targetPin = [props.data.from, props.data.to]
+  mapDelegate.value.unpinAnnotation(...lastAnnotations.value.filter(a => !targetPin.includes(a)))
+  mapDelegate.value.pinAnnotation(...targetPin.filter(a => !lastAnnotations.value.includes(a)))
+
+  lastAnnotations.value = targetPin
 })
 
 

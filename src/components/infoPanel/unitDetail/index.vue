@@ -23,7 +23,7 @@
           </template>
         </SectionCellVue>
         <hr class="separator small" />
-        <SectionCellVue title="Сообщить об ошибке" :clickable="true" @click="createRoute">
+        <SectionCellVue title="Сообщить об ошибке" :clickable="true">
           <template #left>
             <IconVue img="report" class="controll-image" />
           </template>
@@ -55,10 +55,6 @@ const mapDelegate = inject('mapDelegate') as ShallowRef<IMapDelegate>
 
 const unitInfo = computed(() => unitInfoFromAnnotation(props.data.annotation))
 
-function createRoute() {
-  emit('push', { component: RouteDetailVue })
-}
-
 const onClose = () => {
   if (mapDelegate.value.selectedAnnotation.value === props.data.annotation) {
     mapDelegate.value.deselectAnnotation(props.data.annotation)
@@ -78,10 +74,12 @@ watchEffect(() => {
 })
 
 function onSetTo() {
+  mapDelegate.value.deselectAnnotation(props.data.annotation)
   setTo(props.data.annotation)
 }
 
 function onSetFrom() {
+  mapDelegate.value.deselectAnnotation(props.data.annotation)
   setFrom(props.data.annotation)
 }
 

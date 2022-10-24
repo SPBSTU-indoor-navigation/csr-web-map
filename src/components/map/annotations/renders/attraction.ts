@@ -234,7 +234,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
       ctx.restore()
     }
 
-    const isAnim = this.isSelected || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.chaneStateAnimator?.isPlaying
+    const isAnim = this.isSelected || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.changeStateAnimator?.isPlaying
     drawMiniPoint(ctx)
 
     if (isAnim) {
@@ -325,6 +325,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
     labelOpacity: () => {
       const opacity = () => {
         if (this.isSelected) return 1
+        if (this.isPinned) return 1
         return [DetailLevelState.big].includes(this.state) ? 1 : 0
       }
 
