@@ -5,10 +5,10 @@
     </template>
 
     <template #content>
-      <p>{{  fromUnitInfo.title  }}</p>
-      <p>{{  toUnitInfo.title  }}</p>
-      <p>{{  pathResult.indoorDistance  }}</p>
-      <p>{{  pathResult.outdoorDistance  }}</p>
+      <p>{{ fromUnitInfo.title }}</p>
+      <p>{{ toUnitInfo.title }}</p>
+      <p>{{ pathResult.indoorDistance }}</p>
+      <p>{{ pathResult.outdoorDistance }}</p>
     </template>
   </BottomSheetPageVue>
 </template>
@@ -20,7 +20,7 @@ import { IMapDelegate } from "@/components/map/mapControlls";
 import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
 import { PathFinder } from "@/core/pathFinder";
 import { Node2D } from "@/core/pathFinder/aStar";
-import { computed, inject, Ref, ShallowRef, watch, watchEffect } from "vue";
+import { computed, inject, ShallowRef, watch } from "vue";
 import { IInfoPanelDelegate } from "../infoPanelControlls";
 import { unitInfoFromAnnotation } from "../unitDetail/data";
 
@@ -58,19 +58,21 @@ function onClose() {
   emit('pop')
 }
 
-watchEffect(() => {
-  if (pathResult.value != null) {
+watch(pathResult, result => {
+  if (result != null) {
     mapDelegate.value.removePath(currentRouteId.value)
   }
 
-  currentRouteId.value = mapDelegate.value.addPath(pathResult.value.path)
+  currentRouteId.value = mapDelegate.value.addPath(result.path)
 
   const targetPin = [props.data.from, props.data.to]
   mapDelegate.value.unpinAnnotation(...lastAnnotations.value.filter(a => !targetPin.includes(a)))
   mapDelegate.value.pinAnnotation(...targetPin.filter(a => !lastAnnotations.value.includes(a)))
 
   lastAnnotations.value = targetPin
-})
+
+}, { immediate: true })
+
 
 
 </script>
