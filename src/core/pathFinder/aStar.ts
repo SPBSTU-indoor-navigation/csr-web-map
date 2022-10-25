@@ -28,38 +28,39 @@ export class Node {
   }
 
   findPath(goal: Node): Node[] {
-    const open: Node[] = []
-    const closed: Node[] = []
+    const openSet: Node[] = [this]
     const cameFrom: Map<Node, Node> = new Map()
+    const gScore: Map<Node, number> = new Map()
 
-    open.push(this)
+    gScore.set(this, 0)
 
-    while (open.length > 0) {
-      const current = open.sort((a, b) => a.estimatedCost(goal) - b.estimatedCost(goal))[0]
+    const fScore: Map<Node, number> = new Map()
+    fScore.set(this, this.estimatedCost(goal))
 
-      if (current === goal) {
-        const path: Node[] = []
-        let current = goal
-        while (current !== this) {
-          path.unshift(current)
-          current = cameFrom.get(current)
+    while (openSet.length > 0) {
+      let current = openSet.reduce((prev, curr) => (fScore.get(curr) ?? Infinity) > (fScore.get(prev) ?? Infinity) ? curr : prev)
+
+      if (current == goal) {
+        const totalPath = [current]
+        while (cameFrom.has(current)) {
+          current = cameFrom.get(current)!
+          totalPath.unshift(current)
         }
-
-        path.unshift(this)
-        return path
+        return totalPath
       }
 
-      open.splice(open.indexOf(current), 1)
-      closed.push(current)
+      openSet.splice(openSet.indexOf(current), 1)
 
-      for (const neighbor of current.connectedNodes) {
-        if (closed.includes(neighbor)) continue
-        const tentativeGScore = current.cost(neighbor)
-        if (!open.includes(neighbor)) open.push(neighbor)
-        else if (tentativeGScore >= current.cost(neighbor)) continue
+      current.connectedNodes.forEach(neighbour => {
+        const tentativeGScore = (gScore.get(current) ?? Infinity) + current.cost(neighbour)
 
-        cameFrom.set(neighbor, current)
-      }
+        if (tentativeGScore < (gScore.get(neighbour) ?? Infinity)) {
+          cameFrom.set(neighbour, current)
+          gScore.set(neighbour, tentativeGScore)
+          fScore.set(neighbour, tentativeGScore + neighbour.estimatedCost(goal))
+          if (!openSet.includes(neighbour)) openSet.push(neighbour)
+        }
+      })
     }
 
     return []

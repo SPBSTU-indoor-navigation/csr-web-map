@@ -127,6 +127,7 @@ export default function useMapPath(options: { pathFinder: PathFinder }) {
 
     if (showDebugPath.value)
       (options.pathFinder as any).nodes.forEach(node => {
+        if (node.isIndoor && !node.level.isShow) return
         const t = (node as PathNode)
         const pos = project(t.position)
 
@@ -138,13 +139,13 @@ export default function useMapPath(options: { pathFinder: PathFinder }) {
           return `rgb(${R}, ${G}, ${B})`
         }
 
-        t.connectedNodes.forEach(n => {
-          const pos2 = project((n as PathNode).position)
+        t.connectedNodes.forEach((n: PathNode) => {
+          const pos2 = project(n.position)
 
           ctx.beginPath()
           ctx.moveTo(pos.x, pos.y)
           ctx.lineTo(pos2.x, pos2.y)
-          ctx.strokeStyle = lerp((t.weight - 1) * 50)
+          ctx.strokeStyle = (n.isIndoor && !n.level.isShow) ? 'blue' : lerp((t.weight - 1) * 50)
           ctx.stroke()
         })
 
