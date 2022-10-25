@@ -55,6 +55,7 @@ function onClose() {
     mapDelegate.value.removePath(currentRouteId.value)
   }
   mapDelegate.value.unpinAnnotation(...lastAnnotations.value)
+  lastAnnotations.value = []
   emit('pop')
 }
 

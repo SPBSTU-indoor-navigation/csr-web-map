@@ -32,7 +32,7 @@ export class Animator {
     return this.playedAnimations.length != 0
   }
 
-  constructor(setDirty: () => void, dependents: Animator[] = []) {
+  constructor(setDirty: () => void = () => { }, dependents: Animator[] = []) {
     this.setDirty = setDirty
     this.dependents = dependents
   }
@@ -99,11 +99,14 @@ export class Animator {
       if (!skipFrame) {
         tween.start()
       } else {
-        nextFrame(() => tween.start())
+        nextFrame(() => {
+          if (!tween['animation_stoped']) tween.start()
+        })
       }
     }
 
     executeCallback(this.onStartCallback)
+    return this
   }
 
   skip() {
@@ -119,15 +122,18 @@ export class Animator {
       executeCallback(this.onEndCallback)
       completion?.()
     }
+    return this
   }
 
   stop() {
     if (!this.isPlaying) return
-    for (const animation of this.playedAnimations) {
+    this.playedAnimations.forEach(animation => {
+      animation['animation_stoped'] = true
       animation.stop()
-    }
+    })
     this.playedAnimations = []
     executeCallback(this.onEndCallback)
+    return this
   }
 
 }

@@ -27,9 +27,11 @@ export class AnimatedAnnotation<DetailLevel extends number, DetailLevelState> ex
     super.setSelected(selected, animated)
 
     if (selected) {
+      this.selectAnimation?.stop()
       this.selectAnimation?.start(true)
     }
     else {
+      this.deSelectAnimation?.stop()
       this.deSelectAnimation?.start(true)
     }
     this.onPinSelect()
