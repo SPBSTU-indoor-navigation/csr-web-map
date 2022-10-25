@@ -104,6 +104,7 @@ export default function useMapAnnotations(options: {
     renderAnnotationCount.value = annotationsToRender.length
 
     let renderQueue = []
+    renderQueue.push(...annotationsToRender.filter(t => t.annotation.isPinned))
     renderQueue.push(...annotationsToRender.filter(t => t.annotation.isSelected))
 
     const renderQueueSet = new Set(renderQueue.map(t => t.annotation.id))

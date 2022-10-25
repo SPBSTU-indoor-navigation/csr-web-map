@@ -5,10 +5,10 @@
     </template>
 
     <template #content>
-      <p>{{fromUnitInfo.title}}</p>
-      <p>{{toUnitInfo.title}}</p>
-      <p>{{pathResult.indoorDistance}}</p>
-      <p>{{pathResult.outdoorDistance}}</p>
+      <p>{{  fromUnitInfo.title  }}</p>
+      <p>{{  toUnitInfo.title  }}</p>
+      <p>{{  pathResult.indoorDistance  }}</p>
+      <p>{{  pathResult.outdoorDistance  }}</p>
     </template>
   </BottomSheetPageVue>
 </template>
@@ -54,6 +54,7 @@ function onClose() {
   if (pathResult.value != null) {
     mapDelegate.value.removePath(currentRouteId.value)
   }
+  mapDelegate.value.unpinAnnotation(...lastAnnotations.value)
   emit('pop')
 }
 

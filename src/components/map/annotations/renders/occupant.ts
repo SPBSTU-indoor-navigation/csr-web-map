@@ -2,6 +2,7 @@ import { Animator } from '@/core/animator/animator'
 import Building from '@/core/imdf/building'
 import Level from '@/core/imdf/level'
 import { AnnotationBakery, TextBakery } from '@/core/map/overlayDrawing/annotations/bakery'
+import { Size } from '@/core/map/overlayDrawing/annotations/bounds'
 import { DetailLevelProcessor, DetailLevelState } from '@/core/map/overlayDrawing/annotations/detailLevelProcessor'
 import { Color } from '@/core/shared/color'
 import { LocalizedString } from '@/core/shared/localizedString'
@@ -124,6 +125,10 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     const center = bubble.getCenter(new Vector2())
     const size = bubble.getSize(new Vector2())
     this.updateBBox(size.width, size.height, center)
+  }
+
+  protected override onPinSelect() {
+    this.bounds.set(this.target.bounds())
   }
 
   constructor(localPosition: Vector2, data: any, level: Level) {
@@ -288,7 +293,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
       ctx.restore()
     }
 
-    const isAnim = this.isSelected || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.changeStateAnimator?.isPlaying
+    const isAnim = this.isSelected || this.isPinned || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.changeStateAnimator?.isPlaying
     drawMiniPoint(ctx)
 
     if (isAnim) {
@@ -332,9 +337,19 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
   }
 
   private target = {
+    bounds: () => {
+      const shouldPin = !this.isSelected && this.isPinned
+      const size = (() => {
+        if (shouldPin) return 42.5
+        return 15
+      })()
+
+      return { size: new Size(shouldPin ? size * 0.7 : size, size), pivot: new Vector2(0.5, shouldPin ? 0.8 : 0.5) }
+    },
     mainPoint: () => {
-      let scale = () => {
+      const scale = () => {
         if (this.isSelected) return 5.5
+        if (this.isPinned) return 2.8
         if ([DetailLevel.circleWithoutLabel].includes(this.detailLevel)) {
           switch (this.state) {
             case DetailLevelState.big: return 1.7
@@ -348,24 +363,30 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
         }
       }
 
-      let imageOpacity = () => {
-        if (this.isSelected) return 1
+      const imageOpacity = () => {
+        if (this.isSelected || this.isPinned) return 1
         if ([DetailLevel.circleWithoutLabel].includes(this.detailLevel)) return 1
         return 0
       }
 
+      const offsetY = () => {
+        if (this.isSelected) return -38
+        if (this.isPinned) return -20
+        return 0
+      }
 
       return {
         size: scale(),
-        offsetY: this.isSelected ? -38 : 0,
+        offsetY: offsetY(),
         imageOpacity: imageOpacity()
       }
     },
-    borderOpacity: () => ({ strokeOpacity: this.isSelected ? 0 : 1 }),
-    shapeProgress: () => ({ progress: this.isSelected ? 1 : 0 }),
+    borderOpacity: () => ({ strokeOpacity: (this.isSelected || this.isPinned) ? 0 : 1 }),
+    shapeProgress: () => ({ progress: (this.isSelected || this.isPinned) ? 1 : 0 }),
     miniPoint: () => {
       const size = () => {
         if (this.isSelected) return 2
+        if (this.isPinned) return 1.5
         return 0
       }
 
@@ -373,17 +394,19 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     },
     labelTransform: () => {
       const color = () => {
-        if (this.isSelected) return new Color('#000000')
+        if (this.isSelected || this.isPinned) return new Color('#000000')
         return new Color(this.currentStyle.labelColor.hex)
       }
 
       const offset = () => {
         if (this.isSelected) return -1
+        if ([DetailLevel.circleWithoutLabel].includes(this.detailLevel) && this.isPinned) return -3
+        if (this.isPinned) return -2
         return 0
       }
 
       const scale = () => {
-        if (this.isSelected) return 1
+        if (this.isSelected || this.isPinned) return 1
         if ([DetailLevel.circleWithoutLabel].includes(this.detailLevel)) return 0.5
         return 1
       }
@@ -396,7 +419,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     },
     labelOpacity: () => {
       const opacity = () => {
-        if (this.isSelected) return 1
+        if (this.isSelected || this.isPinned) return 1
         if ([DetailLevel.circleWithoutLabel].includes(this.detailLevel)) return 0
         return [DetailLevelState.big].includes(this.state) ? 1 : 0
       }

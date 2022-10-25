@@ -10,6 +10,7 @@ import { AnnotationBakery } from '@/core/map/overlayDrawing/annotations/bakery'
 import { LocalizedString } from "@/core/shared/localizedString";
 import Building from "@/core/imdf/building";
 import Level from "@/core/imdf/level";
+import { Size } from "@/core/map/overlayDrawing/annotations/bounds";
 
 enum DetailLevel {
   alwaysShowBig = 0,
@@ -109,6 +110,10 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
     this.updateBBox(size.width, size.height, center)
   }
 
+  protected override onPinSelect() {
+    this.bounds.set(this.target.bounds())
+  }
+
   constructor(localPosition: Vector2, data: any, level: Level = null) {
     data.properties.name = new LocalizedString(data.properties.name)
     data.properties.alt_name = new LocalizedString(data.properties.alt_name)
@@ -147,15 +152,14 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
 
   override shouldDraw(screen: Box2): boolean {
     const isAnim = this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.changeStateAnimator.isPlaying
-    return (this.state != DetailLevelState.hide || isAnim || this.isSelected) && super.shouldDraw(screen)
+    return (this.state != DetailLevelState.hide || isAnim || this.isSelected || this.isPinned) && super.shouldDraw(screen)
   }
 
   override changeState(state: DetailLevelState, animated: boolean): void {
     super.changeState(state, animated)
     const target = this.target
 
-    const size = Math.max(15, this.target.mainPointScale() * DEFAULT_RADIUS * 2)
-    this.bounds.setSize({ width: size, height: size })
+    this.bounds.set(this.target.bounds())
 
     this.animateChangeState(new Animator(this.onAnim)
       .animate({ value: this.annotationParams.point, to: () => ({ ...target.point(), ...target.contentOpacity() }), duration: 300, easing: Easing.Quadratic.InOut })
@@ -280,7 +284,7 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
     drawMiniPoint(ctx)
     drawLabel(ctx)
 
-    const isAnim = this.isSelected || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.changeStateAnimator?.isPlaying
+    const isAnim = this.isSelected || this.isPinned || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.changeStateAnimator?.isPlaying
     if (isAnim) {
       drawPoint(ctx)
     } else {
@@ -311,6 +315,15 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
   }
 
   private target = {
+    bounds: () => {
+      const shouldPin = !this.isSelected && this.isPinned
+      const size = (() => {
+        if (shouldPin) return 40
+        return Math.max(15, this.target.mainPointScale() * DEFAULT_RADIUS * 2)
+      })()
+
+      return { size: new Size(shouldPin ? size * 0.6 : size, size), pivot: new Vector2(0.5, shouldPin ? 0.75 : 0.5) }
+    },
     mainPointScale: () => {
       switch (this.state) {
         case DetailLevelState.big: return 1
@@ -322,26 +335,34 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
     point: () => {
       const scale = () => {
         if (this.isSelected) return 2.2
+        if (this.isPinned) return 1.2
         return this.target.mainPointScale()
       }
 
       const cornerRadius = () => {
         if (this.isSelected) return 0.25
+        if (this.isPinned) return 0.25
         switch (this.state) {
           case DetailLevelState.min: return 0.5
           default: return 0.25
         }
       }
 
+      const offsetY = () => {
+        if (this.isSelected) return -31.5
+        if (this.isPinned) return -18
+        return 0
+      }
+
       return {
         size: scale(),
-        offsetY: this.isSelected ? -31.5 : 0,
+        offsetY: offsetY(),
         cornerRadius: cornerRadius(),
       }
     },
     pointOpacity: () => {
       const opacity = () => {
-        if (this.isSelected) return 1
+        if (this.isSelected || this.isPinned) return 1
         switch (this.state) {
           case DetailLevelState.hide: return 0
           default: return 1
@@ -355,15 +376,16 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
     miniPoint: () => {
       const size = () => {
         if (this.isSelected) return 2
+        if (this.isPinned) return 1.5
         return 0
       }
 
       return { size: size() }
     },
-    shapeProgress: () => ({ progress: this.isSelected ? 1 : 0 }),
+    shapeProgress: () => ({ progress: (this.isSelected || this.isPinned) ? 1 : 0 }),
     contentOpacity: () => {
       const opacity = () => {
-        if (this.isSelected) return 1
+        if (this.isSelected || this.isPinned) return 1
         switch (this.state) {
           case DetailLevelState.big:
           case DetailLevelState.normal: return 1
@@ -376,11 +398,12 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
     labelTransform: () => {
       const offset = () => {
         if (this.isSelected) return -1
+        if (this.isPinned) return -3
         return -3
       }
 
       const scale = () => {
-        if (this.isSelected) return 1
+        if (this.isSelected || this.isPinned) return 1
         return 0.5
       }
 
@@ -391,7 +414,7 @@ export class AmenityAnnotation extends AnimatedAnnotation<DetailLevel, DetailLev
     },
     labelOpacity: () => {
       const opacity = () => {
-        if (this.isSelected) return 1
+        if (this.isSelected || this.isPinned) return 1
         return 0
       }
 

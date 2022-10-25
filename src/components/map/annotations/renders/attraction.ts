@@ -1,5 +1,6 @@
 import { Animator } from "@/core/animator/animator";
 import { AnnotationBakery, TextBakery } from "@/core/map/overlayDrawing/annotations/bakery";
+import { Size } from "@/core/map/overlayDrawing/annotations/bounds";
 import { DetailLevelProcessor, DetailLevelState } from "@/core/map/overlayDrawing/annotations/detailLevelProcessor";
 import { Color } from "@/core/shared/color";
 import { LocalizedString } from "@/core/shared/localizedString";
@@ -66,14 +67,22 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
 
     const h = this.currentStyle.labelBBox.height
 
-    const s = this.isSelected ? 70 : this.target.mainPointScale() * DEFAULT_RADIUS * 2
-    const bubble = new Box2().setFromCenterAndSize(new Vector2(0, this.isSelected ? -s / 2 : 0), new Vector2(s, s))
+    const s = (() => {
+      if (this.isSelected) return 70
+      if (this.isPinned) return 60
+      return this.target.mainPointScale() * DEFAULT_RADIUS * 2
+    })()
+    const bubble = new Box2().setFromCenterAndSize(new Vector2(0, (this.isSelected || this.isPinned) ? -s / 2 : 0), new Vector2(s, s))
     const label = new Box2().setFromCenterAndSize(new Vector2(0, (h + 3) / 2 + 20), new Vector2(this.currentStyle.labelBBox.width, h))
 
     if (this.target.labelOpacity().opacity != 0) bubble.union(label)
     const center = bubble.getCenter(new Vector2())
     const size = bubble.getSize(new Vector2())
     this.updateBBox(size.width, size.height, center)
+  }
+
+  protected override onPinSelect() {
+    this.bounds.set(this.target.bounds())
   }
 
   contentImg: HTMLImageElement | null = null
@@ -125,9 +134,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
     super.changeState(state, animated)
     const target = this.target
 
-
-    const size = Math.max(15, this.target.mainPointScale() * DEFAULT_RADIUS * 2)
-    this.bounds.setSize({ width: size, height: size })
+    this.bounds.set(this.target.bounds())
 
     this.animateChangeState(new Animator(this.onAnim)
       .animate({ value: this.annotationParams.point, to: () => ({ ...target.point(), ...target.contentOpacity() }), duration: 200, easing: Easing.Quadratic.InOut })
@@ -234,7 +241,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
       ctx.restore()
     }
 
-    const isAnim = this.isSelected || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.changeStateAnimator?.isPlaying
+    const isAnim = this.isSelected || this.isPinned || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.changeStateAnimator?.isPlaying
     drawMiniPoint(ctx)
 
     if (isAnim) {
@@ -277,6 +284,15 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
   }
 
   private target = {
+    bounds: () => {
+      const shouldPin = !this.isSelected && this.isPinned
+      const size = (() => {
+        if (shouldPin) return 60
+        return Math.max(15, this.target.mainPointScale() * DEFAULT_RADIUS * 2)
+      })()
+
+      return { size: new Size(shouldPin ? size * 0.7 : size, size), pivot: new Vector2(0.5, shouldPin ? 0.8 : 0.5) }
+    },
     mainPointScale: () => {
       switch (this.state) {
         case DetailLevelState.hide: return 0.2
@@ -288,24 +304,35 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
     point: () => {
       let scale = () => {
         if (this.isSelected) return 1.8
+        if (this.isPinned) return 1.3
         return this.target.mainPointScale()
       }
 
       return {
         size: scale(),
-        offsetY: this.isSelected ? -38 : 0
+        offsetY: (() => {
+          if (this.isSelected) return -38
+          if (this.isPinned) return -27
+          return 0
+        })()
       }
     },
-    contentOpacity: () => ({ contentOpacity: this.isSelected || this.state == DetailLevelState.normal || this.state == DetailLevelState.big ? 1 : 0 }),
+    contentOpacity: () => ({
+      contentOpacity: this.isSelected
+        || this.isPinned
+        || this.state == DetailLevelState.normal
+        || this.state == DetailLevelState.big ? 1 : 0
+    }),
     miniPoint: () => {
       const size = () => {
         if (this.isSelected) return 2
+        if (this.isPinned) return 1.6
         return 0
       }
 
       return { size: size() }
     },
-    shapeProgress: () => ({ progress: this.isSelected ? 1 : 0 }),
+    shapeProgress: () => ({ progress: (this.isSelected || this.isPinned) ? 1 : 0 }),
     labelTransform: () => {
       const color = () => {
         if (this.isSelected) return new Color('#000000')
@@ -314,6 +341,7 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
 
       const offset = () => {
         if (this.isSelected) return -15
+        if (this.isPinned) return -16
         return -(1 - this.target.mainPointScale()) * DEFAULT_RADIUS
       }
 

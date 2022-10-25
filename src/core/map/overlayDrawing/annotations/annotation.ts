@@ -14,6 +14,7 @@ export interface IAnnotation {
   scenePosition: Vector2
   isDirty: boolean
   isSelected: boolean
+  isPinned: boolean
 
   frame: Box2
   bounds: Bounds

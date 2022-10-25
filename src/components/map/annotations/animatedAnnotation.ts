@@ -16,6 +16,8 @@ export class AnimatedAnnotation<DetailLevel extends number, DetailLevelState> ex
     this.bounds.updateRect()
   }
 
+  protected onPinSelect() { }
+
   constructor(localPosition: Vector2, data: any, detailLevel: DetailLevel, levelProcessor: DetailLevelProcessor<DetailLevel, DetailLevelState>) {
     super(localPosition, detailLevel, data, (detailLevel: DetailLevel, mapSize: number) => levelProcessor.evaluate(detailLevel, mapSize))
     this.bounds.set({ size: new Size(15, 15), pivot: new Vector2(0.5, 0.5) })
@@ -30,11 +32,13 @@ export class AnimatedAnnotation<DetailLevel extends number, DetailLevelState> ex
     else {
       this.deSelectAnimation?.start(true)
     }
+    this.onPinSelect()
   }
 
   override setPinned(pinned: boolean, animated: boolean): void {
     super.setPinned(pinned, animated)
     this.setSelected(this.isSelected, animated)
+    this.onPinSelect()
   }
 
   protected animateChangeState(animator: Animator, animated: boolean = true) {
