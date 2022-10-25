@@ -23,12 +23,12 @@
           <input type="checkbox" v-model="showDebugPath" id="checkbox4">
           <label for="checkbox4">navpath</label>
         </div>
-        <p>annotation c: {{renderAnnotationCount}}</p>
-        <p>zoom: {{zoom.toFixed(4)}}</p>
-        <p>fps: {{fps}}</p>
-        <p>fps2: {{fps2}}</p>
+        <p>annotation c: {{ renderAnnotationCount }}</p>
+        <p>zoom: {{ zoom.toFixed(4) }}</p>
+        <p>fps: {{ fps }}</p>
+        <p>fps2: {{ fps2 }}</p>
         <hr>
-        <button @click="showDebugPanel=false">close</button>
+        <button @click="showDebugPanel = false">close</button>
 
       </div>
     </div>

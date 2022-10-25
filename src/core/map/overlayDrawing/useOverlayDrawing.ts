@@ -24,7 +24,7 @@ function useCanvas(container: Ref<HTMLElement>, onResize: (size: Vector2) => voi
   ctx.imageSmoothingEnabled = true
   ctx.imageSmoothingQuality = 'high'
 
-  document.querySelector('.mk-map-view').appendChild(canvas)
+  document.querySelector('.mk-map-view>.map-geometry').after(canvas)
 
   watchEffect(() => {
     const width = screenSize.width.value

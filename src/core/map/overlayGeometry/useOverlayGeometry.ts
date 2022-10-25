@@ -22,7 +22,8 @@ export default function useOverlayGeometry(options: {
   renderer.setClearColor(0x000000, 0);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(window.devicePixelRatio)
-  document.querySelector('.mk-map-view').insertBefore(renderer.domElement, document.querySelector(".mk-map-view>.map-annotations"))
+  document.querySelector('.mk-map-view>.rt-root').after(renderer.domElement)
+
   renderer.domElement.className += ' map-geometry'
 
   function render() {
