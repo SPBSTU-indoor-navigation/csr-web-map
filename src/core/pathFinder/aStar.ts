@@ -1,3 +1,4 @@
+import { inversePath } from '@/store/debugParams'
 
 interface INode {
   connectedNodes: Node[]
@@ -37,8 +38,14 @@ export class Node {
     const fScore: Map<Node, number> = new Map()
     fScore.set(this, this.estimatedCost(goal))
 
+    let compare = (prev: Node, curr: Node) => (fScore.get(curr) ?? Infinity) < (fScore.get(prev) ?? Infinity) ? curr : prev
+
+    if (inversePath.value) {
+      compare = (prev: Node, curr: Node) => (fScore.get(curr) ?? Infinity) > (fScore.get(prev) ?? Infinity) ? curr : prev
+    }
+
     while (openSet.length > 0) {
-      let current = openSet.reduce((prev, curr) => (fScore.get(curr) ?? Infinity) > (fScore.get(prev) ?? Infinity) ? curr : prev)
+      let current = openSet.reduce(compare)
 
       if (current == goal) {
         const totalPath = [current]
