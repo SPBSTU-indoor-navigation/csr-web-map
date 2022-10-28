@@ -7,7 +7,7 @@ import Environments from "./environment";
 import Level from "./level";
 import { MeshLineMaterial } from "./MeshLineESM";
 import {
-  createPolygon, geoToVector,
+  createPolygon,
   LineMeshMaterialStorage,
   meshForFeatureCollection, outlineMeshForFeatureCollection, processGeometryCoordinates,
   unwrapBy, createSvgPathFromFeature, createSvgPathFromFeatureCollection
@@ -15,7 +15,8 @@ import {
 
 import { PathFinder } from '@/core/pathFinder'
 import { IAnnotation } from "../map/overlayDrawing/annotations/annotation";
-import { IMap } from "@/components/map/mapControlls";
+import { IMap, MapKit } from "@/components/map/mapControlls";
+import { geoToVector, vectorToGeo } from "./geoUtils";
 
 export default class Venue {
   archive: {
@@ -194,8 +195,17 @@ export default class Venue {
     console.log('svg', svg);
   }
 
-  Translate(position) {
+  Translate(position: MapKit.Coordinate) {
     return geoToVector(this.pivot, position)
+  }
+
+  TranslateVector(position: MapKit.Coordinate) {
+    const pos = geoToVector(this.pivot, position)
+    return new Vector2(pos.x, pos.y)
+  }
+
+  Inverse(position: Vector2) {
+    return vectorToGeo(this.pivot, position)
   }
 
   OnZoom(zoom) {

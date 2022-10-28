@@ -1,9 +1,9 @@
 import { OrthographicCamera, Scene, Vector2, WebGLRenderer } from 'three';
 import { ref, watch, watchEffect, Ref, ShallowRef } from "vue";
 
-import { geoToVector } from '@/core/imdf/utils';
 import { useElementSize, useWindowSize } from '@vueuse/core';
 import Venue from '@/core/imdf/venue';
+import { geoToVector } from '@/core/imdf/geoUtils';
 
 export default function useOverlayGeometry(options: {
   venue: Ref<Venue>,

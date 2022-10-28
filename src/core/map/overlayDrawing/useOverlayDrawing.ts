@@ -100,7 +100,8 @@ export default function useOverlayDrawing(options: {
   return {
     draw,
     addOverlay,
-    click
+    click,
+    project
   }
 
 }

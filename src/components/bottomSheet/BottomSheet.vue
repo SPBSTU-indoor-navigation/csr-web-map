@@ -1,5 +1,5 @@
 <template>
-  <div class="container non-block" :class="fullHeight ? 'fullHeight':''"
+  <div class="container non-block" :class="fullHeight ? 'fullHeight' : ''"
     :style="{backgroundColor: `rgba(0,0,0,${backgroundOpacity})`, pointerEvents }">
     <Transition :name="animType" @before-leave="onBeforeLeave">
       <component :is="currentPage.component" :key="currentPage.key" :data="currentPage.data" :page="currentPage.key"
@@ -23,6 +23,10 @@ import { IInfoPanelDelegate } from '../infoPanel/infoPanelControlls';
 const { delegate, initPage } = defineProps<{
   delegate: IInfoPanelDelegate,
   initPage: any
+}>()
+
+const emit = defineEmits<{
+  (e: 'stateChange', state: State): void,
 }>()
 
 const pages = ref([{
@@ -76,6 +80,10 @@ function onMove(value: number) {
 
 watch(() => pages.value.length, (current, last) => {
   pop.value = current < last
+})
+
+watchEffect(() => {
+  emit('stateChange', state.value)
 })
 
 function animPushPopProrgress() {

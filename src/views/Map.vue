@@ -17,19 +17,19 @@ import { IMapDelegate } from "@/components/map/mapControlls";
 // @ts-ignore
 const mapDelegate: ShallowRef<IMapDelegate> = shallowRef({
   selectedAnnotation: shallowRef(null),
+  pinnedAnnotations: shallowRef([]),
   venue: shallowRef(null),
 })
 
 provide('mapDelegate', mapDelegate)
 useFullscreenScrollFix()
 
-const onScroll = (e) => {
+function onScroll(e) {
   if (e.ctrlKey) {
     e.preventDefault()
     e.stopPropagation()
   }
 };
-
 function onMapDelegate(delegate: IMapDelegate) {
   mapDelegate.value = delegate
 }

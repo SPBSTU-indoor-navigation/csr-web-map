@@ -1,6 +1,6 @@
 <template>
   <div class="abs-full non-block info-panel">
-    <BottomSheetVue :delegate="delegate" :initPage="initPage" />
+    <BottomSheetVue :delegate="delegate" :initPage="initPage" @state-change="onStateChange" />
   </div>
 </template>
 
@@ -13,6 +13,7 @@ import SearchVue from './search/index.vue';
 import { IMapDelegate } from '../map/mapControlls';
 import { IAnnotation } from '@/core/map/overlayDrawing/annotations/annotation';
 import { useDefineControlls, IInfoPanelDelegate } from './infoPanelControlls';
+import { computed } from '@vue/reactivity';
 
 const initPage = {
   component: SearchVue,
@@ -22,6 +23,10 @@ const initPage = {
 const delegate: IInfoPanelDelegate = {};
 
 const mapDelegate = inject('mapDelegate') as ShallowRef<IMapDelegate>
+
+const safeArea = computed(() => {
+
+})
 
 watch(() => mapDelegate.value.selectedAnnotation.value, (annotation) => {
   if (!delegate.pages) return
@@ -68,6 +73,11 @@ function setRoute(annotation: IAnnotation, isFrom = false) {
     });
   }
 }
+
+function onStateChange(state) {
+  console.log('onStateChange', state);
+}
+
 
 useDefineControlls({
   setFrom: a => setRoute(a, true),

@@ -1,15 +1,8 @@
 import { BufferGeometry, Mesh, MeshBasicMaterial, Path, Shape, ShapeGeometry, Vector3 } from 'three';
 import { MeshLine, MeshLineMaterial } from './MeshLineESM.js';
 import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { geoToVector } from './geoUtils';
 
-const metersInLatDegree = 111194.92664
-const Deg2Rad = Math.PI / 180.0
-export function geoToVector(pivot, position) {
-  return {
-    x: (position.longitude - pivot.longitude) * metersInLatDegree * Math.cos(Deg2Rad * (pivot.latitude + position.latitude) / 2),
-    y: (position.latitude - pivot.latitude) * metersInLatDegree
-  }
-}
 
 export function processGeometryCoordinates(geometry, pivot) {
 

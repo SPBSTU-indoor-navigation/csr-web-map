@@ -2,6 +2,8 @@ import { Box2, Vector2 } from 'three'
 import { DetailLevelProcessor, DetailLevelState } from './detailLevelProcessor'
 import { Bounds, Size } from './bounds'
 import { v4 as uuidv4 } from 'uuid';
+import Level from '@/core/imdf/level';
+import Building from '@/core/imdf/building';
 
 export interface IGeoPosition {
   latitude: number
@@ -33,6 +35,16 @@ export interface IAnnotation {
 
   get renderOrder(): number
   get shouldSelectOnTap(): boolean
+}
+
+export interface IAnnotationIndoor {
+  level: Level
+  building: Building
+}
+
+export function annotationIsIndoor(annotation: IAnnotation | IAnnotationIndoor): annotation is IAnnotationIndoor {
+  const a = annotation as IAnnotationIndoor
+  return a.level !== undefined && a.building !== undefined;
 }
 
 export class Shape2D {

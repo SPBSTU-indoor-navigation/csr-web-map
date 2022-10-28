@@ -51,7 +51,7 @@ import { nearestBuiling } from '@/core/map/utils';
 
 import { showBackedCanvas, showBackedOutline, renderAnnotationCount, showAnnotationBBox, showDebugPanel, showDebugPath } from '@/store/debugParams'
 
-import { FocusVariant, IMap, IMapDelegate } from './mapControlls';
+import { focusMap, FocusVariant, IMap, IMapDelegate } from './mapControlls';
 import useOverlayDrawing from '@/core/map/overlayDrawing/useOverlayDrawing';
 import useMapAnnotations from '@/core/map/overlayDrawing/annotations/useMapAnnotations';
 import useOverlayGeometry from '@/core/map/overlayGeometry/useOverlayGeometry';
@@ -173,6 +173,16 @@ async function load() {
     pinnedAnnotations: mapAnnotations.pinned,
     venue,
     selectAnnotation: (a, focusVariant) => {
+      console.log('focus', FocusVariant[focusVariant]);
+      focusMap({
+        annotation: a,
+        map: mkMap.value,
+        variant: focusVariant,
+        insets: { top: 100, left: 100, right: 100, bottom: 100 },
+        translate: t => venue.value.TranslateVector(t),
+        inverse: t => venue.value.Inverse(t),
+        project: t => overlayDrawing.project(t),
+      })
       mapAnnotations.selected.value = a
     },
     deselectAnnotation: (a) => {
