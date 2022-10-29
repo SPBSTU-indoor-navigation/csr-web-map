@@ -12,7 +12,7 @@ export default function useOverlayGeometry(options: {
   mapContainer: Ref<HTMLElement>,
   scheduleUpdate: () => void,
 }) {
-  const { venue, mkMap, styleSheet, mapContainer, scheduleUpdate, mapZoom } = options
+  const { venue, mkMap, mapContainer, scheduleUpdate, mapZoom } = options
 
   const screenSize = useElementSize(mapContainer)
   const scene = new Scene()
@@ -28,11 +28,10 @@ export default function useOverlayGeometry(options: {
 
   function render() {
     const region = mkMap.region
-    const delta = geoToVector(region.center,
-      {
-        latitude: region.center.latitude + region.span.latitudeDelta / 2,
-        longitude: region.center.longitude + region.span.longitudeDelta / 2
-      })
+    const delta = geoToVector(region.center, {
+      latitude: region.center.latitude + region.span.latitudeDelta / 2,
+      longitude: region.center.longitude + region.span.longitudeDelta / 2
+    })
 
     camera.left = -delta.x
     camera.right = delta.x
@@ -60,7 +59,6 @@ export default function useOverlayGeometry(options: {
     const width = screenSize.width.value
     const height = screenSize.height.value
 
-    // camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
 
@@ -77,8 +75,6 @@ export default function useOverlayGeometry(options: {
 
     //@ts-ignore
     mkMap.cameraZoomRange = new mapkit.CameraZoomRange(0, 3000)
-
-    // val.Add(mapController)
   })
 
   // StyleSheet

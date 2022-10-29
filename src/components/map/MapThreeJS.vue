@@ -178,10 +178,14 @@ async function load() {
         annotation: a,
         map: mkMap.value,
         variant: focusVariant,
-        insets: { top: 100, left: 100, right: 100, bottom: 100 },
+        insets: { top: 10, left: 400, right: 10, bottom: 10 },
         translate: t => venue.value.TranslateVector(t),
-        inverse: t => venue.value.Inverse(t),
+        inverse: t => {
+          const l = venue.value.Inverse(t)
+          return new mapkit.Coordinate(l.latitude, l.longitude)
+        },
         project: t => overlayDrawing.project(t),
+        unproject: t => overlayDrawing.unprojectScreenPoint(t),
       })
       mapAnnotations.selected.value = a
     },

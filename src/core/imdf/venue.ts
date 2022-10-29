@@ -15,7 +15,7 @@ import {
 
 import { PathFinder } from '@/core/pathFinder'
 import { IAnnotation } from "../map/overlayDrawing/annotations/annotation";
-import { IMap, MapKit } from "@/components/map/mapControlls";
+import { IMap } from "@/components/map/mapControlls";
 import { geoToVector, vectorToGeo } from "./geoUtils";
 
 export default class Venue {
@@ -195,11 +195,11 @@ export default class Venue {
     console.log('svg', svg);
   }
 
-  Translate(position: MapKit.Coordinate) {
+  Translate(position: mapkit.Coordinate) {
     return geoToVector(this.pivot, position)
   }
 
-  TranslateVector(position: MapKit.Coordinate) {
+  TranslateVector(position: mapkit.Coordinate) {
     const pos = geoToVector(this.pivot, position)
     return new Vector2(pos.x, pos.y)
   }

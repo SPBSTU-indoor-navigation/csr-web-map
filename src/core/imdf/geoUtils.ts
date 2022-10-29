@@ -1,4 +1,4 @@
-const metersInLatDegree = 111194.92664
+export const metersInLatDegree = 111194.92664
 const Deg2Rad = Math.PI / 180.0
 
 declare type Location = {
@@ -9,6 +9,10 @@ declare type Location = {
 declare type Vector2 = {
   x: number;
   y: number;
+}
+
+export function meterPerLongitudeAtLatitude(latitude: number) {
+  return metersInLatDegree * Math.cos(latitude * Deg2Rad)
 }
 
 export function geoToVector(pivot: Location, position: Location): Vector2 {

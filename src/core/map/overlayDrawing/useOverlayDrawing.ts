@@ -7,7 +7,7 @@ import { Ref, shallowRef, watchEffect } from "vue";
 export interface IOverlayDrawing {
   isDirty(): boolean
   setup(options: {
-    project: (pos: { x: number, y: number }) => Vector2
+    project: (pos: Vector2) => DOMPoint
   }): void
   draw(ctx: CanvasRenderingContext2D, canvasSize: Vector2): void
   click?(pos: Vector2, e: PointerEvent): void
@@ -59,12 +59,22 @@ export default function useOverlayDrawing(options: {
 
   const { ctx, canvasSize } = useCanvas(options.container, t => { if (initFinished) draw() })
 
-  function project(pos: { x: number, y: number }) {
+  function project(pos: Vector2) {
     const v = new Vector3(pos.x, pos.y, 0)
     v.project(options.threeJsCamera)
     v.x = ((v.x + 1) / 2)
     v.y = ((-v.y + 1) / 2)
-    return new Vector2(v.x * canvasSize.value.x, v.y * canvasSize.value.y)
+    return new DOMPoint(v.x * canvasSize.value.x, v.y * canvasSize.value.y)
+  }
+
+  function unproject(pos: { x: number, y: number }) {
+    const v = new Vector3(pos.x, pos.y, 0)
+    v.unproject(options.threeJsCamera)
+    return new Vector2(v.x, v.y)
+  }
+
+  function unprojectScreenPoint(pos: DOMPoint) {
+    return unproject({ x: (pos.x / canvasSize.value.x - 0.5) * 2, y: (0.5 - (pos.y / canvasSize.value.y)) * 2 })
   }
 
   function addOverlay(overlay: IOverlayDrawing) {
@@ -101,7 +111,8 @@ export default function useOverlayDrawing(options: {
     draw,
     addOverlay,
     click,
-    project
+    project,
+    unprojectScreenPoint
   }
 
 }

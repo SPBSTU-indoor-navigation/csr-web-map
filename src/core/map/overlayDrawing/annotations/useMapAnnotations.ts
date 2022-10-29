@@ -17,10 +17,10 @@ export default function useMapAnnotations(options: {
   const pinned = shallowRef<IAnnotation[]>([])
 
   let annotations: Annotation[] = []
-  let project: (pos: { x: number, y: number }) => Vector2
+  let project: (pos: Vector2) => DOMPoint
 
   function setup(options: {
-    project: (pos: { x: number, y: number }) => Vector2
+    project: (pos: Vector2) => DOMPoint
   }) {
     project = options.project
   }
@@ -91,7 +91,8 @@ export default function useMapAnnotations(options: {
     const screen = new Box2(new Vector2(0, 0), canvasSize.clone())
     const annotationsToRender = annotations
       .map(t => {
-        const pos = project(t.scenePosition)
+        const projection = project(t.scenePosition)
+        const pos = new Vector2(projection.x, projection.y)
         t.updateScreenPosition(pos)
         t.isDirty = false
         return {
