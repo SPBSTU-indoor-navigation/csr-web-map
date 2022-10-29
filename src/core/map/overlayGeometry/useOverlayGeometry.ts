@@ -4,6 +4,7 @@ import { ref, watch, watchEffect, Ref, ShallowRef } from "vue";
 import { useElementSize, useWindowSize } from '@vueuse/core';
 import Venue from '@/core/imdf/venue';
 import { geoToVector } from '@/core/imdf/geoUtils';
+import { regionWorldSize, zoomCalculate } from '@/components/map/mapControlls';
 
 export default function useOverlayGeometry(options: {
   venue: Ref<Venue>,
@@ -28,10 +29,7 @@ export default function useOverlayGeometry(options: {
 
   function render() {
     const region = mkMap.region
-    const delta = geoToVector(region.center, {
-      latitude: region.center.latitude + region.span.latitudeDelta / 2,
-      longitude: region.center.longitude + region.span.longitudeDelta / 2
-    })
+    const delta = regionWorldSize(region)
 
     camera.left = -delta.x
     camera.right = delta.x
@@ -45,10 +43,7 @@ export default function useOverlayGeometry(options: {
 
     camera.updateProjectionMatrix()
 
-
-    const size = new Vector2()
-    renderer.getSize(size)
-    mapZoom.value = size.x / delta.x
+    mapZoom.value = zoomCalculate(mkMap)
     venue.value.OnZoom(mapZoom.value)
 
     renderer.render(scene, camera);

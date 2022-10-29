@@ -16,6 +16,8 @@ export default function useMapAnnotations(options: {
   const selected = shallowRef<IAnnotation | null>(null)
   const pinned = shallowRef<IAnnotation[]>([])
 
+  const preventDeselect = shallowRef(false)
+
   let annotations: Annotation[] = []
   let project: (pos: Vector2) => DOMPoint
 
@@ -41,7 +43,7 @@ export default function useMapAnnotations(options: {
   function removeAnotation(annotation: IAnnotation | IAnnotation[]) {
     const toRemove = new Set((Array.isArray(annotation) ? annotation : [annotation]).map(t => t.id))
 
-    if (toRemove.has(selected.value?.id)) {
+    if (!preventDeselect.value && toRemove.has(selected.value?.id)) {
       selected.value.setSelected(false, false)
       selected.value = null
     }
@@ -183,7 +185,8 @@ export default function useMapAnnotations(options: {
     add: addAnotation,
     remove: removeAnotation,
     selected,
-    pinned
+    pinned,
+    preventDeselect
   }
 
 }

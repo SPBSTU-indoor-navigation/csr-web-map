@@ -1,13 +1,17 @@
-import { meterPerLongitudeAtLatitude, metersInLatDegree } from "@/core/imdf/geoUtils";
+import { Animator } from "@/core/animator/animator";
+import { geoToVector, meterPerLongitudeAtLatitude, metersInLatDegree } from "@/core/imdf/geoUtils";
 import Venue from "@/core/imdf/venue";
 import { annotationIsIndoor, IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
 import { PathNode } from "@/core/pathFinder";
+import { Easing } from "@tweenjs/tween.js";
 import { Object3D, Vector2 } from "three";
 import { ShallowRef } from "vue";
 import { AmenityAnnotation } from "./annotations/renders/amenity";
 import { AttractionAnnotation } from "./annotations/renders/attraction";
 import { OccupantAnnotation } from "./annotations/renders/occupant";
 
+export const INDOOR_SHOW_ZOOM = 4;
+export const INDOOR_HIDE_ZOOM = 3.9;
 
 export enum FocusVariant {
   none,
@@ -48,52 +52,119 @@ export declare type Insets = {
   right?: number;
 }
 
+export function regionWorldSize(region: mapkit.CoordinateRegion): Vector2 {
+  const t = geoToVector(region.center, {
+    latitude: region.center.latitude + region.span.latitudeDelta / 2,
+    longitude: region.center.longitude + region.span.longitudeDelta / 2
+  })
+
+  return new Vector2(t.x, t.y)
+}
+
+export function zoomCalculate(map: mapkit.Map) {
+  const delta = regionWorldSize(map.region)
+  return map.element.clientWidth / delta.x
+}
+
+declare type CameraParams = {
+  center: mapkit.Coordinate,
+  rotation: number,
+  cameraDistance: number
+}
+
+function applyCamera(map: mapkit.Map & { cameraDistance: number }, camera: CameraParams, animated: boolean = false, onCompleate?: () => void): void {
+  const { center, rotation, cameraDistance } = camera
+
+  if (animated) {
+    const currentCamera = cameraParams(map)
+
+    const vector = geoToVector(center, currentCamera.center)
+    const distance = new Vector2(vector.x, vector.y).length()
+    const regionDistance = regionWorldSize(map.region).length()
+
+    const shouldFast = distance / regionDistance < 0.3 && Math.abs(rotation - currentCamera.rotation) < 0.1 && Math.abs(cameraDistance - currentCamera.cameraDistance) < 0.1
+
+    new Animator()
+      .animate({
+        value: currentCamera, to: camera,
+        duration: shouldFast ? 300 : 600,
+        easing: shouldFast ? Easing.Cubic.Out : Easing.Cubic.InOut,
+        onUpdate: (camera) => applyCamera(map, camera)
+      })
+      .onEnd(() => onCompleate?.())
+      .start(true)
+  } else {
+    map.center = center
+    map.rotation = rotation
+    map.cameraDistance = cameraDistance
+  }
+}
+
+function cameraParams(map: mapkit.Map & { cameraDistance: number }): CameraParams {
+  return {
+    center: map.center,
+    rotation: map.rotation,
+    cameraDistance: map.cameraDistance
+  }
+}
+
 
 export function focusMap(params: {
   annotation: IAnnotation,
   map: mapkit.Map & { cameraDistance: number },
-  variant: FocusVariant,
   insets: Insets,
-  translate: (location: mapkit.Coordinate) => Vector2,
   inverse: (pos: Vector2) => mapkit.Coordinate,
-  project: (pos: Vector2) => DOMPoint,
-  unproject: (pos: DOMPoint) => Vector2,
   onEnd?: () => void
 }): void {
-  const { annotation, map, variant, insets, translate, inverse, unproject, onEnd } = params;
+  const { annotation, map, insets, inverse, onEnd } = params;
 
-  let deltaLat = map.region.span.latitudeDelta
   if (annotationIsIndoor(annotation)) {
-    annotation.building.ChangeOrdinal(annotation.level.ordinal);
-    deltaLat = 0.001
-  } else {
-    deltaLat = 0.006
+    annotation.building.ChangeOrdinal(annotation.level.ordinal)
   }
 
-  // let targetZoom = map.cameraDistance
-  // if (annotation instanceof OccupantAnnotation) {
-  //   targetZoom = 150
-  // } else if (annotation instanceof AmenityAnnotation) {
-  //   if (annotationIsIndoor(annotation)) {
-  //     targetZoom = 200
-  //   } else {
-  //     if (500 < targetZoom || targetZoom < 200) {
-  //       targetZoom = 400
-  //     }
-  //   }
-  // } else if (annotation instanceof AttractionAnnotation) {
-  //   if (targetZoom > 1000) {
-  //     targetZoom = 800
-  //   }
-  // }
+  let targetZoom = map.cameraDistance
+  if (annotation instanceof OccupantAnnotation) {
+    targetZoom = 150
+  } else if (annotation instanceof AmenityAnnotation) {
+    if (annotationIsIndoor(annotation)) {
+      targetZoom = 200
+    } else {
+      if (500 < targetZoom || targetZoom < 200) {
+        targetZoom = 400
+      }
+    }
+  } else if (annotation instanceof AttractionAnnotation) {
+    if (targetZoom > 1000 || zoomCalculate(map) > INDOOR_SHOW_ZOOM) {
+      targetZoom = 800
+    }
+  }
 
   const scenePosition = inverse(annotation.scenePosition)
   const center = new mapkit.Coordinate(scenePosition.latitude, scenePosition.longitude)
 
-  const region = regionWithInsets(map, insets, new mapkit.CoordinateRegion(center, new mapkit.CoordinateSpan(deltaLat, 0)))
-  // map.center = region.center
-  // map.cameraDistance = targetZoom
-  map.region = new mapkit.CoordinateRegion(region.center, new mapkit.CoordinateSpan(deltaLat, 0))
+  const lastMap = cameraParams(map)
+  const targetMap: CameraParams = {
+    center: center,
+    rotation: map.rotation,
+    cameraDistance: targetZoom
+  }
+
+  applyCamera(map, targetMap)
+  targetMap.center = insetsMapCenter(map, insets)
+  applyCamera(map, lastMap)
+
+  applyCamera(map, targetMap, true, onEnd)
+}
+
+function insetsMapCenter(map: mapkit.Map, insets: Insets): mapkit.Coordinate {
+  const { top, left, bottom, right } = insets
+  const width = map.element.clientWidth
+  const height = map.element.clientHeight
+
+  return map.convertPointOnPageToCoordinate(new DOMPoint(
+    width / 2 - (left + right) / 2,
+    height / 2 - (top + bottom) / 2)
+  )
 }
 
 function regionWithInsets(map: mapkit.Map, insets: Insets, region: mapkit.CoordinateRegion): mapkit.CoordinateRegion {

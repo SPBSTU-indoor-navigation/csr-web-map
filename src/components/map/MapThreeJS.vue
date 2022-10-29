@@ -51,7 +51,7 @@ import { nearestBuiling } from '@/core/map/utils';
 
 import { showBackedCanvas, showBackedOutline, renderAnnotationCount, showAnnotationBBox, showDebugPanel, showDebugPath } from '@/store/debugParams'
 
-import { focusMap, FocusVariant, IMap, IMapDelegate } from './mapControlls';
+import { focusMap, FocusVariant, IMap, IMapDelegate, INDOOR_HIDE_ZOOM, INDOOR_SHOW_ZOOM } from './mapControlls';
 import useOverlayDrawing from '@/core/map/overlayDrawing/useOverlayDrawing';
 import useMapAnnotations from '@/core/map/overlayDrawing/annotations/useMapAnnotations';
 import useOverlayGeometry from '@/core/map/overlayGeometry/useOverlayGeometry';
@@ -74,10 +74,6 @@ let mapAnnotations: ReturnType<typeof useMapAnnotations>;
 let mapPath: ReturnType<typeof useMapPath>;
 
 let map: IMap = null;
-
-
-const SHOW_ZOOM = 4;
-const HIDE_ZOOM = 3.9;
 
 let lastAnimateTime = 0
 let fps = ref("0")
@@ -177,16 +173,16 @@ async function load() {
       focusMap({
         annotation: a,
         map: mkMap.value,
-        variant: focusVariant,
         insets: { top: 10, left: 400, right: 10, bottom: 10 },
-        translate: t => venue.value.TranslateVector(t),
         inverse: t => {
           const l = venue.value.Inverse(t)
           return new mapkit.Coordinate(l.latitude, l.longitude)
         },
-        project: t => overlayDrawing.project(t),
-        unproject: t => overlayDrawing.unprojectScreenPoint(t),
+        onEnd: () => {
+          mapAnnotations.preventDeselect.value = false
+        }
       })
+      mapAnnotations.preventDeselect.value = true
       mapAnnotations.selected.value = a
     },
     deselectAnnotation: (a) => {
@@ -222,10 +218,10 @@ watch(venue, (newValue, oldValue) => {
 
 watch(zoom, (zoom) => {
   if (currentBuilding.value) {
-    if (zoom > SHOW_ZOOM) {
+    if (zoom > INDOOR_SHOW_ZOOM) {
       currentBuilding.value.ShowIndoor(undefined);
       showIndoor.value = true;
-    } else if (zoom < HIDE_ZOOM) {
+    } else if (zoom < INDOOR_HIDE_ZOOM) {
       currentBuilding.value.HideIndoor();
       showIndoor.value = false;
     }
@@ -236,7 +232,7 @@ watch(currentBuilding, (building, old) => {
   if (old) old.HideIndoor();
   if (building) {
     currentOrdinal.value = building.currentOrdinal;
-    if (zoom.value > HIDE_ZOOM) {
+    if (zoom.value > INDOOR_HIDE_ZOOM) {
       building.ShowIndoor(undefined);
       showIndoor.value = true;
     }
