@@ -88,7 +88,7 @@ function applyCamera(map: mapkit.Map & { cameraDistance: number }, camera: Camer
       .animate({
         value: currentCamera, to: camera,
         duration: shouldFast ? 300 : 600,
-        easing: shouldFast ? Easing.Cubic.Out : Easing.Cubic.InOut,
+        easing: Easing.Cubic.Out,
         onUpdate: (camera) => applyCamera(map, camera)
       })
       .onEnd(() => onCompleate?.())
