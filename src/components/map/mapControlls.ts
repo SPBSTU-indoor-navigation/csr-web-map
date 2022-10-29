@@ -35,7 +35,7 @@ export interface IMapDelegate {
   pinnedAnnotations: ShallowRef<IAnnotation[]>;
   venue: ShallowRef<Venue | null>;
 
-  selectAnnotation?(annotation: IAnnotation, focusVariant: FocusVariant): void;
+  selectAnnotation?(annotation: IAnnotation, focusVariant: FocusVariant, insets?: Insets): void;
   deselectAnnotation?(annotation: IAnnotation): void;
 
   addPath?: (path: PathNode[]) => string;
@@ -162,9 +162,9 @@ function insetsMapCenter(map: mapkit.Map, insets: Insets): mapkit.Coordinate {
   const height = map.element.clientHeight
 
   return map.convertPointOnPageToCoordinate(new DOMPoint(
-    width / 2 - (left + right) / 2,
-    height / 2 - (top + bottom) / 2)
-  )
+    width / 2 - (left - right) / 2,
+    height / 2 + (bottom - top) / 2
+  ))
 }
 
 function regionWithInsets(map: mapkit.Map, insets: Insets, region: mapkit.CoordinateRegion): mapkit.CoordinateRegion {

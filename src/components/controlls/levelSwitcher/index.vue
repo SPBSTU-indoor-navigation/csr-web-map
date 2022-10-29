@@ -15,6 +15,7 @@ import { computed, ref } from '@vue/reactivity';
 import { watchEffect } from 'vue';
 import { useMediaQuery } from '@vueuse/core';
 import { phoneWidth } from '@/styles/variables';
+import { isPhoneLayout } from '@/components/infoPanel/infoPanelControlls';
 
 
 const props = defineProps(['levels', 'level'])
@@ -25,7 +26,7 @@ const levels = computed(() => {
   return props.levels.map(t => ({ ordinal: t.ordinal, name: t.data.properties.short_name.bestLocalizedValue })).sort((a, b) => b.ordinal - a.ordinal)
 })
 
-const isPhone = useMediaQuery(`(max-width: ${phoneWidth})`)
+const isPhone = isPhoneLayout
 
 const offset = computed(() => levels.value.map(t => t.ordinal).indexOf(props.level) * (isPhone.value ? 3 : 2.5))
 

@@ -56,6 +56,8 @@ import useOverlayDrawing from '@/core/map/overlayDrawing/useOverlayDrawing';
 import useMapAnnotations from '@/core/map/overlayDrawing/annotations/useMapAnnotations';
 import useOverlayGeometry from '@/core/map/overlayGeometry/useOverlayGeometry';
 import useMapPath from '@/core/map/overlayDrawing/path/useMapPath';
+import { isPhoneLayout, selectAnnotationInsets } from '../infoPanel/infoPanelControlls';
+import { bottomSheet } from '@/styles/variables';
 
 const mapContainer = ref(null)
 
@@ -168,12 +170,9 @@ async function load() {
     selectedAnnotation: mapAnnotations.selected,
     pinnedAnnotations: mapAnnotations.pinned,
     venue,
-    selectAnnotation: (a, focusVariant) => {
-      console.log('focus', FocusVariant[focusVariant]);
+    selectAnnotation: (a, focusVariant, insets) => {
       focusMap({
-        annotation: a,
-        map: mkMap.value,
-        insets: { top: 10, left: 400, right: 10, bottom: 10 },
+        annotation: a, map: mkMap.value, insets: insets ?? selectAnnotationInsets.value,
         inverse: t => {
           const l = venue.value.Inverse(t)
           return new mapkit.Coordinate(l.latitude, l.longitude)

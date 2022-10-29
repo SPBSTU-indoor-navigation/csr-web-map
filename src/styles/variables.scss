@@ -1,4 +1,5 @@
-$phone-width: 700px;
+@import './generated.scss';
+
 $accent-color: #37b34a;
 $font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu;
 
@@ -26,10 +27,6 @@ $gray3: #c7c7ccff;
 $gray4: #d1d1d6ff;
 $gray5: #e5e5eaff;
 $gray6: #f2f2f7ff;
-
-// bottom sheet
-$smallOffset: 80px;
-$middleOffset: 320px;
 
 // searchBar
 $search-bar-background: rgba(117, 117, 117, 0.12); //dark: rgba(117, 117, 127, 0.24)

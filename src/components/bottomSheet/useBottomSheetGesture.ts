@@ -4,7 +4,7 @@ import { Easing, Group, Tween } from '@tweenjs/tween.js'
 import { lerp, project } from '@/core/shared/utils';
 import { SpringEasing } from '@/core/animator/springAnimation';
 import { watch, watchEffect } from 'vue';
-import { smallOffset as small, middleOffset as middle } from '@/styles/variables'
+import { bottomSheet } from '@/styles/variables'
 
 export enum State {
   small = 0,
@@ -27,8 +27,8 @@ export function useBottomSheetGesture(page, scroll, containerHeight: Ref<number>
   let movedByUser = false
   let initialVelocity = 0
 
-  const smallOffset = computed(() => containerHeight.value - small)
-  const middleOffset = computed(() => containerHeight.value - middle)
+  const smallOffset = computed(() => containerHeight.value - bottomSheet.vertical.smallOffset)
+  const middleOffset = computed(() => containerHeight.value - bottomSheet.vertical.middleOffset)
 
   const offsetY = computed(() => {
     if (!movedByUser) return targetY.value

@@ -1,13 +1,13 @@
 <template>
   <div class="page-container non-block" ref="pageContainer">
-    <div class="page card" ref="page" :style="{transform: `translateY(${offsetY}px)`}">
+    <div class="page card" ref="page" :style="{ transform: `translateY(${offsetY}px)` }">
       <div class="header" v-if="showHeader" :class="cloaseble ? 'cloaseble' : ''">
         <div class="line"></div>
         <CloseButtonVue v-if="cloaseble" class="close" @close="$emit('close')" />
         <slot name="header"></slot>
       </div>
-      <hr v-if="showHeader" class="separator" :style="{opacity: hrOpacity}">
-      <div class="content-container" ref="scrollElement" :style="{opacity: contentOpacity}" @scroll="onScroll">
+      <hr v-if="showHeader" class="separator" :style="{ opacity: hrOpacity }">
+      <div class="content-container" ref="scrollElement" :style="{ opacity: contentOpacity }" @scroll="onScroll">
         <div class="content">
           <slot name="content"></slot>
         </div>
@@ -19,7 +19,7 @@
 <script setup>
 import { computed, ref } from '@vue/reactivity';
 import { useElementSize, useMediaQuery } from '@vueuse/core';
-import { phoneWidth } from '@/styles/variables.ts';
+import { phoneWidth } from '@/styles/variables.js';
 import CloseButtonVue from '../shared/closeButton.vue';
 
 import { useBottomSheetGesture } from './useBottomSheetGesture'
@@ -30,7 +30,7 @@ const page = ref(null)
 const scrollElement = ref(null)
 const pageContainer = ref(null)
 const scrollTop = ref(0)
-const isPhone = useMediaQuery(`(max-width: ${phoneWidth})`)
+const isPhone = useMediaQuery(`(max-width: ${phoneWidth}px)`)
 const { height } = useElementSize(pageContainer)
 
 const { cloaseble, showHeader } = defineProps({

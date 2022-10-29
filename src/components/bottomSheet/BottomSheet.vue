@@ -16,7 +16,7 @@ import { watch, } from 'vue';
 import { State } from './useBottomSheetGesture';
 import { clamp, lerp, nextFrame } from '@/core/shared/utils';
 import { useElementSize, useMediaQuery } from '@vueuse/core';
-import { middleOffset, phoneWidth } from '@/styles/variables';
+import { bottomSheet, phoneWidth } from '@/styles/variables';
 import { Easing, Group, Tween } from '@tweenjs/tween.js';
 import { IInfoPanelDelegate } from '../infoPanel/infoPanelControlls';
 
@@ -42,7 +42,7 @@ const state = ref(State.small)
 const pop = ref(false)
 const pushPopProrgress = ref(0)
 const offsetY = ref(0)
-const isPhone = useMediaQuery(`(max-width: ${phoneWidth})`)
+const isPhone = useMediaQuery(`(max-width: ${phoneWidth}px)`)
 const { height } = useElementSize(pageContainer)
 
 
@@ -58,10 +58,10 @@ const fullHeight = computed(() => pages.value.length != 0)
 const currentPage = computed(() => pages.value[pages.value.length - 1])
 const backgroundOpacity = computed(() => {
   if (!isPhone.value) return 0
-  const progress = clamp(1 - offsetY.value / (height.value - middleOffset), 0, 1)
+  const progress = clamp(1 - offsetY.value / (height.value - bottomSheet.vertical.middleOffset), 0, 1)
   return lerp(0, 0.3, Math.max(pushPopProrgress.value, progress))
 })
-const pointerEvents = computed(() => (1 - offsetY.value / (height.value - middleOffset)) < 0.1 ? 'none' : 'auto')
+const pointerEvents = computed(() => (1 - offsetY.value / (height.value - bottomSheet.vertical.middleOffset)) < 0.1 ? 'none' : 'auto')
 
 function onBeforeLeave(el: HTMLElement) {
   el.classList.add(`to-${State[state.value]}`)
@@ -188,16 +188,16 @@ $page-color: rgb(239, 239, 239);
 
     &.big {
       &.to-middle {
-        transform: translateY(calc(100% - $middleOffset));
+        transform: translateY(calc(100% - $bottom-sheet-vertical-middle-offset));
       }
 
       &.to-small {
-        transform: translateY(calc(100% - $smallOffset));
+        transform: translateY(calc(100% - $bottom-sheet-vertical-small-offset));
       }
     }
 
     &.middle.to-small {
-      transform: translateY(calc(100% - $middleOffset - $smallOffset));
+      transform: translateY(calc(100% - $bottom-sheet-vertical-middle-offset - $bottom-sheet-vertical-small-offset));
     }
   }
 
@@ -211,11 +211,11 @@ $page-color: rgb(239, 239, 239);
     transform: translateY(100%);
 
     &.small {
-      transform: translateY($smallOffset);
+      transform: translateY($bottom-sheet-vertical-small-offset);
     }
 
     &.middle {
-      transform: translateY($middleOffset);
+      transform: translateY($bottom-sheet-vertical-middle-offset);
     }
   }
 }
@@ -251,14 +251,14 @@ $page-color: rgb(239, 239, 239);
 /*#endregion Animation*/
 
 .container {
-  width: 400px;
+  width: $bottom-sheet-horizontal-regular-width;
   height: 100%;
   touch-action: none;
   overflow: hidden;
   position: relative;
 
   @media (max-width: 1200px) {
-    width: 330px;
+    width: $bottom-sheet-horizontal-small-width;
   }
 
   @media (max-width: $phone-width) {
