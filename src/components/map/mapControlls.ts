@@ -1,10 +1,10 @@
 import { Animator } from "@/core/animator/animator";
-import { geoToVector, meterPerLongitudeAtLatitude, metersInLatDegree } from "@/core/imdf/geoUtils";
+import { geoToVector, meterPerLongitudeAtLatitude, metersInLatDegree, vectorToGeo } from "@/core/imdf/geoUtils";
 import Venue from "@/core/imdf/venue";
-import { annotationIsIndoor, IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
-import { PathNode } from "@/core/pathFinder";
+import { Annotation, annotationIsIndoor, IAnnotation, Shape2D } from "@/core/map/overlayDrawing/annotations/annotation";
+import { PathNode, PathResult } from "@/core/pathFinder";
 import { Easing } from "@tweenjs/tween.js";
-import { Object3D, Vector2 } from "three";
+import { Box2, Object3D, Vector2 } from "three";
 import { ShallowRef } from "vue";
 import { AmenityAnnotation } from "./annotations/renders/amenity";
 import { AttractionAnnotation } from "./annotations/renders/attraction";
@@ -38,7 +38,7 @@ export interface IMapDelegate {
   selectAnnotation?(annotation: IAnnotation, focusVariant: FocusVariant, insets?: Insets): void;
   deselectAnnotation?(annotation: IAnnotation): void;
 
-  addPath?: (path: PathNode[]) => string;
+  addPath?: (path: PathResult) => string;
   removePath?: (id: string) => void;
 
   pinAnnotation?: (...annotation: IAnnotation[]) => void;
@@ -72,6 +72,8 @@ declare type CameraParams = {
   cameraDistance: number
 }
 
+let currentAnimation: Animator | null = null
+
 function applyCamera(map: mapkit.Map & { cameraDistance: number }, camera: CameraParams, animated: boolean = false, onCompleate?: () => void): void {
   const { center, rotation, cameraDistance } = camera
 
@@ -84,7 +86,8 @@ function applyCamera(map: mapkit.Map & { cameraDistance: number }, camera: Camer
 
     const shouldFast = distance / regionDistance < 0.3 && Math.abs(rotation - currentCamera.rotation) < 0.1 && Math.abs(cameraDistance - currentCamera.cameraDistance) < 0.1
 
-    new Animator()
+    currentAnimation?.stop()
+    currentAnimation = new Animator()
       .animate({
         value: currentCamera, to: camera,
         duration: shouldFast ? 300 : 600,
@@ -108,8 +111,51 @@ function cameraParams(map: mapkit.Map & { cameraDistance: number }): CameraParam
   }
 }
 
+export function focusMapOnPath(params: {
+  path: PathResult,
+  map: mapkit.Map & { cameraDistance: number },
+  insets: Insets,
+  inverse: (pos: Vector2) => mapkit.Coordinate,
+}) {
+  const { path, map, insets, inverse } = params
 
-export function focusMap(params: {
+  const bbox = new Box2().setFromPoints(path.path.map(t => new Vector2(t.position.x, t.position.y)))
+
+
+  const center = inverse(bbox.getCenter(new Vector2()))
+  const size = vectorToGeo(center, bbox.max.add(bbox.min.negate()))
+
+  const region = new mapkit.CoordinateRegion(center, new mapkit.CoordinateSpan(size.latitude - center.latitude, size.longitude - center.longitude))
+
+
+  const fromBbox = (path.from as Annotation).boundingBox.getSize(new Vector2())
+  const toBbox = (path.to as Annotation).boundingBox.getSize(new Vector2())
+
+  const addInsetsVertical = Math.max(fromBbox.y, toBbox.y) / 2
+  const addInsetsHorizontal = Math.max(fromBbox.x, toBbox.x) / 2
+
+  const target = regionWithInsets(map, {
+    top: (insets.top ?? 0) + addInsetsVertical,
+    left: (insets.left ?? 0) + addInsetsHorizontal,
+    bottom: (insets.bottom ?? 0) + addInsetsVertical,
+    right: (insets.right ?? 0) + addInsetsHorizontal
+  }, region)
+
+
+  const lastMap = cameraParams(map)
+  map.region = target
+
+  const targetMap: CameraParams = {
+    center: map.center,
+    rotation: map.rotation,
+    cameraDistance: map.cameraDistance
+  }
+
+  applyCamera(map, lastMap)
+  applyCamera(map, targetMap, true)
+}
+
+export function focusMapOnAnnotation(params: {
   annotation: IAnnotation,
   map: mapkit.Map & { cameraDistance: number },
   insets: Insets,

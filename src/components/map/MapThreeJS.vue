@@ -51,7 +51,7 @@ import { nearestBuiling } from '@/core/map/utils';
 
 import { showBackedCanvas, showBackedOutline, renderAnnotationCount, showAnnotationBBox, showDebugPanel, showDebugPath } from '@/store/debugParams'
 
-import { focusMap, FocusVariant, IMap, IMapDelegate, INDOOR_HIDE_ZOOM, INDOOR_SHOW_ZOOM } from './mapControlls';
+import { focusMapOnAnnotation, focusMapOnPath, IMap, IMapDelegate, INDOOR_HIDE_ZOOM, INDOOR_SHOW_ZOOM } from './mapControlls';
 import useOverlayDrawing from '@/core/map/overlayDrawing/useOverlayDrawing';
 import useMapAnnotations from '@/core/map/overlayDrawing/annotations/useMapAnnotations';
 import useOverlayGeometry from '@/core/map/overlayGeometry/useOverlayGeometry';
@@ -166,17 +166,19 @@ async function load() {
   }
 
 
+  const inverse = (t: Vector2) => {
+    const l = venue.value.Inverse(t)
+    return new mapkit.Coordinate(l.latitude, l.longitude)
+  }
+
   const delegate: IMapDelegate = {
     selectedAnnotation: mapAnnotations.selected,
     pinnedAnnotations: mapAnnotations.pinned,
     venue,
     selectAnnotation: (a, focusVariant, insets) => {
-      focusMap({
+      focusMapOnAnnotation({
         annotation: a, map: mkMap.value, insets: insets ?? selectAnnotationInsets.value,
-        inverse: t => {
-          const l = venue.value.Inverse(t)
-          return new mapkit.Coordinate(l.latitude, l.longitude)
-        },
+        inverse,
         onEnd: () => {
           mapAnnotations.preventDeselect.value = false
         }
@@ -189,7 +191,15 @@ async function load() {
         mapAnnotations.selected.value = null
       }
     },
-    addPath: mapPath.add,
+    addPath: (result) => {
+      focusMapOnPath({
+        map: mkMap.value,
+        path: result,
+        inverse,
+        insets: selectAnnotationInsets.value
+      })
+      return mapPath.add(result.path)
+    },
     removePath: mapPath.remove,
     pinAnnotation: (...a) => {
       mapAnnotations.pinned.value.push(...a)

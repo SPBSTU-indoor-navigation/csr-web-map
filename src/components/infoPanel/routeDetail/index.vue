@@ -64,7 +64,7 @@ watch(pathResult, result => {
     mapDelegate.value.removePath(currentRouteId.value)
   }
 
-  currentRouteId.value = mapDelegate.value.addPath(result.path)
+  currentRouteId.value = mapDelegate.value.addPath(result)
 
   const targetPin = [props.data.from, props.data.to]
   mapDelegate.value.unpinAnnotation(...lastAnnotations.value.filter(a => !targetPin.includes(a)))
