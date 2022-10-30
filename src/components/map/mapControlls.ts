@@ -77,6 +77,16 @@ let currentAnimation: Animator | null = null
 function applyCamera(map: mapkit.Map & { cameraDistance: number }, camera: CameraParams, animated: boolean = false, onCompleate?: () => void): void {
   const { center, rotation, cameraDistance } = camera
 
+  function angleLerp(a0: number, a1: number, t: number) {
+    function shortAngleDist(a0: number, a1: number) {
+      var max = 360;
+      var da = (a1 - a0) % max;
+      return 2 * da % max - da;
+    }
+
+    return a0 + shortAngleDist(a0, a1) * t;
+  }
+
   if (animated) {
     const currentCamera = cameraParams(map)
 
@@ -89,10 +99,14 @@ function applyCamera(map: mapkit.Map & { cameraDistance: number }, camera: Camer
     currentAnimation?.stop()
     currentAnimation = new Animator()
       .animate({
-        value: currentCamera, to: camera,
+        value: { ...currentCamera, progress: 0 }, to: { ...camera, progress: 1 },
         duration: shouldFast ? 300 : 600,
         easing: Easing.Cubic.Out,
-        onUpdate: (camera) => applyCamera(map, camera)
+        onUpdate: (val) => {
+          map.center = val.center
+          map.rotation = angleLerp(currentCamera.rotation, camera.rotation, val.progress)
+          map.cameraDistance = val.cameraDistance
+        }
       })
       .onEnd(() => onCompleate?.())
       .start(true)
