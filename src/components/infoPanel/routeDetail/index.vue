@@ -1,7 +1,7 @@
 <template>
   <BottomSheetPageVue @close="onClose">
     <template #header>
-      <h1>Route</h1>
+      <h1>Маршрут</h1>
     </template>
 
     <template #content>
@@ -80,7 +80,7 @@ function createPath(result: PathResult) {
 }
 
 watch(pathResult, (result, old) => {
-  if (!(lastPath.value && result && lastPath.value.ecuals(result))) {
+  if (!(lastPath.value && result && lastPath.value.equals(result))) {
     lastPath.value = result
     createPath(result)
   }
