@@ -58,6 +58,7 @@ import useOverlayGeometry from '@/core/map/overlayGeometry/useOverlayGeometry';
 import useMapPath from '@/core/map/overlayDrawing/path/useMapPath';
 import { isPhoneLayout, selectAnnotationInsets } from '../infoPanel/infoPanelControlls';
 import { bottomSheet } from '@/styles/variables';
+import { annotationIsIndoor } from '@/core/map/overlayDrawing/annotations/annotation';
 
 const mapContainer = ref(null)
 
@@ -176,6 +177,14 @@ async function load() {
     pinnedAnnotations: mapAnnotations.pinned,
     venue,
     selectAnnotation: (a, focusVariant, insets) => {
+
+      if (focusVariant != FocusVariant.none) {
+        if (annotationIsIndoor(a)) {
+          if (currentBuilding.value == a.building) currentOrdinal.value = a.level.ordinal
+          else a.building.ChangeOrdinal(a.level.ordinal)
+        }
+      }
+
       if (focusVariant != FocusVariant.none) {
         // const annotationOnScreen 
         focusMapOnAnnotation({

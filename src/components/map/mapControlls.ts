@@ -178,10 +178,6 @@ export function focusMapOnAnnotation(params: {
 }): void {
   const { annotation, map, insets, inverse, onEnd } = params;
 
-  if (annotationIsIndoor(annotation)) {
-    annotation.building.ChangeOrdinal(annotation.level.ordinal)
-  }
-
   let targetZoom = map.cameraDistance
   if (annotation instanceof OccupantAnnotation) {
     targetZoom = 150
