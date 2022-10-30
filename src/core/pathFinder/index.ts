@@ -58,6 +58,10 @@ export class PathResult {
     return result
   }
 
+  equals(other: PathResult) {
+    return this.from === other.from && this.to === other.to
+  }
+
 }
 
 

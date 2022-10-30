@@ -15,12 +15,12 @@
 
 <script setup lang="ts">
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
-import { usePageStore } from "@/components/bottomSheet/usePageStore";
+import { usePageStore, useStorageComptuted } from "@/components/bottomSheet/usePageStore";
 import { IMapDelegate } from "@/components/map/mapControlls";
 import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
-import { PathFinder } from "@/core/pathFinder";
+import { PathFinder, PathResult } from "@/core/pathFinder";
 import { Node2D } from "@/core/pathFinder/aStar";
-import { computed, inject, ShallowRef, watch } from "vue";
+import { computed, inject, onMounted, Ref, ref, ShallowRef, watch } from "vue";
 import { IInfoPanelDelegate } from "../infoPanelControlls";
 import { unitInfoFromAnnotation } from "../unitDetail/data";
 
@@ -38,8 +38,12 @@ const emit = defineEmits<{
   (event: 'pop'): void
 }>()
 
-const currentRouteId = usePageStore<string>(`route_${props.page}`, 'currentRouteId', null)
-const lastAnnotations = usePageStore<IAnnotation[]>(`route_${props.page}`, 'lastAnnotations', [])
+const { currentRouteId, lastAnnotations, lastPath } = usePageStore(`route_${props.page}`, () => ({
+  currentRouteId: ref<string>(null),
+  lastAnnotations: ref([]) as Ref<IAnnotation[]>,
+  lastPath: ref(null) as Ref<PathResult>,
+}))
+
 
 const fromUnitInfo = computed(() => unitInfoFromAnnotation(props.data.from))
 const toUnitInfo = computed(() => unitInfoFromAnnotation(props.data.to))
@@ -53,13 +57,15 @@ const pathResult = computed(() => {
 function onClose() {
   if (pathResult.value != null) {
     mapDelegate.value.removePath(currentRouteId.value)
+    currentRouteId.value = null
   }
   mapDelegate.value.unpinAnnotation(...lastAnnotations.value)
   lastAnnotations.value = []
+  lastPath.value = null
   emit('pop')
 }
 
-watch(pathResult, result => {
+function createPath(result: PathResult) {
   if (result != null) {
     mapDelegate.value.removePath(currentRouteId.value)
   }
@@ -71,9 +77,13 @@ watch(pathResult, result => {
   mapDelegate.value.pinAnnotation(...targetPin.filter(a => !lastAnnotations.value.includes(a)))
 
   lastAnnotations.value = targetPin
+}
 
+watch(pathResult, (result, old) => {
+  if (!(lastPath.value && result && lastPath.value.ecuals(result))) {
+    lastPath.value = result
+    createPath(result)
+  }
 }, { immediate: true })
-
-
 
 </script>

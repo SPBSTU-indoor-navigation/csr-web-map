@@ -1,12 +1,17 @@
-import { Ref, ref } from "vue"
+import { computed, Ref, ref, watch, watchEffect, WatchSource } from "vue"
 
 const storage = {}
+const computedStorage = {}
 
-export function usePageStore<T>(page: string, name: string, value: T): Ref<T> {
-  if (!storage[page]?.[name]) {
-    if (!storage[page]) storage[page] = {}
-    storage[page][name] = ref(value)
-  }
+export function usePageStore<T>(page: string, def: () => T): T {
+  if (!storage[page]) storage[page] = def()
 
-  return storage[page][name]
+  return storage[page]
+}
+
+
+export function useStorageComptuted<T>(key: string, def: () => T) {
+  const t = computed(def)
+  computedStorage[key] = t
+  return t
 }

@@ -1,7 +1,7 @@
 <template>
   <BottomSheetPageVue :showHeader="true" :cloaseble="true" @close="onClose">
     <template #header>
-      <h1 class="title">{{unitInfo.title}}</h1>
+      <h1 class="title">{{  unitInfo.title  }}</h1>
     </template>
 
     <template #content>
@@ -65,7 +65,7 @@ const onClose = () => {
 
 onMounted(() => {
   if (mapDelegate.value.selectedAnnotation.value !== props.data.annotation) {
-    mapDelegate.value.selectAnnotation(props.data.annotation, FocusVariant.none)
+    mapDelegate.value.selectAnnotation(props.data.annotation, FocusVariant.safeArea)
   }
 })
 

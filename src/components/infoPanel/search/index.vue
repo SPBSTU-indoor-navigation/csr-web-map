@@ -28,7 +28,7 @@ const state = inject<Ref<State>>('state')
 const mapDelegate = inject<ShallowRef<IMapDelegate>>('mapDelegate')
 const annotations: ShallowRef<IAnnotationInfo[]> = shallowRef([]);
 
-const searchText = usePageStore(`search_${props.page}`, 'searchText', '')
+const { searchText } = usePageStore(`search_${props.page}`, () => ({ searchText: ref('') }))
 
 const focusDelay = computed(() => state.value == State.big ? 0 : 500)
 

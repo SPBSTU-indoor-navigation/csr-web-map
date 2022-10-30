@@ -51,7 +51,7 @@ import { nearestBuiling } from '@/core/map/utils';
 
 import { showBackedCanvas, showBackedOutline, renderAnnotationCount, showAnnotationBBox, showDebugPanel, showDebugPath } from '@/store/debugParams'
 
-import { focusMapOnAnnotation, focusMapOnPath, IMap, IMapDelegate, INDOOR_HIDE_ZOOM, INDOOR_SHOW_ZOOM } from './mapControlls';
+import { focusMapOnAnnotation, focusMapOnPath, FocusVariant, IMap, IMapDelegate, INDOOR_HIDE_ZOOM, INDOOR_SHOW_ZOOM } from './mapControlls';
 import useOverlayDrawing from '@/core/map/overlayDrawing/useOverlayDrawing';
 import useMapAnnotations from '@/core/map/overlayDrawing/annotations/useMapAnnotations';
 import useOverlayGeometry from '@/core/map/overlayGeometry/useOverlayGeometry';
@@ -176,14 +176,16 @@ async function load() {
     pinnedAnnotations: mapAnnotations.pinned,
     venue,
     selectAnnotation: (a, focusVariant, insets) => {
-      focusMapOnAnnotation({
-        annotation: a, map: mkMap.value, insets: insets ?? selectAnnotationInsets.value,
-        inverse,
-        onEnd: () => {
-          mapAnnotations.preventDeselect.value = false
-        }
-      })
-      mapAnnotations.preventDeselect.value = true
+      if (focusVariant != FocusVariant.none) {
+        // const annotationOnScreen 
+        focusMapOnAnnotation({
+          annotation: a, map: mkMap.value, insets: insets ?? selectAnnotationInsets.value, inverse,
+          onEnd: () => {
+            mapAnnotations.preventDeselect.value = false
+          }
+        })
+        mapAnnotations.preventDeselect.value = true
+      }
       mapAnnotations.selected.value = a
     },
     deselectAnnotation: (a) => {
