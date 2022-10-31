@@ -1,5 +1,5 @@
 <template>
-  <component :is=components[props.img] cl />
+  <component :is=components[props.img] />
 </template>
 
 <script setup>

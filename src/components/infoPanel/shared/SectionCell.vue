@@ -3,7 +3,7 @@
     <div class="left flex" v-if="slots.left">
       <slot name="left"></slot>
     </div>
-    <p>{{props.title}}</p>
+    <p>{{ props.title }}</p>
     <div class="right flex" v-if="slots.right">
       <slot name="right"></slot>
     </div>

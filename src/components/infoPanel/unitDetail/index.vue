@@ -1,14 +1,14 @@
 <template>
   <BottomSheetPageVue :showHeader="true" :cloaseble="true" @close="onClose">
     <template #header>
-      <h1 class="title">{{  unitInfo.title  }}</h1>
+      <h1 class="title">{{ unitInfo.title }}</h1>
     </template>
 
     <template #content>
       <RouteButtonsVue :fromToPlan="unitInfo.fromToPlan" v-if="unitInfo.fromToPlan" @set-to="onSetTo"
         @set-from="onSetFrom" />
       <DetailVue :detail="unitInfo.detail" v-if="unitInfo.detail" />
-      <div class="info-panel-section share-section">
+      <div class="info-panel-section info-panel-section-group">
         <SectionCellVue title="Поделиться" :clickable="true">
           <template #right>
             <IconVue img="share" class="controll-image" />
@@ -16,7 +16,7 @@
         </SectionCellVue>
       </div>
 
-      <div class="info-panel-section share-section">
+      <div class="info-panel-section info-panel-section-group">
         <SectionCellVue title="Добавить в Закладки" :clickable="true">
           <template #left>
             <IconVue img="star.fill" class="controll-image" />
@@ -88,10 +88,6 @@ function onSetFrom() {
 <style lang="scss" scoped>
 @import '../style.scss';
 @import '@/styles/variables.scss';
-
-.share-section {
-  margin-top: 15px;
-}
 
 .title {
   font-size: 1.7em;
