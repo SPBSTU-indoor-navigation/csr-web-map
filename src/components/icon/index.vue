@@ -9,12 +9,14 @@ const star = defineAsyncComponent(() => import('./icons/Star.vue'))
 const starFill = defineAsyncComponent(() => import('./icons/StarFill.vue'))
 const share = defineAsyncComponent(() => import('./icons/Share.vue'))
 const report = defineAsyncComponent(() => import('./icons/Report.vue'))
+const arrowUpArrowDown = defineAsyncComponent(() => import('./icons/ArrowUpArrowDown.vue'))
 
 const components = {
   star,
   report,
   share,
-  'star.fill': starFill
+  'star.fill': starFill,
+  'arrow.up.arrow.down': arrowUpArrowDown
 }
 
 const props = defineProps({

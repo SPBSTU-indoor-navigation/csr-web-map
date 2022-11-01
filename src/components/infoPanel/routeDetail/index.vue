@@ -1,14 +1,14 @@
 <template>
-  <BottomSheetPageVue @close="onClose">
+  <BottomSheetPageVue @close="onClose" @contentOpacity="onContentOpacity">
     <template #header>
       <h1>Маршрут</h1>
+      <HeaderVue :from="fromUnitInfo" :to="toUnitInfo" @swap="onSwapFromTo" :style="{ opacity: headerOpacity }" />
+      <p class="secondary-label select-annotation-suggestion">Для изменения точек назначения, выберите аннотацию на
+        карте</p>
     </template>
 
     <template #content>
-      <p>{{ fromUnitInfo.title }}</p>
-      <p>{{ toUnitInfo.title }}</p>
-
-      <DetailInfoVue title="Информация о маршруте" :lines="pathDetailInfo" />
+      <DetailInfoVue title="Информация о маршруте" :lines="pathDetailInfo" class="route-detail-info" />
 
       <div class="info-panel-section-group">
         <h2 class="info-panel-section-title">Параметры</h2>
@@ -42,6 +42,8 @@
 <script setup lang="ts">
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
 import IconVue from "@/components/icon/index.vue";
+import HeaderVue from "./Header.vue";
+
 import { usePageStore, useStorageComptuted } from "@/components/bottomSheet/usePageStore";
 import { IMapDelegate } from "@/components/map/mapControlls";
 import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
@@ -56,6 +58,7 @@ import SectionCellVue from "../shared/SectionCell.vue";
 import { distanceFormatter } from "@/core/formatter/distance";
 import { timeFormatter } from "@/core/formatter/time";
 import { useStorage } from "@vueuse/core";
+import { Tag } from "@/core/imdf/navPath";
 
 const props = defineProps<{
   delegate: IInfoPanelDelegate,
@@ -84,6 +87,8 @@ const fromUnitInfo = computed(() => unitInfoFromAnnotation(props.data.from))
 const toUnitInfo = computed(() => unitInfoFromAnnotation(props.data.to))
 const mapDelegate = inject<ShallowRef<IMapDelegate>>('mapDelegate')
 
+const headerOpacity = ref(1)
+
 
 const pathDetailInfo = computed(() => {
   let content: { title: string, content: string }[] = []
@@ -104,10 +109,27 @@ const pathDetailInfo = computed(() => {
   return content
 })
 
+const denyTags = computed(() => {
+  let tags: Tag[] = []
+  if (prefereAsphalt.value) tags.push(Tag.dirt)
+  if (!allowService.value) tags.push(Tag.service)
+  return tags
+})
+
 const pathResult = computed(() => {
   if (!props.data.from || !props.data.to) return null
-  return props.data.pathFinder.findPath(props.data.from, props.data.to)
+  return props.data.pathFinder.findPath(props.data.from, props.data.to, denyTags.value)
 })
+
+function onSwapFromTo() {
+  const from = props.data.from
+  props.data.from = props.data.to
+  props.data.to = from
+}
+
+function onContentOpacity(val) {
+  headerOpacity.value = val
+}
 
 function onClose() {
   if (pathResult.value != null) {
@@ -143,7 +165,11 @@ watch(pathResult, (result, old) => {
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles/variables.scss';
+
+$white: white;
+
 .separator {
   margin: 10px -10px 10px 10px;
 }
@@ -166,5 +192,55 @@ watch(pathResult, (result, old) => {
   margin-right: 3px;
 
   cursor: pointer;
+}
+
+.route-detail-info {
+  margin: 0;
+}
+
+.select-annotation-suggestion {
+  text-align: center;
+  font-size: small;
+  font-style: italic;
+  margin-bottom: 10px;
+  margin-top: -8px;
+}
+
+input[type="checkbox"] {
+  position: relative;
+  width: 1.5em;
+  height: 1.5em;
+  color: black;
+  border: 1px solid gray;
+  border-radius: 4px;
+  appearance: none;
+  outline: 0;
+  cursor: pointer;
+  transition: background 175ms cubic-bezier(0.1, 0.1, 0.25, 1);
+
+  &::before {
+    position: absolute;
+    content: '';
+    display: block;
+    top: 1.5px;
+    left: 4px;
+    width: 4px;
+    height: 6.5px;
+    border-style: solid;
+    border-color: $white;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+    opacity: 0;
+  }
+
+  &:checked {
+    color: $white;
+    border-color: $accent-color;
+    background: $accent-color;
+
+    &::before {
+      opacity: 1;
+    }
+  }
 }
 </style>

@@ -46,7 +46,7 @@ const { cloaseble, showHeader } = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'move', 'progress'])
+const emit = defineEmits(['close', 'move', 'progress', 'contentOpacity'])
 
 const state = inject('state')
 const { contentOpacity, offsetY, progress, reset } = useBottomSheetGesture(page, scrollElement, height, isPhone, state)
@@ -54,6 +54,7 @@ const hrOpacity = computed(() => clamp(scrollTop.value / 20, 0, 1) * contentOpac
 
 watch(offsetY, (val) => emit('move', val))
 watch(progress, val => emit('progress', val))
+watch(contentOpacity, val => emit('contentOpacity', val))
 
 watch(isPhone, (isPhone) => {
   if (!isPhone) {
@@ -109,6 +110,8 @@ function onScroll({ target: { scrollTop: y } }) {
   }
 
   .header {
+    flex-shrink: 0;
+    flex-grow: 0;
     padding-top: 13px;
     position: relative;
     min-height: 42.5px;

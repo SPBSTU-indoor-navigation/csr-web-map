@@ -19,6 +19,7 @@ export class PathResult {
   to: IAnnotation
 
   path: PathNode[]
+  denyTags: Tag[]
 
   totalCost: number
   indoorDistance: number
@@ -30,10 +31,11 @@ export class PathResult {
     return this.indoorDistance + this.outdoorDistance
   }
 
-  constructor(path: PathNode[], from: IAnnotation, to: IAnnotation, totalCost: number) {
+  constructor(path: PathNode[], from: IAnnotation, to: IAnnotation, denyTags: Tag[], totalCost: number) {
     this.path = path
     this.from = from
     this.to = to
+    this.denyTags = denyTags
     this.totalCost = totalCost
 
     this.indoorDistance = this.distance((a, b) => b.building != null)
@@ -59,7 +61,10 @@ export class PathResult {
   }
 
   equals(other: PathResult) {
-    return this.from === other.from && this.to === other.to
+    return this.from === other.from &&
+      this.to === other.to &&
+      this.denyTags.length == other.denyTags.length &&
+      this.denyTags.every(t => other.denyTags.includes(t))
   }
 
 }
@@ -178,6 +183,6 @@ export class PathFinder {
       }
     }
 
-    return new PathResult(bestPath as PathNode[], from, to, bestPathDistance)
+    return new PathResult(bestPath as PathNode[], from, to, denyTags, bestPathDistance)
   }
 }
