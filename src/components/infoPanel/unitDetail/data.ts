@@ -90,7 +90,8 @@ export function unitInfoFromAnnotation(annotation: IAnnotation, allowFrom: boole
     fromToPlan: {
       from: allowFrom,
       to: allowTo,
-      planTarget: t.planTarget
+      // TODO: Fix this
+      planTarget: null // t.planTarget
     }
   }
 
