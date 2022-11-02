@@ -51,7 +51,7 @@ import { nearestBuiling } from '@/core/map/utils';
 
 import { showBackedCanvas, showBackedOutline, renderAnnotationCount, showAnnotationBBox, showDebugPanel, showDebugPath } from '@/store/debugParams'
 
-import { focusMapOnAnnotation, focusMapOnPath, FocusVariant, IMap, IMapDelegate, INDOOR_HIDE_ZOOM, INDOOR_SHOW_ZOOM } from './mapControlls';
+import { focusMapOnAnnotation, focusMapOnBuilding, focusMapOnPath, FocusVariant, IMap, IMapDelegate, INDOOR_HIDE_ZOOM, INDOOR_SHOW_ZOOM } from './mapControlls';
 import useOverlayDrawing from '@/core/map/overlayDrawing/useOverlayDrawing';
 import useMapAnnotations from '@/core/map/overlayDrawing/annotations/useMapAnnotations';
 import useOverlayGeometry from '@/core/map/overlayGeometry/useOverlayGeometry';
@@ -201,6 +201,12 @@ async function load() {
       if (mapAnnotations.selected.value == a) {
         mapAnnotations.selected.value = null
       }
+    },
+    focusOnBuilding: (building, insets) => {
+      focusMapOnBuilding({
+        building, map: mkMap.value, inverse,
+        insets: insets ?? selectAnnotationInsets.value,
+      })
     },
     addPath: (result) => {
       focusMapOnPath({

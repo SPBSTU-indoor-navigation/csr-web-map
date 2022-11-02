@@ -5,8 +5,8 @@
     </template>
 
     <template #content>
-      <RouteButtonsVue :fromToPlan="unitInfo.fromToPlan" v-if="unitInfo.fromToPlan" @set-to="onSetTo"
-        @set-from="onSetFrom" />
+      <RouteButtonsVue :fromToPlan="unitInfo.fromToPlan" v-if="unitInfo.fromToPlan" @setTo="onSetTo"
+        @setFrom="onSetFrom" @openPlan="onOpenPlan" />
       <DetailVue :detail="unitInfo.detail" v-if="unitInfo.detail" />
       <div class="info-panel-section info-panel-section-group">
         <SectionCellVue title="Поделиться" :clickable="true">
@@ -35,7 +35,6 @@
 
 <script setup lang="ts">
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
-import RouteDetailVue from "@/components/infoPanel/routeDetail/index.vue";
 import DetailVue from './Detail.vue'
 import RouteButtonsVue from './RouteButtons.vue'
 import { FocusVariant, IMapDelegate } from "@/components/map/mapControlls";
@@ -81,6 +80,17 @@ function onSetTo() {
 function onSetFrom() {
   mapDelegate.value.deselectAnnotation(props.data.annotation)
   setFrom(props.data.annotation)
+}
+
+function onOpenPlan() {
+  const target = unitInfo.value.fromToPlan.planTarget
+  if (target) {
+    if (target.levels.length > 0 || true) {
+      mapDelegate.value.focusOnBuilding(target)
+    } else {
+      alert("У этого здания нет планировки")
+    }
+  }
 }
 
 </script>

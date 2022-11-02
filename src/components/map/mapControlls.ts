@@ -1,10 +1,12 @@
 import { Animator } from "@/core/animator/animator";
+import Building from "@/core/imdf/building";
 import { geoToVector, meterPerLongitudeAtLatitude, metersInLatDegree, vectorToGeo } from "@/core/imdf/geoUtils";
+import { geometryIMDF2Three } from "@/core/imdf/utils";
 import Venue from "@/core/imdf/venue";
 import { Annotation, annotationIsIndoor, IAnnotation, Shape2D } from "@/core/map/overlayDrawing/annotations/annotation";
 import { PathNode, PathResult } from "@/core/pathFinder";
 import { Easing } from "@tweenjs/tween.js";
-import { Box2, Object3D, Vector2 } from "three";
+import { Box2, Object3D, Vector2, Vector3 } from "three";
 import { ShallowRef } from "vue";
 import { AmenityAnnotation } from "./annotations/renders/amenity";
 import { AttractionAnnotation } from "./annotations/renders/attraction";
@@ -43,6 +45,8 @@ export interface IMapDelegate {
 
   pinAnnotation?: (...annotation: IAnnotation[]) => void;
   unpinAnnotation?: (...annotation: IAnnotation[]) => void;
+
+  focusOnBuilding?: (building: Building, insets?: Insets) => void;
 }
 
 export declare type Insets = {
@@ -123,6 +127,54 @@ function cameraParams(map: mapkit.Map & { cameraDistance: number }): CameraParam
     rotation: map.rotation,
     cameraDistance: map.cameraDistance
   }
+}
+
+export function focusMapOnBuilding(params: {
+  building: Building,
+  map: mapkit.Map & { cameraDistance: number },
+  insets: Insets,
+  inverse: (pos: Vector2) => mapkit.Coordinate,
+}) {
+  const { building, map, insets, inverse } = params
+
+  const rotation = building.data.properties.rotation ?? params.map.rotation
+
+  const geometry = geometryIMDF2Three(building.data.geometry)
+  geometry.computeBoundingBox()
+
+
+  const delta = geometry.boundingBox.getCenter(new Vector3())
+  const center = inverse(new Vector2(delta.x, delta.y))
+
+  geometry.translate(-delta.x, -delta.y, 0)
+  geometry.rotateZ(rotation * Math.PI / 180);
+  geometry.translate(delta.x, delta.y, 0)
+
+  geometry.computeBoundingBox()
+
+  const bbox = new Box2(new Vector2(geometry.boundingBox.min.x, geometry.boundingBox.min.y), new Vector2(geometry.boundingBox.max.x, geometry.boundingBox.max.y))
+
+  const size = vectorToGeo(center, bbox.max.add(bbox.min.negate()))
+
+  const region = new mapkit.CoordinateRegion(center, new mapkit.CoordinateSpan(size.latitude - center.latitude, size.longitude - center.longitude))
+  const target = regionWithInsets(map, {
+    top: insets.top ?? 0,
+    left: insets.left ?? 0,
+    bottom: insets.bottom ?? 0,
+    right: insets.right ?? 0
+  }, region)
+
+  const lastMap = cameraParams(map)
+  map.region = target
+
+  const targetMap: CameraParams = {
+    center: map.center,
+    rotation: -rotation,
+    cameraDistance: map.cameraDistance
+  }
+
+  applyCamera(map, lastMap)
+  applyCamera(map, targetMap, true)
 }
 
 export function focusMapOnPath(params: {

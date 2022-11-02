@@ -14,6 +14,7 @@ export default class Building {
     properties: {
       name: LocalizedString,
       alt_name: LocalizedString,
+      rotation: number,
     }
   }
 
@@ -37,7 +38,7 @@ export default class Building {
     this.levels = levels
     this.attractions = attractions.map(t => {
       const pos = t.geometry.coordinates
-      return new AttractionAnnotation(new Vector2(pos.x, pos.y), t)
+      return new AttractionAnnotation(new Vector2(pos.x, pos.y), t, this)
     })
 
     this.levelByOrdinal = levels.reduce((acc, level) => {

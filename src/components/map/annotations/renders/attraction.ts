@@ -1,4 +1,5 @@
 import { Animator } from "@/core/animator/animator";
+import Building from "@/core/imdf/building";
 import { AnnotationBakery, TextBakery } from "@/core/map/overlayDrawing/annotations/bakery";
 import { Size } from "@/core/map/overlayDrawing/annotations/bounds";
 import { DetailLevelProcessor, DetailLevelState } from "@/core/map/overlayDrawing/annotations/detailLevelProcessor";
@@ -31,6 +32,8 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
       image: string
     }
   }
+
+  targetBuilding: Building
 
   annotationParams = {
     point: {
@@ -87,13 +90,14 @@ export class AttractionAnnotation extends AnimatedAnnotation<0, DetailLevelState
 
   contentImg: HTMLImageElement | null = null
 
-  constructor(localPosition: Vector2, data: any) {
+  constructor(localPosition: Vector2, data: any, targetBuilding: Building) {
     data.properties.short_name = new LocalizedString(data.properties.short_name)
     data.properties.alt_name = new LocalizedString(data.properties.alt_name)
     data.properties.name = new LocalizedString(data.properties.name)
 
 
     super(localPosition, data, 0, levelProcessor)
+    this.targetBuilding = targetBuilding
 
     const target = this.target
 

@@ -2,6 +2,7 @@ import { AttractionAnnotation } from '@/components/map/annotations/renders/attra
 import { OccupantAnnotation } from '@/components/map/annotations/renders/occupant'
 import { AmenityAnnotation } from '@/components/map/annotations/renders/amenity'
 import { IAnnotation } from '@/core/map/overlayDrawing/annotations/annotation';
+import Building from '@/core/imdf/building';
 
 
 
@@ -15,7 +16,7 @@ export declare type Detail = {
 export declare type FromToPlan = {
   from: boolean,
   to: boolean,
-  plan: boolean
+  planTarget: Building | null
 }
 
 export declare type UnitInfoData = {
@@ -46,7 +47,6 @@ function fromAmenityAnnotation(annotation: AmenityAnnotation, allowFrom: boolean
 
   return {
     title: prop.name.bestLocalizedValue,
-    allowFocusPlan: false
   }
 }
 
@@ -61,7 +61,6 @@ function fromOccupantAnnotation(annotation: OccupantAnnotation, allowFrom: boole
       website: prop.website,
       address: addressToString(prop.address)
     },
-    allowFocusPlan: false
   }
 }
 
@@ -70,18 +69,18 @@ function fromAttractionAnnotation(annotation: AttractionAnnotation, allowFrom: b
 
   return {
     title: prop.name.bestLocalizedValue,
-    allowFocusPlan: true
+    planTarget: annotation.targetBuilding
   }
 }
 
 export function unitInfoFromAnnotation(annotation: IAnnotation, allowFrom: boolean, allowTo: boolean): UnitInfoData {
 
-  const titleDetail = (): { title: string, allowFocusPlan: boolean, detail?: Detail } => {
+  const titleDetail = (): { title: string, planTarget?: Building, detail?: Detail } => {
     if (annotation instanceof OccupantAnnotation) return fromOccupantAnnotation(annotation, allowFrom)
     if (annotation instanceof AttractionAnnotation) return fromAttractionAnnotation(annotation, allowFrom)
     if (annotation instanceof AmenityAnnotation) return fromAmenityAnnotation(annotation, allowFrom)
 
-    return { title: '----', allowFocusPlan: false }
+    return { title: '----' }
   }
 
   const t = titleDetail()
@@ -91,7 +90,7 @@ export function unitInfoFromAnnotation(annotation: IAnnotation, allowFrom: boole
     fromToPlan: {
       from: allowFrom,
       to: allowTo,
-      plan: t.allowFocusPlan
+      planTarget: t.planTarget
     }
   }
 

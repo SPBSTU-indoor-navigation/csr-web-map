@@ -1,5 +1,5 @@
 <template>
-  <div class="multy-line flex" v-if="props.fromToPlan.to && props.fromToPlan.from && props.fromToPlan.plan">
+  <div class="multy-line flex" v-if="props.fromToPlan.to && props.fromToPlan.from && props.fromToPlan.planTarget">
     <div class="line1 flex">
       <button v-if="props.fromToPlan.to" class="to" @click="$emit('setTo')">
         {{ props.fromToPlan.from ? "Отсюда" : "Маршрут" }}
@@ -7,7 +7,7 @@
       <button v-if="props.fromToPlan.from" class="from" @click="$emit('setFrom')">Маршрут</button>
     </div>
     <div class="line2 flex">
-      <button v-if="props.fromToPlan.plan" class="plan" @click="$emit('setPlan')">Планировка</button>
+      <button v-if="props.fromToPlan.planTarget" class="plan" @click="$emit('openPlan')">Планировка</button>
     </div>
   </div>
   <div class="single-line flex" v-else>
@@ -15,7 +15,7 @@
     <button v-if="props.fromToPlan.to" class="to" @click="$emit('setTo')">
       {{ props.fromToPlan.from ? "Сюда" : "Маршрут" }}
     </button>
-    <button v-if="props.fromToPlan.plan" class="plan" @click="$emit('setPlan')">Планировка</button>
+    <button v-if="props.fromToPlan.planTarget" class="plan" @click="$emit('openPlan')">Планировка</button>
   </div>
 </template>
 
@@ -23,7 +23,11 @@
 import { FromToPlan } from './data'
 
 const props = defineProps<{ fromToPlan: FromToPlan }>()
-const emit = defineEmits(['setFrom', 'setTo', 'openPlan'])
+const emit = defineEmits<{
+  setFrom: () => void,
+  setTo: () => void,
+  openPlan: () => void
+}>()
 
 </script>
 
