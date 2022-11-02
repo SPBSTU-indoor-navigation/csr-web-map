@@ -1,20 +1,20 @@
 <template>
   <div class="multy-line flex" v-if="props.fromToPlan.to && props.fromToPlan.from && props.fromToPlan.plan">
     <div class="line1 flex">
-      <button v-if="props.fromToPlan.to" class="from" @click="$emit('setFrom')">
-        {{props.fromToPlan.from ? "Отсюда" : "Маршрут"}}
+      <button v-if="props.fromToPlan.to" class="to" @click="$emit('setTo')">
+        {{ props.fromToPlan.from ? "Отсюда" : "Маршрут" }}
       </button>
-      <button v-if="props.fromToPlan.from" class="to" @click="$emit('setTo')">Сюда</button>
+      <button v-if="props.fromToPlan.from" class="from" @click="$emit('setFrom')">Маршрут</button>
     </div>
     <div class="line2 flex">
       <button v-if="props.fromToPlan.plan" class="plan" @click="$emit('setPlan')">Планировка</button>
     </div>
   </div>
   <div class="single-line flex" v-else>
-    <button v-if="props.fromToPlan.to" class="from" @click="$emit('setFrom')">
-      {{props.fromToPlan.from ? "Отсюда" : "Маршрут"}}
+    <button v-if="props.fromToPlan.from" class="from" @click="$emit('setFrom')">Отсюда</button>
+    <button v-if="props.fromToPlan.to" class="to" @click="$emit('setTo')">
+      {{ props.fromToPlan.from ? "Сюда" : "Маршрут" }}
     </button>
-    <button v-if="props.fromToPlan.from" class="to" @click="$emit('setTo')">Сюда</button>
     <button v-if="props.fromToPlan.plan" class="plan" @click="$emit('setPlan')">Планировка</button>
   </div>
 </template>

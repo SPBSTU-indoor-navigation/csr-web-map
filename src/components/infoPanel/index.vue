@@ -31,23 +31,35 @@ const safeArea = computed(() => {
 watch(() => mapDelegate.value.selectedAnnotation.value, (annotation) => {
   if (!delegate.pages) return
 
+  const routePage = getRoutePage()
+
+  const allowFrom = () => {
+    if (!routePage) return false
+    if (routePage.data.to === annotation) return false
+    return true
+  }
+
+  const allowTo = () => {
+    if (!routePage) return true
+    if (routePage.data.from === annotation) return false
+    return true
+  }
+
   const pages = delegate.pages();
   const lastPage = pages[pages.length - 1];
   if (annotation && lastPage.component != UnitDetailVue) {
     delegate.push({
       component: UnitDetailVue,
-      data: { annotation: markRaw(annotation) }
+      data: { annotation: markRaw(annotation), allowFrom: allowFrom(), allowTo: allowTo() }
     });
   } else if (annotation && lastPage.component == UnitDetailVue) {
-    lastPage.data = { annotation: markRaw(annotation) };
+    lastPage.data = { annotation: markRaw(annotation), allowFrom: allowFrom(), allowTo: allowTo() };
   } else if (!annotation && lastPage.component == UnitDetailVue) {
     delegate.pop();
   }
 });
 
 function setRoute(annotation: IAnnotation, isFrom = false) {
-  console.log('setRoute', annotation, isFrom);
-
   const pages = delegate.pages();
   const pathFinder = mapDelegate.value.venue.value.pathFinder
   const defaultStart = mapDelegate.value.venue.value.navpathBegin
@@ -72,6 +84,15 @@ function setRoute(annotation: IAnnotation, isFrom = false) {
       },
     });
   }
+}
+
+function getRoutePage() {
+  const pages = delegate.pages();
+  const routeDetailIndex = pages.findIndex((page) => page.component == RouteDetailVue);
+  if (routeDetailIndex != -1) {
+    return pages[routeDetailIndex];
+  }
+  return null;
 }
 
 function onStateChange(state) {

@@ -47,13 +47,13 @@ import IconVue from "@/components/icon/index.vue";
 import { useInfoPanel } from "../infoPanelControlls";
 import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
 
-const props = defineProps<{ data: { annotation: IAnnotation }, delegate: any }>()
+const props = defineProps<{ data: { annotation: IAnnotation, allowFrom: boolean, allowTo: boolean }, delegate: any }>()
 const emit = defineEmits(['pop', 'push'])
 const { setFrom, setTo } = useInfoPanel()
 
 const mapDelegate = inject('mapDelegate') as ShallowRef<IMapDelegate>
 
-const unitInfo = computed(() => unitInfoFromAnnotation(props.data.annotation))
+const unitInfo = computed(() => unitInfoFromAnnotation(props.data.annotation, props.data.allowFrom, props.data.allowTo))
 
 const onClose = () => {
   if (mapDelegate.value.selectedAnnotation.value === props.data.annotation) {

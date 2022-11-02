@@ -134,6 +134,9 @@ export function focusMapOnPath(params: {
   const { path, map, insets, inverse } = params
 
   const bbox = new Box2().setFromPoints(path.path.map(t => new Vector2(t.position.x, t.position.y)))
+  bbox
+    .expandByPoint(path.from.scenePosition)
+    .expandByPoint(path.to.scenePosition)
 
 
   const center = inverse(bbox.getCenter(new Vector2()))
@@ -145,8 +148,8 @@ export function focusMapOnPath(params: {
   const fromBbox = (path.from as Annotation).boundingBox.getSize(new Vector2())
   const toBbox = (path.to as Annotation).boundingBox.getSize(new Vector2())
 
-  const addInsetsVertical = Math.max(fromBbox.y, toBbox.y) / 2
-  const addInsetsHorizontal = Math.max(fromBbox.x, toBbox.x) / 2
+  const addInsetsVertical = Math.max(fromBbox.y, toBbox.y) / 2 + 10
+  const addInsetsHorizontal = Math.max(fromBbox.x, toBbox.x) / 2 + 10
 
   const target = regionWithInsets(map, {
     top: (insets.top ?? 0) + addInsetsVertical,
