@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite --port 8080 --host",
     "build": "node prebuild.mjs; vite build",
-    "preview": "vite preview --port 4173  --host",
+    "build-release": "node prebuild.mjs; vite build --mode release",
+    "preview": "vite preview --port 4173 --host",
     "pre-build": "node prebuild.mjs"
   },
   "dependencies": {

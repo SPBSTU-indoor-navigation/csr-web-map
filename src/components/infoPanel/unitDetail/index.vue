@@ -43,7 +43,7 @@ import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
 import DetailVue from './Detail.vue'
 import RouteButtonsVue from './RouteButtons.vue'
 import { FocusVariant, IMapDelegate } from "@/components/map/mapControlls";
-import { computed } from "@vue/reactivity";
+import { computed, markRaw } from "@vue/reactivity";
 import { inject, onMounted, ref, ShallowRef, Ref, toRaw, watchEffect, watch } from "vue";
 import { unitInfoFromAnnotation } from "./data";
 import SectionCellVue from "../shared/SectionCell.vue";
@@ -104,7 +104,7 @@ function onOpenPlan() {
 
 const shareTooltipParams = ref(null) as Ref<{ top: number, left: number }>
 function onShareClick() {
-  navigator.clipboard.writeText(`https://dev.polymap.ru/spbstu?annotation=${props.data.annotation.id}`)
+  navigator.clipboard.writeText(`${import.meta.env.VITE_SHARE_URL}/spbstu/share/annotation?id=${props.data.annotation.id}`)
   const rect = shareIcon.value.getBoundingClientRect()
   shareTooltipParams.value = {
     top: rect.top,

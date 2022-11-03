@@ -2,7 +2,7 @@
   <div class="home">
     <MapVue @mapDelegate="onMapDelegate" />
     <div class="abs-full non-block" @wheel="onScroll">
-      <InfoPanelVue />
+      <InfoPanelVue ref="infoPanel" />
     </div>
   </div>
 </template>
@@ -14,7 +14,8 @@ import { useFullscreenScrollFix } from "@/core/shared/composition/useFullscreenS
 import { provide, ShallowRef, shallowRef, watch, watchEffect } from "vue";
 import { FocusVariant, IMapDelegate } from "@/components/map/mapControlls";
 import { useRoute, useRouter } from "vue-router";
-import { nextFrame } from "@/core/shared/utils";
+
+const infoPanel = shallowRef<InstanceType<typeof InfoPanelVue>>(null);
 
 const route = useRoute()
 const router = useRouter()
@@ -37,23 +38,44 @@ function onScroll(e) {
 };
 
 function onMapDelegate(delegate: IMapDelegate) {
+
+  function annotationById(id: string | string[]) {
+    if (id && typeof id === 'string') {
+      return mapDelegate.value.venue.value.mapAnnotations.get(id)
+    }
+    return null
+  }
+
   mapDelegate.value = delegate
 
-  if (route.query?.annotation) {
-    const annotation = mapDelegate.value.venue.value.annotations.find(a => a.annotationId === route.query.annotation)
-    if (annotation) {
-      nextFrame(() => {
-        nextFrame(() => {
-          mapDelegate.value.selectAnnotation({ annotation: annotation.annotation, focusVariant: FocusVariant.center, animated: route.query.animated ? true : false })
-        })
-      })
+  const variant = route.params.shareVariant
+  if (variant) {
+    if (variant == 'route') {
+      const from = annotationById(route.query.from)
+      const to = annotationById(route.query.to)
+
+      if (from && to) {
+        const asphalt = route.query.asphalt === 'true'
+        const allowService = route.query.serviceRoute === 'true'
+
+        setTimeout(() => {
+          infoPanel.value.setRouteWithOptions({ from, to, asphalt, allowService })
+        }, 500)
+      }
+
+    } else if (variant == 'anotation') {
+      const annotation = annotationById(route.query.id)
+      if (annotation) {
+        setTimeout(() => {
+          mapDelegate.value.selectAnnotation({ annotation, focusVariant: FocusVariant.center, animated: route.query.animated ? true : false })
+        }, 500)
+      }
     }
 
     if (!route.query.b) {
       router.replace({ query: { ...route.query, annotation: undefined } })
     }
   }
-
 }
 
 </script>

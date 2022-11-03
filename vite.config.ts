@@ -11,4 +11,5 @@ export default defineConfig({
       'three': fileURLToPath(new URL('./node_modules/three', import.meta.url))
     },
   },
+  envDir: './env',
 })

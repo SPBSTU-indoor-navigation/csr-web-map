@@ -13,7 +13,7 @@ import SearchVue from './search/index.vue';
 import { IMapDelegate } from '../map/mapControlls';
 import { IAnnotation } from '@/core/map/overlayDrawing/annotations/annotation';
 import { useDefineControlls, IInfoPanelDelegate } from './infoPanelControlls';
-import { computed } from '@vue/reactivity';
+import { computed, toRaw } from '@vue/reactivity';
 
 const initPage = {
   component: SearchVue,
@@ -50,7 +50,7 @@ watch(() => mapDelegate.value.selectedAnnotation.value, (annotation) => {
   if (annotation && lastPage.component != UnitDetailVue) {
     delegate.push({
       component: UnitDetailVue,
-      data: { annotation: markRaw(annotation), allowFrom: allowFrom(), allowTo: allowTo() }
+      data: { annotation: toRaw(markRaw(annotation)), allowFrom: allowFrom(), allowTo: allowTo() }
     });
   } else if (annotation && lastPage.component == UnitDetailVue) {
     lastPage.data = { annotation: markRaw(annotation), allowFrom: allowFrom(), allowTo: allowTo() };
@@ -58,6 +58,37 @@ watch(() => mapDelegate.value.selectedAnnotation.value, (annotation) => {
     delegate.pop();
   }
 });
+
+function setRouteWithOptions(params: {
+  from: IAnnotation,
+  to: IAnnotation,
+  asphalt: boolean,
+  allowService: boolean,
+}) {
+  const pages = delegate.pages();
+
+  const data = {
+    from: markRaw(params.from),
+    to: markRaw(params.to),
+    asphalt: params.asphalt,
+    allowService: params.allowService,
+  }
+
+  let routePage = getRoutePage()
+  if (routePage) {
+    delegate.popTo(pages.indexOf(routePage))
+    routePage.data = { ...routePage.data, ...data }
+  } else {
+    delegate.push({
+      component: RouteDetailVue,
+      data: {
+        ...data,
+        pathFinder: mapDelegate.value.venue.value.pathFinder
+      }
+    })
+  }
+
+}
 
 function setRoute(annotation: IAnnotation, isFrom = false) {
   const pages = delegate.pages();
@@ -103,6 +134,10 @@ function onStateChange(state) {
 useDefineControlls({
   setFrom: a => setRoute(a, true),
   setTo: a => setRoute(a, false),
+})
+
+defineExpose({
+  setRouteWithOptions
 })
 
 </script>

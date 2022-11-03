@@ -5,6 +5,7 @@ import Map from '../views/Map.vue'
 const routes = [
   {
     path: '/:mapID',
+    alias: ['/:mapID/share/:shareVariant'],
     name: 'Map',
     component: Map
   },

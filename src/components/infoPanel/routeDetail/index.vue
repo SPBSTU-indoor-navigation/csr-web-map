@@ -29,11 +29,16 @@
       </div>
 
       <div class="info-panel-section info-panel-section-group">
-        <SectionCellVue title="Поделиться" :clickable="true">
+        <SectionCellVue title="Поделиться" :clickable="true" @click="onShareClick">
           <template #right>
-            <IconVue img="share" class="controll-image" />
+            <div ref="shareIcon">
+              <IconVue img="share" class="controll-image" />
+            </div>
           </template>
         </SectionCellVue>
+
+        <AlertVue text="Скопировано" :pos="{ x: shareTooltipParams?.left, y: shareTooltipParams?.top }"
+          :show="shareTooltipParams != null" />
       </div>
     </template>
   </BottomSheetPageVue>
@@ -43,6 +48,7 @@
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
 import IconVue from "@/components/icon/index.vue";
 import HeaderVue from "./Header.vue";
+import AlertVue from "@/components/shared/alert/index.vue";
 
 import { usePageStore, useStorageComptuted } from "@/components/bottomSheet/usePageStore";
 import { IMapDelegate } from "@/components/map/mapControlls";
@@ -65,7 +71,9 @@ const props = defineProps<{
   page: number
   data: {
     from: IAnnotation,
-    to: IAnnotation
+    to: IAnnotation,
+    allowService?: boolean,
+    asphalt?: boolean,
     pathFinder: PathFinder,
   }
 }>()
@@ -73,6 +81,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'pop'): void
 }>()
+
+const shareIcon = ref(null) as Ref<HTMLElement>
 
 const { currentRouteId, lastAnnotations, lastPath } = usePageStore(`route_${props.page}`, () => ({
   currentRouteId: ref<string>(null),
@@ -83,8 +93,13 @@ const { currentRouteId, lastAnnotations, lastPath } = usePageStore(`route_${prop
 const prefereAsphalt = useStorage('prefereAsphalt', false, localStorage)
 const allowService = useStorage('allowService', true, localStorage)
 
-const fromUnitInfo = computed(() => unitInfoFromAnnotation(props.data.from))
-const toUnitInfo = computed(() => unitInfoFromAnnotation(props.data.to))
+
+if (props.data.allowService != undefined) allowService.value = props.data.allowService
+if (props.data.asphalt != undefined) prefereAsphalt.value = props.data.asphalt
+
+
+const fromUnitInfo = computed(() => unitInfoFromAnnotation(props.data.from, false, false))
+const toUnitInfo = computed(() => unitInfoFromAnnotation(props.data.to, false, false))
 const mapDelegate = inject<ShallowRef<IMapDelegate>>('mapDelegate')
 
 const headerOpacity = ref(1)
@@ -162,6 +177,29 @@ watch(pathResult, (result, old) => {
     createPath(result)
   }
 }, { immediate: true })
+
+
+
+const shareTooltipParams = ref(null) as Ref<{ top: number, left: number }>
+function onShareClick() {
+  const path = pathResult.value
+
+  let url = `${import.meta.env.VITE_SHARE_URL}/spbstu/share/route?from=${path.from.id}&to=${path.to.id}`
+  if (prefereAsphalt.value) url += '&asphalt=true'
+  if (allowService.value) url += '&serviceRoute=true'
+
+  navigator.clipboard.writeText(url)
+
+  const rect = shareIcon.value.getBoundingClientRect()
+  shareTooltipParams.value = {
+    top: rect.top,
+    left: rect.left + rect.width / 2
+  }
+
+  setTimeout(() => {
+    shareTooltipParams.value = null
+  }, 1000)
+}
 
 </script>
 

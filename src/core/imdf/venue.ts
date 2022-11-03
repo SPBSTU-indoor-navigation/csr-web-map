@@ -30,6 +30,7 @@ export default class Venue {
   enviromentAmenity: AmenityAnnotation[] = []
 
   annotations: IAnnotationInfo[] = []
+  mapAnnotations: Map<string, IAnnotation> = new Map()
   pathFinder: PathFinder
   navpathBegin: IAnnotation
 
@@ -132,6 +133,8 @@ export default class Venue {
       new Map(this.buildings.map(t => [t.data.id, t])),
       new Map(this.buildings.flatMap(t => t.levels).map(t => [t.data.id, t])),
       this.annotations.map(t => t.annotation))
+
+    this.mapAnnotations = new Map(this.annotations.map(t => [t.annotationId, t.annotation]))
   }
 
   Add(map: IMap) {
