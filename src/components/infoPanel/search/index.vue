@@ -44,7 +44,7 @@ function onFocus() {
 function onSelectAnnotation(info: IAnnotationInfo) {
   console.log(info);
 
-  mapDelegate.value.selectAnnotation(info.annotation, FocusVariant.center)
+  mapDelegate.value.selectAnnotation({ annotation: info.annotation, focusVariant: FocusVariant.center })
 }
 </script>
 

@@ -176,7 +176,8 @@ async function load() {
     selectedAnnotation: mapAnnotations.selected,
     pinnedAnnotations: mapAnnotations.pinned,
     venue,
-    selectAnnotation: (a, focusVariant, insets) => {
+    selectAnnotation: (params) => {
+      const { annotation: a, focusVariant, insets, animated } = params
 
       if (focusVariant != FocusVariant.none) {
         if (annotationIsIndoor(a)) {
@@ -186,9 +187,8 @@ async function load() {
       }
 
       if (focusVariant != FocusVariant.none) {
-        // const annotationOnScreen 
         focusMapOnAnnotation({
-          annotation: a, map: mkMap.value, insets: insets ?? selectAnnotationInsets.value, inverse,
+          annotation: a, map: mkMap.value, insets: insets ?? selectAnnotationInsets.value, inverse, animated: animated ?? true,
           onEnd: () => {
             mapAnnotations.preventDeselect.value = false
           }

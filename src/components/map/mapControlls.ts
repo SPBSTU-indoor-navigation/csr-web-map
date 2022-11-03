@@ -37,7 +37,7 @@ export interface IMapDelegate {
   pinnedAnnotations: ShallowRef<IAnnotation[]>;
   venue: ShallowRef<Venue | null>;
 
-  selectAnnotation?(annotation: IAnnotation, focusVariant: FocusVariant, insets?: Insets): void;
+  selectAnnotation?(params: { annotation: IAnnotation, focusVariant: FocusVariant, insets?: Insets, animated?: boolean }): void;
   deselectAnnotation?(annotation: IAnnotation): void;
 
   addPath?: (path: PathResult) => string;
@@ -228,10 +228,11 @@ export function focusMapOnAnnotation(params: {
   annotation: IAnnotation,
   map: mapkit.Map & { cameraDistance: number },
   insets: Insets,
+  animated: boolean
   inverse: (pos: Vector2) => mapkit.Coordinate,
   onEnd?: () => void
 }): void {
-  const { annotation, map, insets, inverse, onEnd } = params;
+  const { annotation, map, insets, animated, inverse, onEnd } = params;
 
   let targetZoom = map.cameraDistance
   if (annotation instanceof OccupantAnnotation) {
@@ -262,9 +263,13 @@ export function focusMapOnAnnotation(params: {
 
   applyCamera(map, targetMap)
   targetMap.center = insetsMapCenter(map, insets)
-  applyCamera(map, lastMap)
 
-  applyCamera(map, targetMap, true, onEnd)
+  if (animated) {
+    applyCamera(map, lastMap)
+    applyCamera(map, targetMap, true, onEnd)
+  } else {
+    applyCamera(map, targetMap, false, onEnd)
+  }
 }
 
 function insetsMapCenter(map: mapkit.Map, insets: Insets): mapkit.Coordinate {
