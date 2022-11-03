@@ -21,7 +21,7 @@
           :show="shareTooltipParams != null" />
       </div>
 
-      <div class="info-panel-section info-panel-section-group">
+      <div class="info-panel-section info-panel-section-group" v-if="false">
         <SectionCellVue title="Добавить в Закладки" :clickable="true">
           <template #left>
             <IconVue img="star.fill" class="controll-image" />
