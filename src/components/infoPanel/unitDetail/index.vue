@@ -104,7 +104,7 @@ function onOpenPlan() {
 
 const shareTooltipParams = ref(null) as Ref<{ top: number, left: number }>
 function onShareClick() {
-  navigator.clipboard.writeText(`https://polymap.ru/spbstu?annotation=${props.data.annotation.id}`)
+  navigator.clipboard.writeText(`https://dev.polymap.ru/spbstu?annotation=${props.data.annotation.id}`)
   const rect = shareIcon.value.getBoundingClientRect()
   shareTooltipParams.value = {
     top: rect.top,

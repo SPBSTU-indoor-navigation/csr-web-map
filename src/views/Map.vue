@@ -44,11 +44,14 @@ function onMapDelegate(delegate: IMapDelegate) {
     if (annotation) {
       nextFrame(() => {
         nextFrame(() => {
-          mapDelegate.value.selectAnnotation({ annotation: annotation.annotation, focusVariant: FocusVariant.center, animated: false })
+          mapDelegate.value.selectAnnotation({ annotation: annotation.annotation, focusVariant: FocusVariant.center, animated: route.query.animated ? true : false })
         })
       })
     }
-    router.replace({ query: { ...route.query, annotation: undefined } })
+
+    if (!route.query.b) {
+      router.replace({ query: { ...route.query, annotation: undefined } })
+    }
   }
 
 }
