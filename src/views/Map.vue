@@ -73,7 +73,10 @@ function onMapDelegate(delegate: IMapDelegate) {
     }
 
     if (!route.query.b) {
-      router.replace({ query: { ...route.query, annotation: undefined } })
+      router.replace({
+        query: { ...route.query, annotation: undefined, from: undefined, to: undefined, asphalt: undefined, serviceRoute: undefined },
+        params: { ...route.params, shareVariant: undefined }
+      })
     }
   }
 }
