@@ -18,9 +18,6 @@ const tooltip = ref(null) as Ref<HTMLElement>
 const { width } = useElementBounding(tooltip)
 
 const tooltipStyle = computed(() => {
-
-  console.log('width', width.value);
-
   return {
     left: props.pos.x - width.value / 2 + 'px',
     top: props.pos.y - 40 + 'px'

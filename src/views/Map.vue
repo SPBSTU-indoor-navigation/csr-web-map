@@ -63,7 +63,7 @@ function onMapDelegate(delegate: IMapDelegate) {
         }, 500)
       }
 
-    } else if (variant == 'anotation') {
+    } else if (variant == 'annotation') {
       const annotation = annotationById(route.query.id)
       if (annotation) {
         setTimeout(() => {
@@ -74,7 +74,7 @@ function onMapDelegate(delegate: IMapDelegate) {
 
     if (!route.query.b) {
       router.replace({
-        query: { ...route.query, annotation: undefined, from: undefined, to: undefined, asphalt: undefined, serviceRoute: undefined },
+        query: { ...route.query, id: undefined, from: undefined, to: undefined, asphalt: undefined, serviceRoute: undefined },
         params: { ...route.params, shareVariant: undefined }
       })
     }
