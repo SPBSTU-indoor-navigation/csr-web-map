@@ -41,7 +41,7 @@ function onMapDelegate(delegate: IMapDelegate) {
 
   function annotationById(id: string | string[]) {
     if (id && typeof id === 'string') {
-      return mapDelegate.value.venue.value.mapAnnotations.get(id)
+      return mapDelegate.value.venue.value.mapAnnotations.get(id.toLowerCase())
     }
     return null
   }
