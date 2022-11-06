@@ -2,13 +2,13 @@
   <div class="relative">
     <div class="lines">
       <div class="from">
-        <span class="secondary-label line-from">From:
+        <span class="secondary-label line-from" @click="onClickFrom">От:
           <span class="label">{{ from.title }}</span>
         </span>
       </div>
       <hr class="separator small" />
       <div class="to">
-        <span class="secondary-label line-to">To:
+        <span class="secondary-label line-to" @click="onClickTo">К:
           <span class="label">{{ to.title }}</span>
         </span>
       </div>
@@ -40,6 +40,14 @@ const rot = ref(false)
 function onClick() {
   rot.value = !rot.value
   emit('swap')
+}
+
+function onClickTo() {
+  onClickFrom()
+}
+
+function onClickFrom() {
+  alert("Для изменения точек назначения, выберите аннотацию на карте")
 }
 
 </script>
