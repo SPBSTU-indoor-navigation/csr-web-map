@@ -41,5 +41,5 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          source: 'dist/**'
-          target: '/home/${{ secrets.USERNAME }}/web/polymap/dev/front/dist-umap'
+          source: 'dist/*'
+          target: '/home/${{ secrets.USERNAME }}/web/polymap/dev/front-umap'
