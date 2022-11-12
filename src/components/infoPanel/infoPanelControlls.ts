@@ -1,7 +1,7 @@
 import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
 import { bottomSheet, phoneWidth } from "@/styles/variables";
 import { useMediaQuery } from "@vueuse/core";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 let setFrom: (info: IAnnotation) => void;
 let setTo: (info: IAnnotation) => void;
@@ -31,8 +31,11 @@ export function useDefineControlls(params: {
 export const isPhoneLayout = useMediaQuery(`(max-width: ${phoneWidth}px)`)
 export const isLargeDesktopLayout = useMediaQuery(`(min-width: 1200px)`)
 
+export let skipOffset = ref(false)
+
 export const selectAnnotationInsets = computed(() => {
   const insets = { top: 10, left: 10, bottom: 10, right: 10 }
+  if (skipOffset.value) return insets
   if (isPhoneLayout.value) {
     insets.bottom = bottomSheet.vertical.middleOffset
   } else {

@@ -2,8 +2,12 @@
   <div class="home">
     <MapVue @mapDelegate="onMapDelegate" />
     <div class="abs-full non-block" @wheel="onScroll">
-      <InfoPanelVue ref="infoPanel" />
+      <InfoPanelVue ref="infoPanel" :style="{ display: showUI ? '' : 'none' }" />
     </div>
+
+    <Transition name="loading">
+      <div class="loading abs-full" v-if="loading"></div>
+    </Transition>
   </div>
 </template>
 
@@ -11,14 +15,18 @@
 import MapVue from "../components/map/MapThreeJS.vue";
 import InfoPanelVue from "@/components/infoPanel/index.vue";
 import { useFullscreenScrollFix } from "@/core/shared/composition/useFullscreenScrollFix";
-import { provide, ShallowRef, shallowRef, watch, watchEffect } from "vue";
+import { provide, ref, ShallowRef, shallowRef, watch, watchEffect } from "vue";
 import { FocusVariant, IMapDelegate } from "@/components/map/mapControlls";
 import { useRoute, useRouter } from "vue-router";
+import { skipOffset } from "@/components/infoPanel/infoPanelControlls";
 
 const infoPanel = shallowRef<InstanceType<typeof InfoPanelVue>>(null);
+const loading = ref(true)
 
 const route = useRoute()
 const router = useRouter()
+
+const showUI = ref(true)
 
 // @ts-ignore
 const mapDelegate: ShallowRef<IMapDelegate> = shallowRef({
@@ -48,7 +56,11 @@ function onMapDelegate(delegate: IMapDelegate) {
 
   mapDelegate.value = delegate
 
+  showUI.value = !route.query.hideui
+  skipOffset.value = !showUI.value
+
   const variant = route.params.shareVariant
+
   if (variant) {
     if (variant == 'route') {
       const from = annotationById(route.query.from)
@@ -60,7 +72,7 @@ function onMapDelegate(delegate: IMapDelegate) {
 
         setTimeout(() => {
           infoPanel.value.setRouteWithOptions({ from, to, asphalt, allowService })
-        }, 500)
+        }, 500) // задержка чтоб аннотации успели инициализироваться, если сразу зумиться картинок нет
       }
 
     } else if (variant == 'annotation') {
@@ -79,6 +91,10 @@ function onMapDelegate(delegate: IMapDelegate) {
       })
     }
   }
+
+  setTimeout(() => {
+    loading.value = false
+  }, 100)
 }
 
 </script>
@@ -87,5 +103,21 @@ function onMapDelegate(delegate: IMapDelegate) {
 .abs-full {
   /* 
   background-color: #343434; */
+}
+
+.loading {
+  background-color: #f7f3ea;
+}
+</style>
+
+<style>
+.loading-enter-active,
+.loading-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.loading-enter-from,
+.loading-leave-to {
+  opacity: 0;
 }
 </style>
