@@ -145,8 +145,8 @@ function onMapDelegate(delegate: IMapDelegate) {
   cursor: pointer;
   filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.237));
 
-  top: 10px;
-  left: 10px;
+  top: 4px;
+  left: 4px;
   padding: 5px;
 
   img {
