@@ -5,9 +5,14 @@
       <InfoPanelVue ref="infoPanel" :style="{ display: showUI ? '' : 'none' }" />
     </div>
 
+    <div class="watermark" v-if="!showUI" @click="onClickWatermark">
+      <img src="@/assets/umap-watermark.png">
+    </div>
     <Transition name="loading">
-      <div class="loading abs-full" v-if="loading"></div>
+      <div class="loading abs-full" v-if="loading">
+      </div>
     </Transition>
+
   </div>
 </template>
 
@@ -34,6 +39,10 @@ const mapDelegate: ShallowRef<IMapDelegate> = shallowRef({
   pinnedAnnotations: shallowRef([]),
   venue: shallowRef(null),
 })
+
+function onClickWatermark() {
+  window.open(`${import.meta.env.VITE_BASE_URL}/${route.params.mapID}`, '_blank').focus();
+}
 
 provide('mapDelegate', mapDelegate)
 useFullscreenScrollFix()
@@ -103,7 +112,7 @@ function onMapDelegate(delegate: IMapDelegate) {
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .abs-full {
   /* 
   background-color: #343434; */
@@ -112,9 +121,22 @@ function onMapDelegate(delegate: IMapDelegate) {
 .loading {
   background-color: #f7f3ea;
 }
-</style>
 
-<style>
+.watermark {
+  position: absolute;
+  cursor: pointer;
+  filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.237));
+
+  top: 10px;
+  left: 10px;
+  padding: 5px;
+
+  img {
+    width: 100px;
+  }
+}
+
+
 .loading-enter-active,
 .loading-leave-active {
   transition: opacity 0.2s ease;
@@ -125,3 +147,4 @@ function onMapDelegate(delegate: IMapDelegate) {
   opacity: 0;
 }
 </style>
+

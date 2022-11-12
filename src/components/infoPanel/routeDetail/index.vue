@@ -65,6 +65,7 @@ import { distanceFormatter } from "@/core/formatter/distance";
 import { timeFormatter } from "@/core/formatter/time";
 import { useStorage } from "@vueuse/core";
 import { Tag } from "@/core/imdf/navPath";
+import { useRoute } from "vue-router";
 
 const props = defineProps<{
   delegate: IInfoPanelDelegate,
@@ -184,7 +185,9 @@ const shareTooltipParams = ref(null) as Ref<{ top: number, left: number }>
 function onShareClick() {
   const path = pathResult.value
 
-  let url = `${import.meta.env.VITE_SHARE_URL}/spbstu/share/route?from=${path.from.id}&to=${path.to.id}`
+  const route = useRoute()
+
+  let url = `${import.meta.env.VITE_SHARE_URL}/${route.params.mapID}/share/route?from=${path.from.id}&to=${path.to.id}`
   if (prefereAsphalt.value) url += '&asphalt=true'
   if (allowService.value) url += '&serviceRoute=true'
 

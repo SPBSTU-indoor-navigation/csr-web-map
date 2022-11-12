@@ -51,6 +51,7 @@ import IconVue from "@/components/icon/index.vue";
 import AlertVue from "@/components/shared/alert/index.vue";
 import { useInfoPanel } from "../infoPanelControlls";
 import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
+import { useRoute } from "vue-router";
 
 const props = defineProps<{ data: { annotation: IAnnotation, allowFrom: boolean, allowTo: boolean }, delegate: any }>()
 const emit = defineEmits(['pop', 'push'])
@@ -104,7 +105,8 @@ function onOpenPlan() {
 
 const shareTooltipParams = ref(null) as Ref<{ top: number, left: number }>
 function onShareClick() {
-  navigator.clipboard.writeText(`${import.meta.env.VITE_SHARE_URL}/spbstu/share/annotation?id=${props.data.annotation.id}`)
+  const route = useRoute()
+  navigator.clipboard.writeText(`${import.meta.env.VITE_SHARE_URL}/${route.params.mapID}/share/annotation?id=${props.data.annotation.id}`)
   const rect = shareIcon.value.getBoundingClientRect()
   shareTooltipParams.value = {
     top: rect.top,
