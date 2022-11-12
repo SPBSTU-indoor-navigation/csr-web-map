@@ -1,5 +1,5 @@
 import { Vector2, Box2 } from 'three';
-import { Ref, shallowRef, watch, watchEffect } from 'vue';
+import { ref, Ref, shallowRef, watch, watchEffect } from 'vue';
 import { IAnnotation, Shape2D } from './annotation';
 import { renderAnnotationCount, showAnnotationBBox } from '@/store/debugParams';
 import { groupBy } from '../../../shared/utils';
@@ -15,6 +15,7 @@ export default function useMapAnnotations(options: {
   const mapZoom = options.mapZoom;
   const selected = shallowRef<IAnnotation | null>(null)
   const pinned = shallowRef<IAnnotation[]>([])
+  const preventSelection = ref(false);
 
   const preventDeselect = shallowRef(false)
 
@@ -120,6 +121,8 @@ export default function useMapAnnotations(options: {
   function click(pos: Vector2, e: PointerEvent) {
     let isSelect = false
 
+    if (preventSelection.value) return
+
     const isTouch = e.pointerType === 'touch'
     let touchDistance = Number.MAX_VALUE;
     let touchAnnotation = null;
@@ -186,7 +189,8 @@ export default function useMapAnnotations(options: {
     remove: removeAnotation,
     selected,
     pinned,
-    preventDeselect
+    preventDeselect,
+    preventSelection
   }
 
 }

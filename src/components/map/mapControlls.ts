@@ -7,7 +7,7 @@ import { Annotation, annotationIsIndoor, IAnnotation, Shape2D } from "@/core/map
 import { PathNode, PathResult } from "@/core/pathFinder";
 import { Easing } from "@tweenjs/tween.js";
 import { Box2, Object3D, Vector2, Vector3 } from "three";
-import { ShallowRef } from "vue";
+import { Ref, ShallowRef } from "vue";
 import { AmenityAnnotation } from "./annotations/renders/amenity";
 import { AttractionAnnotation } from "./annotations/renders/attraction";
 import { OccupantAnnotation } from "./annotations/renders/occupant";
@@ -35,6 +35,7 @@ export interface IMap {
 export interface IMapDelegate {
   selectedAnnotation: ShallowRef<IAnnotation | null>;
   pinnedAnnotations: ShallowRef<IAnnotation[]>;
+  preventSelection: Ref<boolean>;
   venue: ShallowRef<Venue | null>;
 
   selectAnnotation?(params: { annotation: IAnnotation, focusVariant: FocusVariant, insets?: Insets, animated?: boolean }): void;

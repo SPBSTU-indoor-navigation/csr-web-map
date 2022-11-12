@@ -83,6 +83,9 @@ function onMapDelegate(delegate: IMapDelegate) {
   showUI.value = !route.query.hideui
   skipOffset.value = !showUI.value
 
+
+  delegate.preventSelection.value = !!route.query.preventselection
+
   const variant = route.params.shareVariant
 
   let delay = 100

@@ -176,6 +176,7 @@ async function load() {
     selectedAnnotation: mapAnnotations.selected,
     pinnedAnnotations: mapAnnotations.pinned,
     venue,
+    preventSelection: mapAnnotations.preventSelection,
     selectAnnotation: (params) => {
       const { annotation: a, focusVariant, insets, animated } = params
 
