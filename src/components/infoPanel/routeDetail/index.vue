@@ -180,12 +180,11 @@ watch(pathResult, (result, old) => {
 }, { immediate: true })
 
 
+const route = useRoute()
 
 const shareTooltipParams = ref(null) as Ref<{ top: number, left: number }>
 function onShareClick() {
   const path = pathResult.value
-
-  const route = useRoute()
 
   let url = `${import.meta.env.VITE_SHARE_URL}/${route.params.mapID}/share/route?from=${path.from.id}&to=${path.to.id}`
   if (prefereAsphalt.value) url += '&asphalt=true'

@@ -102,10 +102,9 @@ function onOpenPlan() {
   }
 }
 
-
+const route = useRoute()
 const shareTooltipParams = ref(null) as Ref<{ top: number, left: number }>
 function onShareClick() {
-  const route = useRoute()
   navigator.clipboard.writeText(`${import.meta.env.VITE_SHARE_URL}/${route.params.mapID}/share/annotation?id=${props.data.annotation.id}`)
   const rect = shareIcon.value.getBoundingClientRect()
   shareTooltipParams.value = {
