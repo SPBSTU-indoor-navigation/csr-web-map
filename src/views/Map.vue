@@ -60,7 +60,7 @@ function onMapDelegate(delegate: IMapDelegate) {
 
         setTimeout(() => {
           infoPanel.value.setRouteWithOptions({ from, to, asphalt, allowService })
-        }, 500)
+        }, 500) // задержка чтоб аннотации успели инициализироваться, если сразу зумиться картинок нет
       }
 
     } else if (variant == 'annotation') {
@@ -68,7 +68,7 @@ function onMapDelegate(delegate: IMapDelegate) {
       if (annotation) {
         setTimeout(() => {
           mapDelegate.value.selectAnnotation({ annotation, focusVariant: FocusVariant.center, animated: route.query.animated ? true : false })
-        }, 500)
+        }, 500) // задержка чтоб аннотации успели инициализироваться, если сразу зумиться картинок нет
       }
     }
 
