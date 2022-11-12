@@ -44,7 +44,8 @@ export default function useMapAnnotations(options: {
   function removeAnotation(annotation: IAnnotation | IAnnotation[]) {
     const toRemove = new Set((Array.isArray(annotation) ? annotation : [annotation]).map(t => t.id))
 
-    if (!preventDeselect.value && toRemove.has(selected.value?.id)) {
+
+    if (!preventDeselect.value && !preventSelection.value && toRemove.has(selected.value?.id)) {
       selected.value.setSelected(false, false)
       selected.value = null
     }
