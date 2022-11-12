@@ -61,6 +61,8 @@ function onMapDelegate(delegate: IMapDelegate) {
 
   const variant = route.params.shareVariant
 
+  let delay = 100
+
   if (variant) {
     if (variant == 'route') {
       const from = annotationById(route.query.from)
@@ -69,6 +71,7 @@ function onMapDelegate(delegate: IMapDelegate) {
       if (from && to) {
         const asphalt = route.query.asphalt === 'true'
         const allowService = route.query.serviceRoute === 'true'
+        delay = 700
 
         setTimeout(() => {
           infoPanel.value.setRouteWithOptions({ from, to, asphalt, allowService })
@@ -78,6 +81,7 @@ function onMapDelegate(delegate: IMapDelegate) {
     } else if (variant == 'annotation') {
       const annotation = annotationById(route.query.id)
       if (annotation) {
+        delay = 700
         setTimeout(() => {
           mapDelegate.value.selectAnnotation({ annotation, focusVariant: FocusVariant.center, animated: route.query.animated ? true : false })
         }, 500)
@@ -94,7 +98,7 @@ function onMapDelegate(delegate: IMapDelegate) {
 
   setTimeout(() => {
     loading.value = false
-  }, 100)
+  }, delay)
 }
 
 </script>
