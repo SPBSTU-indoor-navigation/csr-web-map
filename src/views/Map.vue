@@ -41,7 +41,22 @@ const mapDelegate: ShallowRef<IMapDelegate> = shallowRef({
 })
 
 function onClickWatermark() {
-  window.open(`${import.meta.env.VITE_BASE_URL}/${route.params.mapID}`, '_blank').focus();
+  let url = `${import.meta.env.VITE_BASE_URL}/${route.params.mapID}`
+
+  const variant = route.params.shareVariant
+
+  if (variant) {
+    url += `/share/${variant}?`
+    if (variant == 'route') {
+      url += `from=${route.query.from}&to=${route.query.to}`
+      if (route.query.asphalt === 'true') url += `&asphalt=${route.query.asphalt}`
+      if (route.query.serviceRoute === 'true') url += `&serviceRoute=${route.query.serviceRoute}`
+    } else if (variant == 'annotation') {
+      url += `id=${route.query.id}`
+    }
+  }
+
+  window.open(url, '_blank').focus();
 }
 
 provide('mapDelegate', mapDelegate)
