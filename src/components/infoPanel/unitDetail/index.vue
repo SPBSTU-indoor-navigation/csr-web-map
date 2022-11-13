@@ -17,6 +17,16 @@
           </template>
         </SectionCellVue>
 
+        <hr class="separator separator-left small" />
+
+        <SectionCellVue title="Создать приглашение" :clickable="true" @click="onOpenClick">
+          <template #right>
+            <div ref="shareIcon">
+              <IconVue img="mail" class="controll-image" />
+            </div>
+          </template>
+        </SectionCellVue>
+
         <AlertVue text="Скопировано" :pos="{ x: shareTooltipParams?.left, y: shareTooltipParams?.top }"
           :show="shareTooltipParams != null" />
       </div>
@@ -117,6 +127,10 @@ function onShareClick() {
   }, 1000)
 }
 
+function onOpenClick() {
+  const url = `https://inv.umap.space/panel/index.html?link=${import.meta.env.VITE_SHARE_URL}/${route.params.mapID}/share/annotation?id=${props.data.annotation.id}`
+  window.open(url, '_blank')
+}
 </script>
 
 <style lang="scss" scoped>
