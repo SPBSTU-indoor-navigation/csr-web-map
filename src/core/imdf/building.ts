@@ -46,7 +46,7 @@ export default class Building {
       return acc
     }, {})
 
-    this.currentOrdinal = Math.min(...levels.map(t => t.ordinal))
+    this.currentOrdinal = levels.map(t => t.ordinal).reduce((prev, curr) => (Math.abs(curr - 0) < Math.abs(prev - 0) ? curr : prev))
 
 
 
@@ -90,7 +90,7 @@ export default class Building {
 
   Add(map: IMap) {
     this.map = map
-    setTimeout(() => map.addAnnotation(this.attractions), 0)
+    setTimeout(() => { if (!this.showLevel) map.addAnnotation(this.attractions) }, 0)
   }
 
   Remove(map: IMap) {

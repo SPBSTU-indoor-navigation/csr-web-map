@@ -296,7 +296,7 @@ export class OccupantAnnotation extends AnimatedAnnotation<DetailLevel, DetailLe
     const isAnim = this.isSelected || this.isPinned || this.selectAnimation.isPlaying || this.deSelectAnimation.isPlaying || this.changeStateAnimator?.isPlaying
     drawMiniPoint(ctx)
 
-    if (isAnim) {
+    if (isAnim || true) {
       drawPoint(ctx)
     } else {
       AnnotationBakery.instance.bakeAndRender({

@@ -71,7 +71,7 @@ export default class Venue {
       })
     })
 
-    console.log('archive', archive);
+    // console.log('archive', archive);
 
     const annotations = []
     this.buildings = archive.building.map(building => {
@@ -124,7 +124,7 @@ export default class Venue {
     annotations.push(...this.enviromentAmenity)
 
     this.annotations = annotations.map(convert)
-    console.log('annotations', this.annotations);
+    // console.log('annotations', this.annotations);
 
     this.navpathBegin = annotations.find(t => t.id == this.data[0].properties.navpath_begin_id)
 

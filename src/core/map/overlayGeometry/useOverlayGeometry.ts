@@ -69,7 +69,7 @@ export default function useOverlayGeometry(options: {
     mkMap.setCameraBoundaryAnimated(mkMap.region)
 
     //@ts-ignore
-    mkMap.cameraZoomRange = new mapkit.CameraZoomRange(0, 3000)
+    mkMap.cameraZoomRange = new mapkit.CameraZoomRange(0, 500)
   })
 
   // StyleSheet

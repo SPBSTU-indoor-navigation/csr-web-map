@@ -52,7 +52,7 @@ export default {
     })
     useUtils(m)
     this.map = m
-    console.log(m)
+    // console.log(m)
     this.$emit('map-ready', this.map)
   },
 }

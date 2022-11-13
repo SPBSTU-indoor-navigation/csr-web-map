@@ -78,7 +78,7 @@ onMounted(() => {
 })
 
 watchEffect(() => {
-  console.log('unitInfo', toRaw(unitInfo.value));
+  // console.log('unitInfo', toRaw(unitInfo.value));
 })
 
 function onSetTo() {

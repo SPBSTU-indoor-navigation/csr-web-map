@@ -218,7 +218,7 @@ export function focusMapOnPath(params: {
   const targetMap: CameraParams = {
     center: map.center,
     rotation: map.rotation,
-    cameraDistance: map.cameraDistance
+    cameraDistance: Math.max(80, map.cameraDistance)
   }
 
   applyCamera(map, lastMap)

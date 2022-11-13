@@ -19,12 +19,12 @@ export function useFullscreenViewport() {
       if (keyboardIsOpen && val.h == height.value) {
         keyboardIsOpen = false
         viewport.value.setAttribute("content", `width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no`)
-        console.log("FIX ON KEYBOARD CLOSE");
+        // console.log("FIX ON KEYBOARD CLOSE");
         return;
       } else if (!keyboardIsOpen && val.h < height.value) {
         keyboardIsOpen = true
         viewport.value.setAttribute("content", `width=device-width, height=${height.value}, initial-scale=1.0, maximum-scale=1.0, user-scalable=no`)
-        console.log("FIX ON KEYBOARD OPEN");
+        // console.log("FIX ON KEYBOARD OPEN");
         return;
       }
     }
@@ -33,7 +33,7 @@ export function useFullscreenViewport() {
     if (keyboardIsOpen) {
       keyboardIsOpen = false
       viewport.value.setAttribute("content", `width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no`)
-      console.log("FIX MISS KEYBOARD OPEN");
+      // console.log("FIX MISS KEYBOARD OPEN");
     }
 
     height.value = val.h

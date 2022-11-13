@@ -127,7 +127,7 @@ function getRoutePage() {
 }
 
 function onStateChange(state) {
-  console.log('onStateChange', state);
+  // console.log('onStateChange', state);
 }
 
 
