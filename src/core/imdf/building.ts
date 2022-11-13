@@ -46,7 +46,7 @@ export default class Building {
       return acc
     }, {})
 
-    this.currentOrdinal = levels.map(t => t.ordinal).reduce((prev, curr) => (Math.abs(curr - 0) < Math.abs(prev - 0) ? curr : prev))
+    this.currentOrdinal = levels.length == 0 ? 0 : levels.map(t => t.ordinal).reduce((prev, curr) => (Math.abs(curr - 0) < Math.abs(prev - 0) ? curr : prev))
 
 
 
