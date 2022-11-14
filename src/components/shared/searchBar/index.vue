@@ -47,6 +47,9 @@ watchEffect(() => {
 
 function focusInput() {
   input.value.focus()
+  input.value.click();
+  console.log('shoud focus', input.value);
+
 }
 
 defineExpose({

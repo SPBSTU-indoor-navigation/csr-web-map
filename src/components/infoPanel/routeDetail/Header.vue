@@ -23,7 +23,7 @@
       <div class="search-container">
 
         <SearchBarVue :show-icon="false" ref="search" :search-text="searchText"
-          @update:search-text="e => emit('update:searchText', e)" @focus="onFocus" />
+          @update:search-text="e => emit('update:searchText', e)" @focus="onFocus" :focus-delay="10" />
         <button @click="emit('update:showSearch', '')">Отменить</button>
       </div>
     </div>
@@ -57,9 +57,9 @@ const emit = defineEmits<{
 
 watch(() => props.showSearch, (v) => {
   if (v) {
-    nextFrame(() => {
+    setTimeout(() => {
       search.value.focusInput()
-    })
+    }, 100)
   }
 
 })
