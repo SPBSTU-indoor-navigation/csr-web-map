@@ -2,54 +2,60 @@
   <BottomSheetPageVue @close="onClose" @contentOpacity="onContentOpacity">
     <template #header>
       <h1>Маршрут</h1>
-      <HeaderVue :from="fromUnitInfo" :to="toUnitInfo" @swap="onSwapFromTo" :style="{ opacity: headerOpacity }" />
-      <p class="secondary-label select-annotation-suggestion">Для изменения точек назначения, выберите аннотацию на
-        карте</p>
+      <HeaderVue :from="fromUnitInfo" :to="toUnitInfo" @swap="onSwapFromTo" :style="{ opacity: headerOpacity }"
+        :showSearch="showSearch" @update:showSearch="e => showSearch = e" :searchText="searchText"
+        @update:searchText="e => searchText = e" />
     </template>
 
     <template #content>
-      <DetailInfoVue title="Информация о маршруте" :lines="pathDetailInfo" class="route-detail-info" />
+      <div v-if="!showSearch">
+        <DetailInfoVue title="Информация о маршруте" :lines="pathDetailInfo" class="route-detail-info" />
 
-      <div class="info-panel-section-group">
-        <h2 class="info-panel-section-title">Параметры</h2>
-        <div class="info-panel-section">
-          <SectionCellVue title="По асфальтированным дорогам" :clickable="true"
-            @click="prefereAsphalt = !prefereAsphalt">
+        <div class="info-panel-section-group">
+          <h2 class="info-panel-section-title">Параметры</h2>
+          <div class="info-panel-section">
+            <SectionCellVue title="По асфальтированным дорогам" :clickable="true"
+              @click="prefereAsphalt = !prefereAsphalt">
+              <template #right>
+                <input type="checkbox" v-model="prefereAsphalt" class="controll-checkbox">
+              </template>
+            </SectionCellVue>
+            <hr class="separator small" />
+            <SectionCellVue title="Разрешить служебные проходы" :clickable="true" @click="allowService = !allowService">
+              <template #right>
+                <input type="checkbox" v-model="allowService" class="controll-checkbox">
+              </template>
+            </SectionCellVue>
+          </div>
+        </div>
+
+        <div class="info-panel-section info-panel-section-group">
+          <SectionCellVue title="Поделиться" :clickable="true" @click="onShareClick">
             <template #right>
-              <input type="checkbox" v-model="prefereAsphalt" class="controll-checkbox">
+              <div ref="shareIcon">
+                <IconVue img="share" class="controll-image" />
+              </div>
             </template>
           </SectionCellVue>
-          <hr class="separator small" />
-          <SectionCellVue title="Разрешить служебные проходы" :clickable="true" @click="allowService = !allowService">
+
+          <hr class="separator separator-left small" />
+
+          <SectionCellVue title="Создать приглашение" :clickable="true" @click="onOpenClick">
             <template #right>
-              <input type="checkbox" v-model="allowService" class="controll-checkbox">
+              <div ref="shareIcon">
+                <IconVue img="mail" class="controll-image" />
+              </div>
             </template>
           </SectionCellVue>
+
+
+          <AlertVue text="Скопировано" :pos="{ x: shareTooltipParams?.left, y: shareTooltipParams?.top }"
+            :show="shareTooltipParams != null" />
         </div>
       </div>
-
-      <div class="info-panel-section info-panel-section-group">
-        <SectionCellVue title="Поделиться" :clickable="true" @click="onShareClick">
-          <template #right>
-            <div ref="shareIcon">
-              <IconVue img="share" class="controll-image" />
-            </div>
-          </template>
-        </SectionCellVue>
-
-        <hr class="separator separator-left small" />
-
-        <SectionCellVue title="Создать приглашение" :clickable="true" @click="onOpenClick">
-          <template #right>
-            <div ref="shareIcon">
-              <IconVue img="mail" class="controll-image" />
-            </div>
-          </template>
-        </SectionCellVue>
-
-
-        <AlertVue text="Скопировано" :pos="{ x: shareTooltipParams?.left, y: shareTooltipParams?.top }"
-          :show="shareTooltipParams != null" />
+      <div v-else>
+        <AnnotationInfoListVue :annotations="annotations" :showSearch="showSearch" @select="onSelectAnnotation"
+          :searchText="searchText" />
       </div>
     </template>
   </BottomSheetPageVue>
@@ -66,8 +72,8 @@ import { IMapDelegate } from "@/components/map/mapControlls";
 import { IAnnotation } from "@/core/map/overlayDrawing/annotations/annotation";
 import { PathFinder, PathResult } from "@/core/pathFinder";
 
-import { computed, inject, onMounted, Ref, ref, ShallowRef, watch } from "vue";
-import { IInfoPanelDelegate } from "../infoPanelControlls";
+import { computed, inject, onMounted, Ref, ref, shallowRef, ShallowRef, toRaw, watch, watchEffect } from "vue";
+import { IInfoPanelDelegate, useInfoPanel } from "../infoPanelControlls";
 import { unitInfoFromAnnotation } from "../unitDetail/data";
 
 import DetailInfoVue from '../shared/DetailInfo.vue'
@@ -77,6 +83,9 @@ import { timeFormatter } from "@/core/formatter/time";
 import { useStorage } from "@vueuse/core";
 import { Tag } from "@/core/imdf/navPath";
 import { useRoute } from "vue-router";
+import AnnotationInfoListVue from "@/components/shared/annotations/AnnotationInfoList.vue";
+import { IAnnotationInfo } from "@/components/map/annotations/annotationInfo";
+import { State } from "@/components/bottomSheet/useBottomSheetGesture";
 
 const props = defineProps<{
   delegate: IInfoPanelDelegate,
@@ -90,9 +99,13 @@ const props = defineProps<{
   }
 }>()
 
+
+
 const emit = defineEmits<{
   (event: 'pop'): void
 }>()
+
+const searchText = ref('')
 
 const shareIcon = ref(null) as Ref<HTMLElement>
 
@@ -117,6 +130,11 @@ const mapDelegate = inject<ShallowRef<IMapDelegate>>('mapDelegate')
 const headerOpacity = ref(1)
 
 
+const { setFrom, setTo } = useInfoPanel()
+
+const showSearch = ref('')
+const annotations: ShallowRef<IAnnotationInfo[]> = shallowRef([]);
+const state = inject<Ref<State>>('state')
 const pathDetailInfo = computed(() => {
   let content: { title: string, content: string }[] = []
   const append = (t: string, c: string) => { content.push({ title: t, content: c }) }
@@ -182,6 +200,23 @@ function createPath(result: PathResult) {
 
   lastAnnotations.value = targetPin
 }
+
+function onSelectAnnotation(annotation: IAnnotationInfo) {
+
+  state.value = State.middle;
+  if (showSearch.value == 'from') {
+    setFrom(annotation.annotation)
+  } else {
+    setTo(annotation.annotation)
+  }
+
+  showSearch.value = ''
+}
+
+watchEffect(() => {
+  if (!mapDelegate.value.venue.value) return
+  annotations.value = mapDelegate.value.venue.value.annotations.sort((a, b) => a.title.localCompare(b.title))
+})
 
 watch(pathResult, (result, old) => {
   if (!(lastPath.value && result && lastPath.value.equals(result))) {

@@ -111,7 +111,7 @@ const onPop = () => {
 }
 
 const onPopTo = (index: number) => {
-  if (pages.value.length > index) {
+  if (pages.value.length - 1 > index) {
     pages.value = pages.value.slice(0, index + 1)
 
     if (state.value == State.big) {

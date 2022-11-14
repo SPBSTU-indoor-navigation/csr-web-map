@@ -138,7 +138,6 @@ export class PathFinder {
   nearestPathNode(to: IAnnotation): PathNode {
     let nearest: PathNode | null = null
     let nearestDistance = Infinity
-
     for (let i = 0; i < this.nodes.length; i++) {
       const node = this.nodes[i]
 

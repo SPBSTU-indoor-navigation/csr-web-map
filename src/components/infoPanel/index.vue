@@ -96,6 +96,7 @@ function setRoute(annotation: IAnnotation, isFrom = false) {
   const defaultStart = mapDelegate.value.venue.value.navpathBegin
 
   const routeDetailIndex = pages.findIndex((page) => page.component == RouteDetailVue);
+
   if (routeDetailIndex != -1) {
     delegate.popTo(routeDetailIndex);
     const lastPage = pages[routeDetailIndex];
