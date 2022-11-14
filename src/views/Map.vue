@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="home abs-full">
     <MapVue @mapDelegate="onMapDelegate" />
     <div class="abs-full non-block" @wheel="onScroll">
       <InfoPanelVue ref="infoPanel" :style="{ display: showUI ? '' : 'none' }" />
@@ -145,12 +145,13 @@ function onMapDelegate(delegate: IMapDelegate) {
   cursor: pointer;
   filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.237));
 
-  top: 4px;
-  left: 4px;
-  padding: 5px;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: auto;
 
   img {
-    width: 100px;
+    width: 75px;
   }
 }
 
