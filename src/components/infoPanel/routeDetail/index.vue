@@ -80,12 +80,13 @@ import DetailInfoVue from '../shared/DetailInfo.vue'
 import SectionCellVue from "../shared/SectionCell.vue";
 import { distanceFormatter } from "@/core/formatter/distance";
 import { timeFormatter } from "@/core/formatter/time";
-import { useStorage } from "@vueuse/core";
+import { useMediaQuery, useStorage } from "@vueuse/core";
 import { Tag } from "@/core/imdf/navPath";
 import { useRoute } from "vue-router";
 import AnnotationInfoListVue from "@/components/shared/annotations/AnnotationInfoList.vue";
 import { IAnnotationInfo } from "@/components/map/annotations/annotationInfo";
 import { State } from "@/components/bottomSheet/useBottomSheetGesture";
+import { phoneWidth } from "@/styles/variables";
 
 const props = defineProps<{
   delegate: IInfoPanelDelegate,
@@ -201,9 +202,11 @@ function createPath(result: PathResult) {
   lastAnnotations.value = targetPin
 }
 
+
+const isPhone = useMediaQuery(`(max-width: ${phoneWidth}px)`)
 function onSelectAnnotation(annotation: IAnnotationInfo) {
 
-  state.value = State.middle;
+  if (isPhone.value) state.value = State.middle;
   if (showSearch.value == 'from') {
     setFrom(annotation.annotation)
   } else {
