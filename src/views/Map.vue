@@ -5,7 +5,7 @@
       <InfoPanelVue ref="infoPanel" :style="{ display: showUI ? '' : 'none' }" />
     </div>
 
-    <div class="watermark" v-if="!showUI" @click="onClickWatermark">
+    <div class="watermark tl" v-if="!showUI" @click="onClickWatermark">
       <img src="@/assets/umap-watermark.png">
     </div>
     <Transition name="loading">
@@ -143,15 +143,24 @@ function onMapDelegate(delegate: IMapDelegate) {
 .watermark {
   position: absolute;
   cursor: pointer;
-  filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.237));
+  // filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.237));
 
-  bottom: 4px;
-  left: 50%;
-  transform: translateX(-50%);
+
   padding: auto;
 
+  &.bd {
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &.tl {
+    top: 2px;
+    left: 8px;
+  }
+
   img {
-    width: 75px;
+    width: 100px;
   }
 }
 
