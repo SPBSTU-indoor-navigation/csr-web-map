@@ -5,8 +5,6 @@
     </template>
 
     <template #content>
-      <RouteButtonsVue :fromToPlan="unitInfo.fromToPlan" v-if="unitInfo.fromToPlan" @setTo="onSetTo"
-        @setFrom="onSetFrom" @openPlan="onOpenPlan" />
       <DetailVue :detail="unitInfo.detail" v-if="unitInfo.detail" />
       <div class="info-panel-section info-panel-section-group">
         <SectionCellVue title="Поделиться" :clickable="true" @click="onShareClick">
@@ -41,7 +39,6 @@
 <script setup lang="ts">
 import BottomSheetPageVue from "@/components/bottomSheet/BottomSheetPage.vue";
 import DetailVue from './Detail.vue'
-import RouteButtonsVue from './RouteButtons.vue'
 import { FocusVariant, IMapDelegate } from "@/components/map/mapControlls";
 import { computed, markRaw } from "@vue/reactivity";
 import { inject, onMounted, ref, ShallowRef, Ref, toRaw, watchEffect, watch } from "vue";

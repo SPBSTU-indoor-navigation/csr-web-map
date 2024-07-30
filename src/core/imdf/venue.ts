@@ -13,7 +13,6 @@ import {
   unwrapBy, createSvgPathFromFeature, createSvgPathFromFeatureCollection
 } from './utils';
 
-import { PathFinder } from '@/core/pathFinder'
 import { IAnnotation } from "../map/overlayDrawing/annotations/annotation";
 import { IMap } from "@/components/map/mapControlls";
 import { geoToVector, vectorToGeo } from "./geoUtils";
@@ -31,7 +30,6 @@ export default class Venue {
 
   annotations: IAnnotationInfo[] = []
   mapAnnotations: Map<string, IAnnotation> = new Map()
-  pathFinder: PathFinder
   navpathBegin: IAnnotation
 
   mkGeometry: any
@@ -127,12 +125,6 @@ export default class Venue {
     console.log('annotations', this.annotations);
 
     this.navpathBegin = annotations.find(t => t.id == this.data[0].properties.navpath_begin_id)
-
-    this.pathFinder = new PathFinder(archive.navPath,
-      archive.navPathAssocieted,
-      new Map(this.buildings.map(t => [t.data.id, t])),
-      new Map(this.buildings.flatMap(t => t.levels).map(t => [t.data.id, t])),
-      this.annotations.map(t => t.annotation))
 
     this.mapAnnotations = new Map(this.annotations.map(t => [t.annotationId, t.annotation]))
   }

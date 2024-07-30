@@ -55,7 +55,6 @@ import { focusMapOnAnnotation, focusMapOnBuilding, focusMapOnPath, FocusVariant,
 import useOverlayDrawing from '@/core/map/overlayDrawing/useOverlayDrawing';
 import useMapAnnotations from '@/core/map/overlayDrawing/annotations/useMapAnnotations';
 import useOverlayGeometry from '@/core/map/overlayGeometry/useOverlayGeometry';
-import useMapPath from '@/core/map/overlayDrawing/path/useMapPath';
 import { isPhoneLayout, selectAnnotationInsets } from '../infoPanel/infoPanelControlls';
 import { bottomSheet } from '@/styles/variables';
 import { annotationIsIndoor } from '@/core/map/overlayDrawing/annotations/annotation';
@@ -74,7 +73,6 @@ const currentOrdinal = ref(0);
 let overlayDrawing: ReturnType<typeof useOverlayDrawing>;
 let overlayGeometry: ReturnType<typeof useOverlayGeometry>;
 let mapAnnotations: ReturnType<typeof useMapAnnotations>;
-let mapPath: ReturnType<typeof useMapPath>;
 
 let map: IMap = null;
 
@@ -149,10 +147,8 @@ async function load() {
     scheduleUpdate,
   })
 
-  mapPath = useMapPath({ pathFinder: venue.value.pathFinder })
   mapAnnotations = useMapAnnotations({ styleSheet, mapZoom: readonly(zoom) })
 
-  overlayDrawing.addOverlay(mapPath.overlayDrawing)
   overlayDrawing.addOverlay(mapAnnotations.overlayDrawing)
 
   map = {
@@ -161,9 +157,6 @@ async function load() {
 
     addOverlay: t => overlayGeometry.scene.add(t),
     removeOverlay: t => overlayGeometry.scene.remove(t),
-
-    addPath: mapPath.add,
-    removePath: mapPath.remove,
   }
 
 
@@ -208,16 +201,6 @@ async function load() {
         insets: insets ?? selectAnnotationInsets.value,
       })
     },
-    addPath: (result) => {
-      focusMapOnPath({
-        map: mkMap.value,
-        path: result,
-        inverse,
-        insets: selectAnnotationInsets.value
-      })
-      return mapPath.add(result.path)
-    },
-    removePath: mapPath.remove,
     pinAnnotation: (...a) => {
       mapAnnotations.pinned.value.push(...a)
     },

@@ -11,4 +11,3 @@ export const renderAnnotationCount = ref(0)
 export const showDebugPanel = useStorage('showDebugPanel', false)
 
 window.showDebugPanel = () => showDebugPanel.value = true
-window.inverePathFinder = () => inversePath.value = !inversePath.value
